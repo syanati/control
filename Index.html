@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>جراج كنترول برو - نظام صيانة السيارات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
+            min-height: 100vh;
+        }
+
+        /* Login Container */
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        .login-card i { font-size: 4rem; color: #10b981; margin-bottom: 1rem; }
+        .login-card input {
+            width: 100%;
+            padding: 14px 16px;
+            margin: 12px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+        }
+        .login-card button {
+            width: 100%;
+            padding: 14px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 8px;
+        }
+        .switch-form {
+            margin-top: 1rem;
+            color: #10b981;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .switch-form:hover { text-decoration: underline; }
+
+        .app {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .header {
+            background: white;
+            border-radius: 24px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo h1 { font-size: 1.5rem; color: #1e293b; }
+        .logo span { color: #10b981; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            text-align: center;
+        }
+        .stat-card:hover { transform: translateY(-4px); }
+        .stat-card i { font-size: 2rem; color: #10b981; margin-bottom: 0.5rem; }
+        .stat-card .value { font-size: 1.8rem; font-weight: 700; color: #1e293b; }
+
+        .alert-card {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-right: 4px solid #f59e0b;
+        }
+        .danger-card {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-right: 4px solid #ef4444;
+        }
+
+        .section {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Tajawal', sans-serif;
+        }
+        button:hover { background: #059669; transform: translateY(-2px); }
+
+        .frequency-table {
+            overflow-x: auto;
+        }
+        .frequency-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .frequency-table th, .frequency-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .frequency-table input {
+            width: 120px;
+            padding: 6px;
+        }
+
+        .btn-icon {
+            padding: 6px 12px;
+            margin: 0 4px;
+            font-size: 0.8rem;
+        }
+        .btn-edit { background: #f59e0b; }
+        .btn-delete { background: #ef4444; }
+        .btn-add { background: #10b981; }
+
+        .maintenance-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-right: 4px solid #10b981;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .km-warning { background: #fef3c7; border-right-color: #f59e0b; }
+        .km-danger { background: #fee2e2; border-right-color: #ef4444; }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s;
+        }
+        .progress-fill.warning { background: #f59e0b; }
+        .progress-fill.danger { background: #ef4444; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            text-align: right;
+        }
+
+        @media (max-width: 768px) {
+            .maintenance-item { flex-direction: column; align-items: stretch; }
+            .header { flex-direction: column; text-align: center; }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            z-index: 3000;
+            animation: fadeInOut 3s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px); }
+            15% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(20px); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container" id="loginContainer">
+    <div class="login-card" id="loginCard">
+        <i class="fas fa-car"></i>
+        <h2>جراج كنترول برو</h2>
+        <p>نظام متكامل لصيانة السيارات</p>
+        <div id="loginForm">
+            <input type="text" id="loginUsername" placeholder="اسم المستخدم">
+            <input type="password" id="loginPassword" placeholder="كلمة المرور">
+            <button onclick="login()">دخول</button>
+            <div class="switch-form" onclick="showRegister()">ليس لديك حساب؟ سجل الآن</div>
+
+<p style="margin-top: 1rem; font-size: 0.8rem;">Developed by Hicham El Khamlichi @ 2026</p>
+
+        </div>
+        <div id="registerForm" style="display:none;">
+            <input type="text" id="regUsername" placeholder="اسم المستخدم">
+            <input type="password" id="regPassword" placeholder="كلمة المرور">
+            <input type="text" id="regVehicle" placeholder="اسم السيارة (اختياري)">
+            <button onclick="register()">تسجيل حساب جديد</button>
+            <div class="switch-form" onclick="showLogin()">لديك حساب؟ سجل دخول</div>
+
+<p style="margin-top: 1rem; font-size: 0.8rem;">Developed by Hicham El Khamlichi @ 2026</p>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="app" id="app">
+    <div class="header">
+        <div class="logo">
+            <h1><i class="fas fa-chart-simple"></i> جراج <span>كنترول برو</span></h1>
+            <p style="font-size: 0.8rem;" id="vehicleNameDisplay"></p>
+        </div>
+        <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <span id="currentUser">admin</span>
+            <button class="logout-btn" onclick="logout()" style="background:#ef4444">تسجيل خروج</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fas fa-tachometer-alt"></i> عداد المسافات</h3>
+        <div style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 1rem;">
+            <div style="font-size: 2rem; font-weight: 700; color: #1e293b;" id="totalKmDisplay">0 km</div>
+            <div style="display: inline-flex; gap: 8px;">
+                <input type="number" id="newKmInput" placeholder="قيمة جديدة">
+                <button onclick="updateTotalKilometers()"><i class="fas fa-sync-alt"></i> تحديث</button>
+            </div>
+        </div>
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 8px;">
+            <i class="fas fa-info-circle"></i> آخر تحديث: <span id="lastKmUpdate">-</span>
+        </p>
+    </div>
+
+    <div class="stats-grid" id="alertsGrid"></div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-tools"></i>
+            <h3>إجمالي الصيانات</h3>
+            <div class="value" id="totalCount">0</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-coins"></i>
+            <h3>إجمالي المصروفات</h3>
+            <div class="value" id="totalCost">0 SAR</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-bell"></i>
+            <h3>التنبيهات النشطة</h3>
+            <div class="value" id="alertCount">0</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fas fa-cog"></i> إدارة أنواع الصيانة</h3>
+        <button class="btn-add" onclick="openAddTypeModal()" style="margin-bottom: 1rem;">
+            <i class="fas fa-plus"></i> إضافة نوع جديد
+        </button>
+        <div class="frequency-table">
+            <table id="frequencyTable">
+                <thead>
+                    <tr><th>نوع الصيانة</th><th>المسافة (km)</th><th>آخر صيانة (km)</th><th>الصيانة القادمة (km)</th><th>الحالة</th><th>إجراءات</th></tr>
+                </thead>
+                <tbody id="frequencyBody"></tbody>
+            </table>
+        </div>
+        <button onclick="saveFrequencies()" style="margin-top: 1rem;"><i class="fas fa-save"></i> حفظ الترددات</button>
+    </div>
+
+    <div class="section">
+        <h3><i class="fas fa-plus-circle"></i> تسجيل صيانة جديدة</h3>
+        <div class="form-grid">
+            <select id="maintenanceTypeSelect">
+                <option value="">اختر نوع الصيانة</option>
+            </select>
+            <input type="number" id="kilometers" placeholder="العداد الحالي">
+            <input type="number" id="cost" placeholder="التكلفة (SAR)" step="0.01">
+            <input type="date" id="date">
+            <textarea id="description" placeholder="ملاحظات" rows="2"></textarea>
+        </div>
+        <button onclick="addMaintenance()"><i class="fas fa-save"></i> تسجيل الصيانة</button>
+    </div>
+
+    <div class="section">
+        <h3><i class="fas fa-history"></i> سجل الصيانة والخدمات القادمة</h3>
+        <div class="form-grid" style="margin-bottom: 1rem;">
+            <select id="filterType">
+                <option value="">جميع الأنواع</option>
+            </select>
+            <button onclick="applyFilters()"><i class="fas fa-search"></i> تصفية</button>
+            <button onclick="resetFilters()" style="background:#64748b">إلغاء التصفية</button>
+            <button onclick="generateFullReport()" style="background:#10b981"><i class="fas fa-file-pdf"></i> تقرير PDF</button>
+        </div>
+        <div id="maintenanceList"></div>
+    </div>
+</div>
+
+<div id="typeModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">إضافة نوع صيانة جديد</h3>
+        <input type="text" id="typeName" placeholder="مثال: زيت الفرامل" style="margin: 1rem 0;">
+        <input type="number" id="typeFrequency" placeholder="المسافة بالكيلومترات" value="10000" style="margin-bottom: 1rem;">
+        <input type="hidden" id="editingType">
+        <button onclick="saveType()" style="margin-left: 1rem;"><i class="fas fa-check"></i> حفظ</button>
+        <button onclick="closeModal()" style="background:#64748b"><i class="fas fa-times"></i> إلغاء</button>
+    </div>
+</div>
+
+<script>
+    // Users database
+    let users = {};
+    let currentUser = null;
+    
+    // Current user data
+    let maintenances = [];
+    let frequencies = {};
+    let vehicleKm = 0;
+    let lastKmDate = "";
+    let currentFilter = "";
+
+    const defaultTypes = ["تغيير زيت", "فرامل", "إطارات", "سير التوقيت", "بواجي", "فلتر هواء", "ردياتير", "فحص عام"];
+    const defaultFreqs = {
+        "تغيير زيت": 10000, "فرامل": 20000, "إطارات": 40000,
+        "سير التوقيت": 60000, "بواجي": 30000, "فلتر هواء": 15000,
+        "ردياتير": 50000, "فحص عام": 15000
+    };
+
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function loadUsers() {
+        const stored = localStorage.getItem('garageUsers');
+        if (stored) {
+            users = JSON.parse(stored);
+        } else {
+            users = {
+                'admin': { password: '1234', vehicleName: 'سيارة تجريبية', data: null }
+            };
+            saveUsers();
+        }
+    }
+
+    function saveUsers() {
+        localStorage.setItem('garageUsers', JSON.stringify(users));
+    }
+
+    function loadUserData() {
+        const userData = users[currentUser].data;
+        if (userData) {
+            maintenances = userData.maintenances || [];
+            frequencies = userData.frequencies || JSON.parse(JSON.stringify(defaultFreqs));
+            vehicleKm = userData.vehicleKm || 15000;
+            lastKmDate = userData.lastKmDate || new Date().toLocaleDateString('ar-SA');
+            
+            // Ensure all default types exist
+            defaultTypes.forEach(type => {
+                if (!frequencies[type]) frequencies[type] = defaultFreqs[type] || 10000;
+            });
+        } else {
+            maintenances = [];
+            frequencies = JSON.parse(JSON.stringify(defaultFreqs));
+            vehicleKm = 15000;
+            lastKmDate = new Date().toLocaleDateString('ar-SA');
+        }
+        
+        document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${users[currentUser].vehicleName || 'سيارة'}`;
+        updateDisplay();
+    }
+
+    function saveUserData() {
+        users[currentUser].data = {
+            maintenances: maintenances,
+            frequencies: frequencies,
+            vehicleKm: vehicleKm,
+            lastKmDate: lastKmDate
+        };
+        saveUsers();
+    }
+
+    function register() {
+        const username = document.getElementById('regUsername').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
+        
+        if (!username || !password) {
+            alert("الرجاء إدخال اسم المستخدم وكلمة المرور");
+            return;
+        }
+        
+        if (users[username]) {
+            alert("اسم المستخدم موجود بالفعل");
+            return;
+        }
+        
+        users[username] = { password: password, vehicleName: vehicleName, data: null };
+        saveUsers();
+        showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
+        showLogin();
+    }
+
+    function login() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        if (!users[username] || users[username].password !== password) {
+            alert("اسم المستخدم أو كلمة المرور غير صحيحة");
+            return;
+        }
+        
+        currentUser = username;
+        document.getElementById('currentUser').innerText = currentUser;
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        loadUserData();
+    }
+
+    function logout() {
+        currentUser = null;
+        document.getElementById('loginContainer').style.display = 'flex';
+        document.getElementById('app').style.display = 'none';
+        showLogin();
+    }
+
+    function showRegister() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+    }
+
+    function showLogin() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('regUsername').value = '';
+        document.getElementById('regPassword').value = '';
+        document.getElementById('regVehicle').value = '';
+    }
+
+    function getLastKmForType(type) {
+        const lastMaint = [...maintenances].reverse().find(m => m.type === type);
+        return lastMaint ? lastMaint.kilometers : 0;
+    }
+
+    function getNextKmForType(type) {
+        const lastKm = getLastKmForType(type);
+        const freq = frequencies[type] || 10000;
+        return lastKm + freq;
+    }
+
+    function getKmRemaining(type) {
+        const nextKm = getNextKmForType(type);
+        return Math.max(0, nextKm - vehicleKm);
+    }
+
+    function formatNumber(num) {
+        return num.toLocaleString('en-US');
+    }
+
+    function updateDisplay() {
+        document.getElementById('totalKmDisplay').innerHTML = `${formatNumber(vehicleKm)} km`;
+        document.getElementById('lastKmUpdate').innerText = lastKmDate;
+        
+        const tbody = document.getElementById('frequencyBody');
+        tbody.innerHTML = "";
+        const sortedTypes = Object.keys(frequencies).sort();
+        
+        for (const type of sortedTypes) {
+            const freq = frequencies[type];
+            const lastKm = getLastKmForType(type);
+            const nextKm = getNextKmForType(type);
+            const remaining = getKmRemaining(type);
+            let status = "", statusColor = "";
+            if (remaining <= 0) { status = "⚠️ منتهي!"; statusColor = "danger"; }
+            else if (remaining <= 1000) { status = `🔴 ${formatNumber(remaining)} km - عاجل`; statusColor = "danger"; }
+            else if (remaining <= 3000) { status = `🟡 ${formatNumber(remaining)} km - قريب`; statusColor = "warning"; }
+            else { status = `✅ متبقي ${formatNumber(remaining)} km`; statusColor = "ok"; }
+            
+            tbody.innerHTML += `<tr style="${statusColor === 'danger' ? 'background:#fee2e2' : statusColor === 'warning' ? 'background:#fef3c7' : ''}">
+                <td>${type}</td>
+                <td><input type="number" id="freq_${type.replace(/\s/g, '_')}" value="${freq}" style="width:100px" step="1000"></td>
+                <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</td>
+                <td><strong>${formatNumber(nextKm)} km</strong></td>
+                <td>${status}</td>
+                <td>
+                    <button class="btn-icon btn-edit" onclick="editType('${type}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon btn-delete" onclick="deleteType('${type}')"><i class="fas fa-trash"></i></button>
+                </td>
+             </tr>`;
+        }
+        
+        const select = document.getElementById('maintenanceTypeSelect');
+        const filterSelect = document.getElementById('filterType');
+        const currentType = select.value;
+        select.innerHTML = '<option value="">اختر نوع الصيانة</option>';
+        filterSelect.innerHTML = '<option value="">جميع الأنواع</option>';
+        for (const type of sortedTypes) {
+            select.innerHTML += `<option value="${type}">${type}</option>`;
+            filterSelect.innerHTML += `<option value="${type}">${type}</option>`;
+        }
+        if (currentType && frequencies[currentType]) select.value = currentType;
+        
+        updateAlertsGrid();
+        
+        const totalCost = maintenances.reduce((sum, m) => sum + m.cost, 0);
+        document.getElementById('totalCount').innerText = maintenances.length;
+        document.getElementById('totalCost').innerHTML = totalCost.toFixed(2) + ' SAR';
+        
+        applyFilters();
+        saveUserData();
+    }
+    
+    function updateAlertsGrid() {
+        const alertsGrid = document.getElementById('alertsGrid');
+        let alerts = [];
+        let alertCount = 0;
+        
+        for (const type of Object.keys(frequencies)) {
+            const remaining = getKmRemaining(type);
+            if (remaining <= 3000) {
+                alertCount++;
+                const urgency = remaining <= 0 ? "danger" : (remaining <= 1000 ? "danger" : "warning");
+                alerts.push({ type, remaining, urgency });
+            }
+        }
+        
+        document.getElementById('alertCount').innerText = alertCount;
+        
+        if (alerts.length === 0) {
+            alertsGrid.innerHTML = `<div class="stat-card"><i class="fas fa-check-circle"></i><h3>التنبيهات</h3><div class="value">✅ كل شيء على ما يرام</div><p>لا توجد تنبيهات معلقة</p></div>`;
+            return;
+        }
+        
+        alertsGrid.innerHTML = alerts.map(a => `
+            <div class="stat-card ${a.urgency === 'danger' ? 'danger-card' : 'alert-card'}">
+                <i class="fas fa-bell"></i>
+                <h3>🔔 ${a.type}</h3>
+                <div class="value">${a.remaining <= 0 ? 'منتهي!' : formatNumber(a.remaining) + ' km'}</div>
+                <p>${a.remaining <= 0 ? 'مطلوب الآن' : a.remaining <= 1000 ? 'أقل من 1000 km - عاجل' : 'يحتاج صيانة قريباً'}</p>
+                <div class="progress-bar"><div class="progress-fill ${a.urgency}" style="width: ${Math.min(100, (3000 - Math.max(0, a.remaining)) / 30)}%"></div></div>
+            </div>
+        `).join('');
+    }
+    
+    function saveFrequencies() {
+        for (const type of Object.keys(frequencies)) {
+            const input = document.getElementById(`freq_${type.replace(/\s/g, '_')}`);
+            if (input) {
+                frequencies[type] = parseInt(input.value);
+            }
+        }
+        updateDisplay();
+        showToast("تم حفظ الترددات بنجاح");
+    }
+    
+    function openAddTypeModal() {
+        document.getElementById('modalTitle').innerText = 'إضافة نوع صيانة جديد';
+        document.getElementById('typeName').value = '';
+        document.getElementById('typeFrequency').value = '10000';
+        document.getElementById('editingType').value = '';
+        document.getElementById('typeModal').style.display = 'flex';
+    }
+    
+    function editType(type) {
+        document.getElementById('modalTitle').innerText = 'تعديل نوع الصيانة';
+        document.getElementById('typeName').value = type;
+        document.getElementById('typeFrequency').value = frequencies[type];
+        document.getElementById('editingType').value = type;
+        document.getElementById('typeModal').style.display = 'flex';
+    }
+    
+    function deleteType(type) {
+        if (confirm(`هل أنت متأكد من حذف نوع "${type}"؟\nسيتم حذف جميع سجلات الصيانة المرتبطة به.`)) {
+            delete frequencies[type];
+            maintenances = maintenances.filter(m => m.type !== type);
+            updateDisplay();
+            showToast(`تم حذف نوع "${type}" بنجاح`);
+        }
+    }
+    
+    function saveType() {
+        const newName = document.getElementById('typeName').value.trim();
+        const frequency = parseInt(document.getElementById('typeFrequency').value);
+        const editingOld = document.getElementById('editingType').value;
+        
+        if (!newName) {
+            alert("الرجاء إدخال اسم نوع الصيانة");
+            return;
+        }
+        
+        if (isNaN(frequency) || frequency <= 0) {
+            alert("الرجاء إدخال مسافة صحيحة بالكيلومترات");
+            return;
+        }
+        
+        if (editingOld && editingOld !== newName) {
+            frequencies[newName] = frequency;
+            delete frequencies[editingOld];
+            maintenances = maintenances.map(m => 
+                m.type === editingOld ? { ...m, type: newName } : m
+            );
+        } else if (!editingOld) {
+            if (frequencies[newName]) {
+                alert("هذا النوع موجود بالفعل");
+                return;
+            }
+            frequencies[newName] = frequency;
+        } else {
+            frequencies[editingOld] = frequency;
+        }
+        
+        closeModal();
+        updateDisplay();
+        showToast("تم حفظ نوع الصيانة بنجاح");
+    }
+    
+    function closeModal() {
+        document.getElementById('typeModal').style.display = 'none';
+    }
+    
+    function updateTotalKilometers() {
+        const newKm = parseInt(document.getElementById('newKmInput').value);
+        if (!newKm || newKm <= vehicleKm) {
+            alert("الرجاء إدخال قيمة أكبر من العداد الحالي");
+            return;
+        }
+        vehicleKm = newKm;
+        lastKmDate = new Date().toLocaleDateString('ar-SA');
+        document.getElementById('newKmInput').value = '';
+        updateDisplay();
+        showToast(`تم تحديث العداد إلى ${formatNumber(vehicleKm)} km`);
+    }
+    
+    function addMaintenance() {
+        const type = document.getElementById('maintenanceTypeSelect').value;
+        const kilometers = parseInt(document.getElementById('kilometers').value);
+        const cost = parseFloat(document.getElementById('cost').value);
+        const date = document.getElementById('date').value;
+        const description = document.getElementById('description').value;
+        
+        if (!type) { alert("الرجاء اختيار نوع الصيانة"); return; }
+        if (!kilometers || kilometers < vehicleKm) { alert(`العداد يجب أن يكون ≥ ${formatNumber(vehicleKm)} km`); return; }
+        
+        const newId = maintenances.length > 0 ? Math.max(...maintenances.map(m => m.id)) + 1 : 1;
+        maintenances.push({
+            id: newId, type, kilometers, cost: cost || 0,
+            date: date || new Date().toISOString().split('T')[0],
+            description: description || ""
+        });
+        
+        if (kilometers > vehicleKm) {
+            vehicleKm = kilometers;
+            lastKmDate = new Date().toLocaleDateString('ar-SA');
+        }
+        
+        clearForm();
+        updateDisplay(); // This will refresh alerts immediately
+        showToast("تم تسجيل الصيانة بنجاح");
+    }
+    
+    function clearForm() {
+        document.getElementById('kilometers').value = '';
+        document.getElementById('cost').value = '';
+        document.getElementById('date').value = '';
+        document.getElementById('description').value = '';
+    }
+    
+    function deleteMaintenance(id) {
+        if(confirm('هل أنت متأكد من حذف هذا السجل؟')) {
+            maintenances = maintenances.filter(m => m.id !== id);
+            updateDisplay();
+            showToast("تم حذف السجل بنجاح");
+        }
+    }
+    
+    function applyFilters() {
+        currentFilter = document.getElementById('filterType').value;
+        let filtered = currentFilter ? maintenances.filter(m => m.type === currentFilter) : [...maintenances];
+        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+        
+        const container = document.getElementById('maintenanceList');
+        if(filtered.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:2rem;">لا توجد سجلات</div>';
+            return;
+        }
+        
+        container.innerHTML = filtered.map(m => {
+            const nextKm = getNextKmForType(m.type);
+            const remaining = getKmRemaining(m.type);
+            let warningClass = "";
+            if (remaining <= 0) warningClass = "km-danger";
+            else if (remaining <= 1000) warningClass = "km-warning";
+            
+            return `<div class="maintenance-item ${warningClass}">
+                <div style="flex:2">
+                    <h4><i class="fas fa-wrench"></i> ${m.type}</h4>
+                    <div><span class="badge">📅 ${m.date}</span>
+                    <span class="badge">🔧 ${formatNumber(m.kilometers)} km</span>
+                    <span class="badge">💰 ${m.cost.toFixed(2)} SAR</span></div>
+                    <p style="margin-top:8px; font-size:0.85rem;">${m.description || 'بدون ملاحظات'}</p>
+                    <div class="progress-bar"><div class="progress-fill ${remaining <= 1000 ? 'danger' : remaining <= 3000 ? 'warning' : ''}" style="width: ${Math.min(100, (m.kilometers / (nextKm || 1)) * 100)}%"></div></div>
+                    <small>الصيانة القادمة عند ${formatNumber(nextKm)} km (${remaining <= 0 ? 'منتهي' : formatNumber(remaining) + ' km متبقي'})</small>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="generateInvoicePDF(${m.id})" style="background:#10b981;padding:8px 16px;"><i class="fas fa-file-invoice"></i> فاتورة</button>
+                    <button onclick="deleteMaintenance(${m.id})" style="background:#ef4444;padding:8px 16px;"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+    
+    function resetFilters() {
+        document.getElementById('filterType').value = '';
+        currentFilter = '';
+        applyFilters();
+    }
+    
+    async function generateInvoicePDF(id) {
+        const m = maintenances.find(m => m.id === id);
+        if(!m) return;
+        
+        const element = document.createElement('div');
+        element.style.padding = '40px';
+        element.style.fontFamily = 'Tajawal, sans-serif';
+        element.style.textAlign = 'right';
+        element.style.direction = 'rtl';
+        element.innerHTML = `
+            <div style="border-bottom: 3px solid #10b981; margin-bottom: 20px; padding-bottom: 10px;">
+                <h1 style="color: #1e293b; margin: 0;">جراج كنترول برو</h1>
+                <p style="color: #64748b; margin: 0;">فاتورة صيانة رسمية</p>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p>
+                <p><strong>التاريخ:</strong> ${new Date().toLocaleDateString('ar-SA')}</p>
+                <p><strong>السيارة:</strong> ${users[currentUser].vehicleName || 'سيارة'}</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr style="background: #f1f5f9;">
+                    <th style="padding: 12px; text-align: right;">نوع الصيانة</th>
+                    <th style="padding: 12px; text-align: right;">العداد</th>
+                    <th style="padding: 12px; text-align: right;">المبلغ</th>
+                 </tr>
+                <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.type}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.cost.toFixed(2)} SAR</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="padding: 12px; text-align: left;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td>
+                 </tr>
+            </table>
+            <div style="margin-top: 30px; text-align: center; font-size: 0.8rem; color: #94a3b8;">
+                شكراً لثقتكم بنا - وثيقة رسمية صادرة عن جراج كنترول برو
+            </div>
+        `;
+        
+        const opt = {
+            margin: [0.5, 0.5, 0.5, 0.5],
+            filename: `invoice_${m.type}_${m.id}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, logging: false },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().set(opt).from(element).save();
+        showToast("جاري إنشاء الفاتورة...");
+    }
+    
+    async function generateFullReport() {
+        const totalCost = maintenances.reduce((sum, m) => sum + m.cost, 0);
+        
+        const element = document.createElement('div');
+        element.style.padding = '40px';
+        element.style.fontFamily = 'Tajawal, sans-serif';
+        element.style.textAlign = 'right';
+        element.style.direction = 'rtl';
+        element.innerHTML = `
+            <div style="border-bottom: 3px solid #10b981; margin-bottom: 20px; padding-bottom: 10px;">
+                <h1 style="color: #1e293b; margin: 0;">جراج كنترول برو</h1>
+                <p style="color: #64748b; margin: 0;">تقرير الصيانة الشامل</p>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p><strong>تاريخ التقرير:</strong> ${new Date().toLocaleDateString('ar-SA')}</p>
+                <p><strong>السيارة:</strong> ${users[currentUser].vehicleName || 'سيارة'}</p>
+                <p><strong>العداد الحالي:</strong> ${formatNumber(vehicleKm)} km</p>
+            </div>
+            <h3>إحصائيات عامة</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr style="background: #f1f5f9;">
+                    <th style="padding: 12px; text-align: right;">البيان</th>
+                    <th style="padding: 12px; text-align: right;">القيمة</th>
+                 </tr>
+                <tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">إجمالي الصيانات</td><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${maintenances.length}</td></tr>
+                <tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">إجمالي المصروفات</td><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${totalCost.toFixed(2)} SAR</td></tr>
+             </table>
+            <h3>تفاصيل الصيانات</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="background: #f1f5f9;">
+                    <th style="padding: 12px; text-align: right;">التاريخ</th>
+                    <th style="padding: 12px; text-align: right;">النوع</th>
+                    <th style="padding: 12px; text-align: right;">العداد</th>
+                    <th style="padding: 12px; text-align: right;">التكلفة</th>
+                 </tr>
+                ${maintenances.map(m => `
+                    <tr>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.date}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.type}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.cost.toFixed(2)} SAR</td>
+                    </tr>
+                `).join('')}
+             </table>
+            <div style="margin-top: 30px; text-align: center; font-size: 0.8rem; color: #94a3b8;">
+                * هذا التقرير صادر بشكل آلي من نظام جراج كنترول برو
+            </div>
+        `;
+        
+        const opt = {
+            margin: [0.5, 0.5, 0.5, 0.5],
+            filename: `report_${Date.now()}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, logging: false },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().set(opt).from(element).save();
+        showToast("جاري إنشاء التقرير...");
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('typeModal');
+        if (event.target === modal) closeModal();
+    }
+    
+    loadUsers();
+    showLogin();
+</script>
+</body>
+</html>
