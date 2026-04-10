@@ -203,6 +203,20 @@
             border-radius: 8px;
             cursor: pointer;
         }
+        .loading-spinner {
+            display: none;
+            margin: 10px auto;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -211,10 +225,11 @@
     <div class="login-card">
         <i class="fas fa-cloud-upload-alt"></i>
         <h2>جراج كنترول برو</h2>
-        <p>نظام متكامل لصيانة السيارات</p>
+        <p>نظام صيانة سيارات - سحابي بالكامل</p>
         <div id="loginForm">
             <input type="text" id="loginUsername" placeholder="اسم المستخدم">
             <input type="password" id="loginPassword" placeholder="كلمة المرور">
+            <div class="loading-spinner" id="loginSpinner"></div>
             <button onclick="login()">دخول</button>
             <div class="switch-form" onclick="showRegister()">ليس لديك حساب؟ سجل الآن</div>
 			<p style="margin-top: 1rem; font-size: 0.8rem;">Developed by Hicham El Khamlichi @ 2026</p>
@@ -223,11 +238,11 @@
             <input type="text" id="regUsername" placeholder="اسم المستخدم">
             <input type="password" id="regPassword" placeholder="كلمة المرور">
             <input type="text" id="regVehicle" placeholder="اسم السيارة">
+            <div class="loading-spinner" id="registerSpinner"></div>
             <button onclick="register()">تسجيل حساب جديد</button>
             <div class="switch-form" onclick="showLogin()">لديك حساب؟ سجل دخول</div>
 			<p style="margin-top: 1rem; font-size: 0.8rem;">Developed by Hicham El Khamlichi @ 2026</p>
         </div>
-        <div id="loadingMsg" style="display:none; margin-top:1rem; color:#10b981;">جاري التحميل...</div>
     </div>
 </div>
 
@@ -317,7 +332,8 @@
     const SUPABASE_URL = 'https://eixzktrrtqrzzqqlaqxo.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_XcIH1w6kcZcP7HA8mXW-yg_402H1CVY';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Crear cliente de Supabase (solo una vez)
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     let currentUserId = null;
     let currentUsername = null;
@@ -358,58 +374,88 @@
         const password = document.getElementById('regPassword').value;
         const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
         
-        if (!username || !password) { alert("الرجاء إدخال اسم المستخدم وكلمة المرور"); return; }
-        
-        document.getElementById('loadingMsg').style.display = 'block';
-        
-        const { data: existing } = await supabase.from('users').select('id').eq('username', username);
-        
-        if (existing && existing.length > 0) {
-            alert("اسم المستخدم موجود بالفعل");
-            document.getElementById('loadingMsg').style.display = 'none';
+        if (!username || !password) {
+            alert("الرجاء إدخال اسم المستخدم وكلمة المرور");
             return;
         }
         
-        const { error } = await supabase.from('users').insert({
-            username: username,
-            password: password,
-            vehicle_name: vehicleName
-        });
+        const spinner = document.getElementById('registerSpinner');
+        spinner.style.display = 'block';
         
-        document.getElementById('loadingMsg').style.display = 'none';
-        
-        if (error) { alert("خطأ في التسجيل: " + error.message); return; }
-        
-        showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
-        showLogin();
+        try {
+            const { data: existing } = await supabaseClient.from('users').select('id').eq('username', username);
+            
+            if (existing && existing.length > 0) {
+                alert("اسم المستخدم موجود بالفعل");
+                spinner.style.display = 'none';
+                return;
+            }
+            
+            const { error } = await supabaseClient.from('users').insert({
+                username: username,
+                password: password,
+                vehicle_name: vehicleName
+            });
+            
+            spinner.style.display = 'none';
+            
+            if (error) {
+                alert("خطأ في التسجيل: " + error.message);
+                return;
+            }
+            
+            showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
+            showLogin();
+        } catch (err) {
+            spinner.style.display = 'none';
+            alert("خطأ: " + err.message);
+        }
     }
     
     async function login() {
         const username = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value;
         
-        if (!username || !password) { alert("الرجاء إدخال اسم المستخدم وكلمة المرور"); return; }
-        
-        document.getElementById('loadingMsg').style.display = 'block';
-        
-        const { data, error } = await supabase.from('users').select('*').eq('username', username).eq('password', password);
-        
-        document.getElementById('loadingMsg').style.display = 'none';
-        
-        if (error || !data || data.length === 0) {
-            alert("اسم المستخدم أو كلمة المرور غير صحيحة");
+        if (!username || !password) {
+            alert("الرجاء إدخال اسم المستخدم وكلمة المرور");
             return;
         }
         
-        currentUserId = data[0].id;
-        currentUsername = data[0].username;
-        document.getElementById('currentUser').innerText = currentUsername;
-        document.getElementById('vehicleNameDisplay').innerHTML = '<i class="fas fa-car"></i> ' + (data[0].vehicle_name || 'سيارة') + ' ☁️ متزامن';
+        const spinner = document.getElementById('loginSpinner');
+        spinner.style.display = 'block';
         
-        await loadUserData();
-        
-        document.getElementById('loginContainer').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
+        try {
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password);
+            
+            spinner.style.display = 'none';
+            
+            if (error) {
+                alert("خطأ: " + error.message);
+                return;
+            }
+            
+            if (!data || data.length === 0) {
+                alert("اسم المستخدم أو كلمة المرور غير صحيحة");
+                return;
+            }
+            
+            currentUserId = data[0].id;
+            currentUsername = data[0].username;
+            document.getElementById('currentUser').innerText = currentUsername;
+            document.getElementById('vehicleNameDisplay').innerHTML = '<i class="fas fa-car"></i> ' + (data[0].vehicle_name || 'سيارة') + ' ☁️ متزامن';
+            
+            await loadUserData();
+            
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+        } catch (err) {
+            spinner.style.display = 'none';
+            alert("خطأ في الاتصال: " + err.message);
+        }
     }
     
     async function loadUserData() {
@@ -420,7 +466,7 @@
     }
     
     async function loadFrequencies() {
-        const { data, error } = await supabase.from('frequencies').select('*').eq('user_id', currentUserId);
+        const { data, error } = await supabaseClient.from('frequencies').select('*').eq('user_id', currentUserId);
         
         if (error) { console.error(error); return; }
         
@@ -437,7 +483,7 @@
     }
     
     async function loadVehicleKm() {
-        const { data, error } = await supabase.from('vehicle_info').select('*').eq('user_id', currentUserId);
+        const { data, error } = await supabaseClient.from('vehicle_info').select('*').eq('user_id', currentUserId);
         
         if (error) { console.error(error); return; }
         
@@ -447,7 +493,7 @@
         } else {
             vehicleKm = 15000;
             lastKmDate = formatDate(new Date());
-            await supabase.from('vehicle_info').insert({
+            await supabaseClient.from('vehicle_info').insert({
                 user_id: currentUserId,
                 current_km: vehicleKm,
                 last_update: new Date().toISOString().split('T')[0]
@@ -456,7 +502,7 @@
     }
     
     async function loadMaintenances() {
-        const { data, error } = await supabase.from('maintenances').select('*').eq('user_id', currentUserId).order('date', { ascending: false });
+        const { data, error } = await supabaseClient.from('maintenances').select('*').eq('user_id', currentUserId).order('date', { ascending: false });
         
         if (error) { console.error(error); return; }
         
@@ -465,7 +511,7 @@
     
     async function saveFrequencies() {
         for (const [type, freq] of Object.entries(frequencies)) {
-            const { error } = await supabase.from('frequencies').upsert({
+            const { error } = await supabaseClient.from('frequencies').upsert({
                 user_id: currentUserId,
                 maintenance_type: type,
                 frequency_km: freq
@@ -484,7 +530,7 @@
         vehicleKm = newKm;
         lastKmDate = formatDate(new Date());
         
-        await supabase.from('vehicle_info').update({
+        await supabaseClient.from('vehicle_info').update({
             current_km: vehicleKm,
             last_update: new Date().toISOString().split('T')[0]
         }).eq('user_id', currentUserId);
@@ -504,7 +550,7 @@
         if (!type) { alert("اختر نوع الصيانة"); return; }
         if (!kilometers || kilometers < vehicleKm) { alert("العداد يجب أن يكون ≥ " + formatNumber(vehicleKm) + " km"); return; }
         
-        const { data, error } = await supabase.from('maintenances').insert({
+        const { data, error } = await supabaseClient.from('maintenances').insert({
             user_id: currentUserId,
             type: type,
             kilometers: kilometers,
@@ -522,7 +568,7 @@
         if (kilometers > vehicleKm) {
             vehicleKm = kilometers;
             lastKmDate = formatDate(new Date());
-            await supabase.from('vehicle_info').update({
+            await supabaseClient.from('vehicle_info').update({
                 current_km: vehicleKm,
                 last_update: new Date().toISOString().split('T')[0]
             }).eq('user_id', currentUserId);
@@ -536,7 +582,7 @@
     async function deleteMaintenance(id) {
         if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) return;
         
-        await supabase.from('maintenances').delete().eq('id', id).eq('user_id', currentUserId);
+        await supabaseClient.from('maintenances').delete().eq('id', id).eq('user_id', currentUserId);
         maintenances = maintenances.filter(m => m.id !== id);
         updateDisplay();
         showToast("تم حذف السجل");
@@ -560,7 +606,7 @@
             frequencies[editingOld] = frequency;
         }
         
-        await supabase.from('frequencies').upsert({
+        await supabaseClient.from('frequencies').upsert({
             user_id: currentUserId,
             maintenance_type: newName,
             frequency_km: frequency
@@ -575,8 +621,8 @@
         if (!confirm('هل أنت متأكد من حذف نوع "' + type + '"؟ سيتم حذف جميع سجلات الصيانة المرتبطة به.')) return;
         
         delete frequencies[type];
-        await supabase.from('frequencies').delete().eq('user_id', currentUserId).eq('maintenance_type', type);
-        await supabase.from('maintenances').delete().eq('user_id', currentUserId).eq('type', type);
+        await supabaseClient.from('frequencies').delete().eq('user_id', currentUserId).eq('maintenance_type', type);
+        await supabaseClient.from('maintenances').delete().eq('user_id', currentUserId).eq('type', type);
         
         maintenances = maintenances.filter(m => m.type !== type);
         updateDisplay();
@@ -621,8 +667,8 @@
                 <td>
                     <button class="btn-icon" onclick="editType('${type}')" style="background:#f59e0b;color:white;padding:6px 12px;margin:0 4px;"><i class="fas fa-edit"></i></button>
                     <button onclick="deleteType('${type}')" style="background:#ef4444;color:white;padding:6px 12px;"><i class="fas fa-trash"></i></button>
-                 </td>
-            </tr>`;
+                  </td>
+                </tr>`;
         }
         
         const select = document.getElementById('maintenanceTypeSelect');
@@ -726,10 +772,10 @@
                     <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.type}</td>
                     <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
                     <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.cost.toFixed(2)} SAR</td>
-                 </tr>
-                 <tr>
+                </tr>
+                <tr>
                     <td colspan="2" style="padding: 12px; text-align: left;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td>
-                 </tr>
+                </tr>
             </table>
             <div style="margin-top: 30px; text-align: center; font-size: 0.8rem; color: #94a3b8;">
                 شكراً لثقتكم بنا - وثيقة رسمية صادرة عن جراج كنترول برو
@@ -772,9 +818,9 @@
                 <tr style="background: #f1f5f9;">
                     <th style="padding: 12px; text-align: right;">البيان</th>
                     <th style="padding: 12px; text-align: right;">القيمة</th>
-                 </tr>
-                 <tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">إجمالي الصيانات</td><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${maintenances.length}</td></tr>
-                 <tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">إجمالي المصروفات</td><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${totalCost.toFixed(2)} SAR</td></tr>
+                </tr>
+                <tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">إجمالي الصيانات</td><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${maintenances.length}</td></tr>
+                <tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">إجمالي المصروفات</td><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${totalCost.toFixed(2)} SAR</td></tr>
             </table>
             <h3>تفاصيل الصيانات</h3>
             <table style="width: 100%; border-collapse: collapse;">
@@ -783,14 +829,14 @@
                     <th style="padding: 12px; text-align: right;">النوع</th>
                     <th style="padding: 12px; text-align: right;">العداد</th>
                     <th style="padding: 12px; text-align: right;">التكلفة</th>
-                 </tr>
+                </tr>
                 ${maintenances.map(m => `
-                 <tr>
+                <tr>
                     <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${formatDate(m.date)}</td>
                     <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.type}</td>
                     <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
                     <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.cost.toFixed(2)} SAR</td>
-                  </tr>
+                </tr>
                 `).join('')}
             </table>
             <div style="margin-top: 30px; text-align: center; font-size: 0.8rem; color: #94a3b8;">
@@ -857,6 +903,7 @@
         document.getElementById('regVehicle').value = '';
     }
     
+    // Inicializar
     showLogin();
 </script>
 </body>
