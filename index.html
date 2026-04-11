@@ -11,7 +11,59 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    
+    /* ===== LOGO MODERNO ===== */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    padding: 8px 20px 8px 15px;
+    border-radius: 60px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+.logo-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+.logo-icon {
+    background: #10b981;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+.logo-icon i {
+    color: white;
+}
+.logo-icon i:first-child {
+    font-size: 20px;
+    margin-bottom: -4px;
+}
+.logo-icon i:last-child {
+    font-size: 14px;
+    margin-top: -4px;
+}
+.logo-text {
+    line-height: 1.2;
+}
+.logo-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.5px;
+}
+.logo-tagline {
+    font-size: 0.6rem;
+    color: #94a3b8;
+    display: block;
+    margin-top: -2px;
+}
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
         body { background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%); min-height: 100vh; }
@@ -155,7 +207,16 @@
 <div class="app" id="app">
     <div class="header">
         <div class="logo">
-            <h1><i class="fas fa-car-wrench"></i> ورش<span>تي</span></h1>
+            <div class="logo-container">
+    <div class="logo-icon">
+        <i class="fas fa-car"></i>
+        <i class="fas fa-wrench"></i>
+    </div>
+    <div class="logo-text">
+        <span class="logo-name">ورشتي</span>
+        <span class="logo-tagline">صيانة سيارات</span>
+    </div>
+</div>
             <p style="font-size: 0.8rem;" id="vehicleNameDisplay">البيانات متزامنة مع السحاب ☁️</p>
         </div>
         <div class="user-info">
