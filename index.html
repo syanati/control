@@ -139,16 +139,15 @@
             <div class="loading-spinner" id="loginSpinner"></div>
             <button onclick="login()">دخول</button>
             <div class="switch-form" onclick="showRegister()">ليس لديك حساب؟ سجل الآن</div>
-			<p style="margin-top: 1rem; font-size: 0.8rem;">Developed by Hicham El Khamlichi @ 2026</p>
         </div>
         <div id="registerForm" style="display:none;">
             <input type="text" id="regUsername" placeholder="اسم المستخدم">
+            <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
             <input type="password" id="regPassword" placeholder="كلمة المرور">
             <input type="text" id="regVehicle" placeholder="اسم السيارة">
             <div class="loading-spinner" id="registerSpinner"></div>
             <button onclick="register()">تسجيل حساب جديد</button>
             <div class="switch-form" onclick="showLogin()">لديك حساب؟ سجل دخول</div>
-			<p style="margin-top: 1rem; font-size: 0.8rem;">Developed by Hicham El Khamlichi @ 2026</p>
         </div>
         <div style="margin-top:1rem; font-size:0.7rem; color:#94a3b8;">Developed by Hicham El Khamlichi © 2026</div>
     </div>
@@ -261,13 +260,15 @@
 
 <script>
     // ========== SUPABASE CONFIGURATION ==========
+    // ⚠️ REEMPLAZA CON TUS CLAVES REALES DE SUPABASE ⚠️
     const SUPABASE_URL = 'https://eixzktrrtqrzzqqlaqxo.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_XcIH1w6kcZcP7HA8mXW-yg_402H1CVY';
+    const SUPABASE_ANON_KEY = 'sb_publishable_XclH1w6kcZcP7HA8lGUvNYhzcblDPyMf';
     
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     let currentUserId = null;
     let currentUsername = null;
+    let currentUserEmail = null;
     let currentVehicleId = null;
     let vehicles = [];
     let maintenances = [];
@@ -284,29 +285,50 @@
         "ردياتير": 50000, "فحص عام": 15000
     };
     
-    // Crear tablas si no existen
-    async function initTables() {
+    // ========== CREAR TABLAS NECESARIAS ==========
+    async function createTablesIfNotExist() {
         // Crear tabla vehicles
-        await supabaseClient.rpc('create_vehicles_table_if_not_exists').catch(async () => {
-            const { error } = await supabaseClient.query(`
-                CREATE TABLE IF NOT EXISTS vehicles (
+        const { error: createVehiclesError } = await supabaseClient.rpc('create_vehicles_table', {}, {
+            body: {
+                query: `CREATE TABLE IF NOT EXISTS vehicles (
                     id SERIAL PRIMARY KEY,
                     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                     name TEXT NOT NULL,
                     current_km INTEGER DEFAULT 0,
                     last_update DATE DEFAULT CURRENT_DATE
-                );
-            `);
-            if (error) console.error("Error creating vehicles table:", error);
+                );`
+            }
+        }).catch(async () => {
+            // Si RPC no existe, ejecutar SQL directamente (solo funciona en el dashboard, pero lo intentamos)
+            console.log("Intentando crear tabla vehicles...");
         });
         
+        // Verificar si la tabla vehicles existe, si no, crearla con SQL raw
+        const { error: checkError } = await supabaseClient.from('vehicles').select('id').limit(1);
+        if (checkError && checkError.message.includes('does not exist')) {
+            // Necesitamos que el usuario ejecute SQL manualmente una vez
+            showToast("⚠️ الرجاء تنفيذ SQL التالي في Supabase Dashboard (SQL Editor):\n\nCREATE TABLE IF NOT EXISTS vehicles (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, current_km INTEGER DEFAULT 0, last_update DATE DEFAULT CURRENT_DATE);\n\nALTER TABLE maintenances ADD COLUMN IF NOT EXISTS vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;");
+        }
+        
         // Asegurar que maintenances tenga vehicle_id
-        await supabaseClient.rpc('add_vehicle_id_to_maintenances').catch(async () => {
-            const { error } = await supabaseClient.query(`
-                ALTER TABLE maintenances ADD COLUMN IF NOT EXISTS vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;
-            `);
-            if (error) console.error("Error adding vehicle_id column:", error);
-        });
+        const { error: alterError } = await supabaseClient.rpc('add_vehicle_id', {}, {
+            body: {
+                query: `ALTER TABLE maintenances ADD COLUMN IF NOT EXISTS vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;`
+            }
+        }).catch(() => {});
+    }
+    
+    async function ensureVehiclesTable() {
+        // Intentamos insertar un vehículo de prueba para ver si la tabla existe
+        const { error: testError } = await supabaseClient.from('vehicles').select('id').limit(1);
+        if (testError && testError.message.includes('does not exist')) {
+            console.warn("La tabla 'vehicles' no existe. Por favor, créala manualmente en Supabase SQL Editor con:");
+            console.warn("CREATE TABLE IF NOT EXISTS vehicles (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, current_km INTEGER DEFAULT 0, last_update DATE DEFAULT CURRENT_DATE);");
+            console.warn("ALTER TABLE maintenances ADD COLUMN IF NOT EXISTS vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;");
+            showToast("⚠️ Se necesita crear la tabla 'vehicles' en Supabase. Revisa la consola (F12) para más detalles.");
+            return false;
+        }
+        return true;
     }
     
     function showToast(msg) {
@@ -337,9 +359,13 @@
     }
     
     function sendEmailReminder(type, remaining) {
+        if (!currentUserEmail) {
+            showToast("⚠️ لا يوجد بريد إلكتروني مسجل لهذا المستخدم");
+            return;
+        }
         const subject = `تذكير صيانة: ${type}`;
-        const body = `مرحباً،\n\nموعد صيانة ${type} قد اقترب. المتبقي ${remaining} كم. يرجى التوجه للصيانة قريباً.`;
-        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const body = `مرحباً ${currentUsername},\n\nموعد صيانة ${type} قد اقترب. المتبقي ${remaining} كم. يرجى التوجه للصيانة قريباً.\n\nمع تحيات ورشتي`;
+        window.location.href = `mailto:${currentUserEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         showToast("تم فتح بريدك الإلكتروني لإرسال التذكير");
     }
     
@@ -358,6 +384,9 @@
     }
     
     async function loadVehicles() {
+        const tableExists = await ensureVehiclesTable();
+        if (!tableExists) return;
+        
         const { data, error } = await supabaseClient.from('vehicles').select('*').eq('user_id', currentUserId);
         if (error) { console.error(error); return; }
         vehicles = data || [];
@@ -392,7 +421,14 @@
             current_km: 0,
             last_update: new Date().toISOString().split('T')[0]
         }).select();
-        if (error) { alert("خطأ: " + error.message); return; }
+        if (error) { 
+            if (error.message.includes('does not exist')) {
+                alert("⚠️ La tabla 'vehicles' no existe. Por favor, créala en Supabase SQL Editor con el siguiente SQL:\n\nCREATE TABLE vehicles (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, current_km INTEGER DEFAULT 0, last_update DATE DEFAULT CURRENT_DATE);\n\nALTER TABLE maintenances ADD COLUMN vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;");
+            } else {
+                alert("خطأ: " + error.message);
+            }
+            return; 
+        }
         if (document.getElementById('newVehicleName')) document.getElementById('newVehicleName').value = '';
         await loadVehicles();
         if (data && data[0]) {
@@ -435,7 +471,6 @@
         frequencies = {};
         for (const type of defaultTypes) frequencies[type] = defaultFreqs[type];
         if (data) for (const row of data) frequencies[row.maintenance_type] = row.frequency_km;
-        // Ensure all default types exist in frequencies for this user
         for (const type of defaultTypes) {
             if (!frequencies[type]) frequencies[type] = defaultFreqs[type];
         }
@@ -608,14 +643,13 @@
                 tbody.innerHTML += `<tr style="${statusColor === 'danger' ? 'background:#fee2e2' : statusColor === 'warning' ? 'background:#fef3c7' : ''}">
                     <td>${type}</td>
                     <td><input type="number" id="freq_${type.replace(/\s/g, '_')}" value="${freq}" style="width:100px" step="1000"></td>
-                    <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</td>
-                    <td><strong>${formatNumber(nextKm)} km</strong></td>
+                    <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</td><td><strong>${formatNumber(nextKm)} km</strong></td>
                     <td>${status}</td>
                     <td>
                         <button class="btn-icon" onclick="editType('${type}')" style="background:#f59e0b;color:white;padding:6px 12px;"><i class="fas fa-edit"></i></button>
                         <button onclick="deleteType('${type}')" style="background:#ef4444;color:white;padding:6px 12px;"><i class="fas fa-trash"></i></button>
-                     </td>
-                 </tr>`;
+                      </td>
+                </tr>`;
             }
         }
         const select = document.getElementById('maintenanceTypeSelect');
@@ -768,39 +802,116 @@
     
     async function register() {
         const username = document.getElementById('regUsername').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
         const password = document.getElementById('regPassword').value;
         const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
-        if (!username || !password) { alert("الرجاء إدخال اسم المستخدم وكلمة المرور"); return; }
+        
+        if (!username || !email || !password) { 
+            alert("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور"); 
+            return; 
+        }
+        
+        if (!email.includes('@') || !email.includes('.')) {
+            alert("الرجاء إدخال بريد إلكتروني صحيح");
+            return;
+        }
+        
         document.getElementById('registerSpinner').style.display = 'block';
+        
         const { data: existing } = await supabaseClient.from('users').select('id').eq('username', username);
-        if (existing && existing.length > 0) { alert("اسم المستخدم موجود بالفعل"); document.getElementById('registerSpinner').style.display = 'none'; return; }
-        const { error } = await supabaseClient.from('users').insert({ username, password, vehicle_name: vehicleName });
+        if (existing && existing.length > 0) { 
+            alert("اسم المستخدم موجود بالفعل"); 
+            document.getElementById('registerSpinner').style.display = 'none'; 
+            return; 
+        }
+        
+        const { data: existingEmail } = await supabaseClient.from('users').select('id').eq('email', email);
+        if (existingEmail && existingEmail.length > 0) { 
+            alert("البريد الإلكتروني مستخدم بالفعل"); 
+            document.getElementById('registerSpinner').style.display = 'none'; 
+            return; 
+        }
+        
+        // Añadir columna email si no existe
+        await supabaseClient.rpc('add_email_column', {}, {
+            body: { query: "ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;" }
+        }).catch(() => {});
+        
+        const { error } = await supabaseClient.from('users').insert({ 
+            username, 
+            email,
+            password, 
+            vehicle_name: vehicleName 
+        });
+        
         document.getElementById('registerSpinner').style.display = 'none';
-        if (error) { alert("خطأ: " + error.message); return; }
-        showToast("تم إنشاء الحساب بنجاح"); showLogin();
+        
+        if (error) { 
+            alert("خطأ في التسجيل: " + error.message); 
+            return; 
+        }
+        
+        showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
+        showLogin();
     }
     
     async function login() {
         const username = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value;
-        if (!username || !password) { alert("الرجاء إدخال اسم المستخدم وكلمة المرور"); return; }
+        
+        if (!username || !password) { 
+            alert("الرجاء إدخال اسم المستخدم وكلمة المرور"); 
+            return; 
+        }
+        
         document.getElementById('loginSpinner').style.display = 'block';
+        
         const { data, error } = await supabaseClient.from('users').select('*').eq('username', username).eq('password', password);
+        
         document.getElementById('loginSpinner').style.display = 'none';
-        if (error || !data || data.length === 0) { alert("بيانات الدخول غير صحيحة"); return; }
+        
+        if (error || !data || data.length === 0) { 
+            alert("بيانات الدخول غير صحيحة"); 
+            return; 
+        }
+        
         currentUserId = data[0].id;
         currentUsername = data[0].username;
+        currentUserEmail = data[0].email || '';
+        
         document.getElementById('currentUser').innerText = currentUsername;
         document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${data[0].vehicle_name || 'سيارة'} ☁️`;
-        await initTables();
+        
+        await ensureVehiclesTable();
         await loadVehicles();
+        
         document.getElementById('loginContainer').style.display = 'none';
         document.getElementById('app').style.display = 'block';
     }
     
-    function logout() { currentUserId = null; document.getElementById('loginContainer').style.display = 'flex'; document.getElementById('app').style.display = 'none'; showLogin(); }
-    function showRegister() { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; }
-    function showLogin() { document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('loginUsername').value = ''; document.getElementById('loginPassword').value = ''; document.getElementById('regUsername').value = ''; document.getElementById('regPassword').value = ''; document.getElementById('regVehicle').value = ''; }
+    function logout() { 
+        currentUserId = null; 
+        currentUserEmail = null;
+        document.getElementById('loginContainer').style.display = 'flex'; 
+        document.getElementById('app').style.display = 'none'; 
+        showLogin(); 
+    }
+    
+    function showRegister() { 
+        document.getElementById('loginForm').style.display = 'none'; 
+        document.getElementById('registerForm').style.display = 'block'; 
+    }
+    
+    function showLogin() { 
+        document.getElementById('loginForm').style.display = 'block'; 
+        document.getElementById('registerForm').style.display = 'none'; 
+        document.getElementById('loginUsername').value = ''; 
+        document.getElementById('loginPassword').value = ''; 
+        document.getElementById('regUsername').value = ''; 
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = ''; 
+        document.getElementById('regVehicle').value = ''; 
+    }
     
     showLogin();
 </script>
