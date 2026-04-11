@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ورشتي - نظام صيانة السيارات</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z'/%3E%3Cpath d='M17.5 9.5L15 7l-2.5 2.5L10 7l-2.5 2.5L5 7v7h14V7l-2.5 2.5z' fill='%2310b981'/%3E%3C/svg%3E">
+	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z'/%3E%3Cpath d='M17.5 9.5L15 7l-2.5 2.5L10 7l-2.5 2.5L5 7v7h14V7l-2.5 2.5z' fill='%2310b981'/%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -41,6 +41,8 @@
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
         }
+        .logo h1 { font-size: 1.5rem; color: #1e293b; }
+        .logo span { color: #10b981; }
         .stats-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1.5rem; margin-bottom: 2rem;
@@ -121,8 +123,8 @@
         }
         .collapsible-content { display: none; padding: 1rem; }
         .collapsible-content.show { display: block; }
-        
-        /* ===== LOGO MODERNO ===== */
+		
+		     /* ===== LOGO MODERNO ===== */
         .logo-container {
             display: flex;
             align-items: center;
@@ -208,15 +210,16 @@
     <div class="header">
         <div class="logo">
             <div class="logo-container">
-                <div class="logo-icon">
-                    <i class="fas fa-car"></i>
-                    <i class="fas fa-wrench"></i>
-                </div>
-                <div class="logo-text">
-                    <span class="logo-name">ورشتي</span>
-                    <span class="logo-tagline">صيانة سيارات</span>
-                </div>
-            </div>
+    <div class="logo-icon">
+        <i class="fas fa-car"></i>
+        <i class="fas fa-wrench"></i>
+    </div>
+    <div class="logo-text">
+        <span class="logo-name">ورشتي</span>
+        <span class="logo-tagline">صيانة سيارات</span>
+    </div>
+</div>
+            <p style="font-size: 0.8rem;" id="vehicleNameDisplay">البيانات متزامنة مع السحاب ☁️</p>
         </div>
         <div class="user-info">
             <i class="fas fa-user-circle"></i>
@@ -652,7 +655,76 @@
                 tbody.innerHTML += `<tr style="${statusColor === 'danger' ? 'background:#fee2e2' : statusColor === 'warning' ? 'background:#fef3c7' : ''}">
                     <td>${type}</td>
                     <td><input type="number" id="freq_${type.replace(/\s/g, '_')}" value="${freq}" style="width:100px" step="1000"></td>
-                    <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</span><span class="badge">🔧 ${formatNumber(m.kilometers)} km</span><span class="badge">💰 ${m.cost.toFixed(2)} SAR</span></div>
+                    <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</td><td><strong>${formatNumber(nextKm)} km</strong></td>
+                    <td>${status}</td>
+                    <td>
+                        <button class="btn-icon" onclick="editType('${type}')" style="background:#f59e0b;color:white;padding:6px 12px;"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteType('${type}')" style="background:#ef4444;color:white;padding:6px 12px;"><i class="fas fa-trash"></i></button>
+                      </td>
+                </tr>`;
+            }
+        }
+        const select = document.getElementById('maintenanceTypeSelect');
+        const filterSelect = document.getElementById('filterType');
+        if (select) {
+            select.innerHTML = '<option value="">اختر نوع الصيانة</option>';
+            filterSelect.innerHTML = '<option value="">جميع الأنواع</option>';
+            for (const type of Object.keys(frequencies)) {
+                select.innerHTML += `<option value="${type}">${type}</option>`;
+                filterSelect.innerHTML += `<option value="${type}">${type}</option>`;
+            }
+        }
+        updateAlertsGrid();
+        const totalCost = maintenances.reduce((s, m) => s + m.cost, 0);
+        document.getElementById('totalCount').innerText = maintenances.length;
+        document.getElementById('totalCost').innerHTML = totalCost.toFixed(2) + ' SAR';
+        applyFilters();
+    }
+    
+    function updateAlertsGrid() {
+        const grid = document.getElementById('alertsGrid');
+        let alerts = [];
+        let alertCount = 0;
+        for (const type of Object.keys(frequencies)) {
+            const remaining = getKmRemaining(type);
+            if (remaining <= 3000) {
+                alertCount++;
+                alerts.push({ type, remaining });
+            }
+        }
+        document.getElementById('alertCount').innerText = alertCount;
+        if (!grid) return;
+        if (alerts.length === 0) {
+            grid.innerHTML = '<div class="stat-card"><i class="fas fa-check-circle"></i><h3>التنبيهات</h3><div class="value">✅ كل شيء على ما يرام</div><p>لا توجد تنبيهات</p></div>';
+            return;
+        }
+        grid.innerHTML = alerts.map(a => `<div class="stat-card" style="${a.remaining <= 1000 ? 'background:#fee2e2' : 'background:#fef3c7'}">
+            <i class="fas fa-bell"></i><h3>🔔 ${a.type}</h3>
+            <div class="value">${a.remaining <= 0 ? 'منتهي!' : formatNumber(a.remaining) + ' km'}</div>
+            <p>${a.remaining <= 0 ? 'مطلوب الآن' : (a.remaining <= 1000 ? 'أقل من 1000 km - عاجل' : 'يحتاج صيانة قريباً')}</p>
+            <button onclick="sendEmailReminder('${a.type}', ${a.remaining})" style="margin-top:8px; background:#f59e0b; padding:6px 12px;">📧 تذكير</button>
+        </div>`).join('');
+    }
+    
+    function applyFilters() {
+        currentFilter = document.getElementById('filterType')?.value || '';
+        let filtered = currentFilter ? maintenances.filter(m => m.type === currentFilter) : [...maintenances];
+        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+        const container = document.getElementById('maintenanceList');
+        if (!container) return;
+        if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center; padding:2rem;">لا توجد سجلات</div>'; return; }
+        container.innerHTML = filtered.map(m => {
+            const nextKm = getNextKmForType(m.type);
+            const remaining = getKmRemaining(m.type);
+            let progressPercent = Math.min(100, (m.kilometers / nextKm) * 100);
+            let progressClass = "";
+            if (remaining <= 0) progressClass = "danger";
+            else if (remaining <= 1000) progressClass = "danger";
+            else if (remaining <= 3000) progressClass = "warning";
+            return `<div class="maintenance-item">
+                <div style="flex:2">
+                    <h4><i class="fas fa-wrench"></i> ${m.type}</h4>
+                    <div><span class="badge">📅 ${formatDate(m.date)}</span><span class="badge">🔧 ${formatNumber(m.kilometers)} km</span><span class="badge">💰 ${m.cost.toFixed(2)} SAR</span></div>
                     <p style="margin-top:8px;">${m.description || 'بدون ملاحظات'}</p>
                     <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width: ${progressPercent}%"></div></div>
                     <small>الصيانة القادمة عند ${formatNumber(nextKm)} km (${remaining <= 0 ? 'منتهي' : formatNumber(remaining) + ' km متبقي'})</small>
@@ -706,8 +778,147 @@
             </div>
             <table style="width:100%; border-collapse:collapse;">
                 <tr style="background:#f1f5f9;"><th style="padding:12px; text-align:right;">نوع الصيانة</th><th style="padding:12px; text-align:right;">العداد</th><th style="padding:12px; text-align:right;">المبلغ</th></tr>
-                <tr><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${m.type}</td><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
-    );
+                <tr><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${m.type}</td><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${m.cost.toFixed(2)} SAR</td></tr>
+                <tr><td colspan="2" style="padding:12px;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td></tr>
+            </table>
+            <div style="margin-top:30px; text-align:center; font-size:0.8rem;">شكراً لثقتكم بنا</div>
+        `;
+        const opt = { margin: [0.5,0.5,0.5,0.5], filename: `invoice_${m.id}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+        showToast("جاري إنشاء الفاتورة...");
+    }
+    
+    async function generateFullReport() {
+        const totalCost = maintenances.reduce((s, m) => s + m.cost, 0);
+        const element = document.createElement('div');
+        element.style.padding = '40px';
+        element.style.fontFamily = 'Tajawal, sans-serif';
+        element.style.textAlign = 'right';
+        element.style.direction = 'rtl';
+        element.innerHTML = `
+            <div style="border-bottom:3px solid #10b981;"><h1>تقرير الصيانة الشامل</h1></div>
+            <p><strong>المركبة:</strong> ${vehicles.find(v => v.id === currentVehicleId)?.name || 'سيارة'}</p>
+            <p><strong>العداد الحالي:</strong> ${formatNumber(vehicleKm)} km</p>
+            <p><strong>إجمالي الصيانات:</strong> ${maintenances.length}</p>
+            <p><strong>إجمالي المصروفات:</strong> ${totalCost.toFixed(2)} SAR</p>
+            <h3>تفاصيل الصيانات</h3>
+            <table style="width:100%; border-collapse:collapse;">
+                <tr style="background:#f1f5f9;"><th>التاريخ</th><th>النوع</th><th>العداد</th><th>التكلفة</th></tr>
+                ${maintenances.map(m => `<tr><td>${formatDate(m.date)}</td><td>${m.type}</td><td>${formatNumber(m.kilometers)} km</td><td>${m.cost.toFixed(2)} SAR</td></tr>`).join('')}
+            </table>
+        `;
+        const opt = { margin: [0.5,0.5,0.5,0.5], filename: `report_${Date.now()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+        showToast("جاري إنشاء التقرير...");
+    }
+    
+    async function register() {
+        const username = document.getElementById('regUsername').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
+        
+        if (!username || !email || !password) { 
+            alert("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور"); 
+            return; 
+        }
+        
+        if (!email.includes('@') || !email.includes('.')) {
+            alert("الرجاء إدخال بريد إلكتروني صحيح");
+            return;
+        }
+        
+        document.getElementById('registerSpinner').style.display = 'block';
+        
+        const { data: existing } = await supabaseClient.from('users').select('id').eq('username', username);
+        if (existing && existing.length > 0) { 
+            alert("اسم المستخدم موجود بالفعل"); 
+            document.getElementById('registerSpinner').style.display = 'none'; 
+            return; 
+        }
+        
+        const { data: existingEmail } = await supabaseClient.from('users').select('id').eq('email', email);
+        if (existingEmail && existingEmail.length > 0) { 
+            alert("البريد الإلكتروني مستخدم بالفعل"); 
+            document.getElementById('registerSpinner').style.display = 'none'; 
+            return; 
+        }
+        
+        const { error } = await supabaseClient.from('users').insert({ 
+            username, 
+            email,
+            password, 
+            vehicle_name: vehicleName 
+        });
+        
+        document.getElementById('registerSpinner').style.display = 'none';
+        
+        if (error) { 
+            alert("خطأ في التسجيل: " + error.message); 
+            return; 
+        }
+        
+        showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
+        showLogin();
+    }
+    
+    async function login() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        if (!username || !password) { 
+            alert("الرجاء إدخال اسم المستخدم وكلمة المرور"); 
+            return; 
+        }
+        
+        document.getElementById('loginSpinner').style.display = 'block';
+        
+        const { data, error } = await supabaseClient.from('users').select('*').eq('username', username).eq('password', password);
+        
+        document.getElementById('loginSpinner').style.display = 'none';
+        
+        if (error || !data || data.length === 0) { 
+            alert("بيانات الدخول غير صحيحة"); 
+            return; 
+        }
+        
+        currentUserId = data[0].id;
+        currentUsername = data[0].username;
+        currentUserEmail = data[0].email || '';
+        
+        document.getElementById('currentUser').innerText = currentUsername;
+        document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${data[0].vehicle_name || 'سيارة'} ☁️`;
+        
+        await loadVehicles();
+        
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+    }
+    
+    function logout() { 
+        currentUserId = null; 
+        currentUserEmail = null;
+        document.getElementById('loginContainer').style.display = 'flex'; 
+        document.getElementById('app').style.display = 'none'; 
+        showLogin(); 
+    }
+    
+    function showRegister() { 
+        document.getElementById('loginForm').style.display = 'none'; 
+        document.getElementById('registerForm').style.display = 'block'; 
+    }
+    
+    function showLogin() { 
+        document.getElementById('loginForm').style.display = 'block'; 
+        document.getElementById('registerForm').style.display = 'none'; 
+        document.getElementById('loginUsername').value = ''; 
+        document.getElementById('loginPassword').value = ''; 
+        document.getElementById('regUsername').value = ''; 
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = ''; 
+        document.getElementById('regVehicle').value = ''; 
+    }
+    
     showLogin();
 </script>
 </body>
