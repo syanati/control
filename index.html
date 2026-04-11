@@ -652,76 +652,7 @@
                 tbody.innerHTML += `<tr style="${statusColor === 'danger' ? 'background:#fee2e2' : statusColor === 'warning' ? 'background:#fef3c7' : ''}">
                     <td>${type}</td>
                     <td><input type="number" id="freq_${type.replace(/\s/g, '_')}" value="${freq}" style="width:100px" step="1000"></td>
-                    <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</td><td><strong>${formatNumber(nextKm)} km</strong></td>
-                    <td>${status}</td>
-                    <td>
-                        <button class="btn-icon" onclick="editType('${type}')" style="background:#f59e0b;color:white;padding:6px 12px;"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteType('${type}')" style="background:#ef4444;color:white;padding:6px 12px;"><i class="fas fa-trash"></i></button>
-                      </td>
-                </tr>`;
-            }
-        }
-        const select = document.getElementById('maintenanceTypeSelect');
-        const filterSelect = document.getElementById('filterType');
-        if (select) {
-            select.innerHTML = '<option value="">اختر نوع الصيانة</option>';
-            filterSelect.innerHTML = '<option value="">جميع الأنواع</option>';
-            for (const type of Object.keys(frequencies)) {
-                select.innerHTML += `<option value="${type}">${type}</option>`;
-                filterSelect.innerHTML += `<option value="${type}">${type}</option>`;
-            }
-        }
-        updateAlertsGrid();
-        const totalCost = maintenances.reduce((s, m) => s + m.cost, 0);
-        document.getElementById('totalCount').innerText = maintenances.length;
-        document.getElementById('totalCost').innerHTML = totalCost.toFixed(2) + ' SAR';
-        applyFilters();
-    }
-    
-    function updateAlertsGrid() {
-        const grid = document.getElementById('alertsGrid');
-        let alerts = [];
-        let alertCount = 0;
-        for (const type of Object.keys(frequencies)) {
-            const remaining = getKmRemaining(type);
-            if (remaining <= 3000) {
-                alertCount++;
-                alerts.push({ type, remaining });
-            }
-        }
-        document.getElementById('alertCount').innerText = alertCount;
-        if (!grid) return;
-        if (alerts.length === 0) {
-            grid.innerHTML = '<div class="stat-card"><i class="fas fa-check-circle"></i><h3>التنبيهات</h3><div class="value">✅ كل شيء على ما يرام</div><p>لا توجد تنبيهات</p></div>';
-            return;
-        }
-        grid.innerHTML = alerts.map(a => `<div class="stat-card" style="${a.remaining <= 1000 ? 'background:#fee2e2' : 'background:#fef3c7'}">
-            <i class="fas fa-bell"></i><h3>🔔 ${a.type}</h3>
-            <div class="value">${a.remaining <= 0 ? 'منتهي!' : formatNumber(a.remaining) + ' km'}</div>
-            <p>${a.remaining <= 0 ? 'مطلوب الآن' : (a.remaining <= 1000 ? 'أقل من 1000 km - عاجل' : 'يحتاج صيانة قريباً')}</p>
-            <button onclick="sendEmailReminder('${a.type}', ${a.remaining})" style="margin-top:8px; background:#f59e0b; padding:6px 12px;">📧 تذكير</button>
-        </div>`).join('');
-    }
-    
-    function applyFilters() {
-        currentFilter = document.getElementById('filterType')?.value || '';
-        let filtered = currentFilter ? maintenances.filter(m => m.type === currentFilter) : [...maintenances];
-        filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
-        const container = document.getElementById('maintenanceList');
-        if (!container) return;
-        if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center; padding:2rem;">لا توجد سجلات</div>'; return; }
-        container.innerHTML = filtered.map(m => {
-            const nextKm = getNextKmForType(m.type);
-            const remaining = getKmRemaining(m.type);
-            let progressPercent = Math.min(100, (m.kilometers / nextKm) * 100);
-            let progressClass = "";
-            if (remaining <= 0) progressClass = "danger";
-            else if (remaining <= 1000) progressClass = "danger";
-            else if (remaining <= 3000) progressClass = "warning";
-            return `<div class="maintenance-item">
-                <div style="flex:2">
-                    <h4><i class="fas fa-wrench"></i> ${m.type}</h4>
-                    <div><span class="badge">📅 ${formatDate(m.date)}</span><span class="badge">🔧 ${formatNumber(m.kilometers)} km</span><span class="badge">💰 ${m.cost.toFixed(2)} SAR</span></div>
+                    <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</span><span class="badge">🔧 ${formatNumber(m.kilometers)} km</span><span class="badge">💰 ${m.cost.toFixed(2)} SAR</span></div>
                     <p style="margin-top:8px;">${m.description || 'بدون ملاحظات'}</p>
                     <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width: ${progressPercent}%"></div></div>
                     <small>الصيانة القادمة عند ${formatNumber(nextKm)} km (${remaining <= 0 ? 'منتهي' : formatNumber(remaining) + ' km متبقي'})</small>
@@ -775,89 +706,8 @@
             </div>
             <table style="width:100%; border-collapse:collapse;">
                 <tr style="background:#f1f5f9;"><th style="padding:12px; text-align:right;">نوع الصيانة</th><th style="padding:12px; text-align:right;">العداد</th><th style="padding:12px; text-align:right;">المبلغ</th></tr>
-                <tr><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${m.type}</td><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${m.cost.toFixed(2)} SAR</td></tr>
-                <tr><td colspan="2" style="padding:12px;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td></tr>
-            </table>
-            <div style="margin-top:30px; text-align:center; font-size:0.8rem;">شكراً لثقتكم بنا</div>
-        `;
-        const opt = { margin: [0.5,0.5,0.5,0.5], filename: `invoice_${m.id}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
-        html2pdf().set(opt).from(element).save();
-        showToast("جاري إنشاء الفاتورة...");
-    }
-    
-    async function generateFullReport() {
-        const totalCost = maintenances.reduce((s, m) => s + m.cost, 0);
-        const element = document.createElement('div');
-        element.style.padding = '40px';
-        element.style.fontFamily = 'Tajawal, sans-serif';
-        element.style.textAlign = 'right';
-        element.style.direction = 'rtl';
-        element.innerHTML = `
-            <div style="border-bottom:3px solid #10b981;"><h1>تقرير الصيانة الشامل</h1></div>
-            <p><strong>المركبة:</strong> ${vehicles.find(v => v.id === currentVehicleId)?.name || 'سيارة'}</p>
-            <p><strong>العداد الحالي:</strong> ${formatNumber(vehicleKm)} km</p>
-            <p><strong>إجمالي الصيانات:</strong> ${maintenances.length}</p>
-            <p><strong>إجمالي المصروفات:</strong> ${totalCost.toFixed(2)} SAR</p>
-            <h3>تفاصيل الصيانات</h3>
-            <table style="width:100%; border-collapse:collapse;">
-                <tr style="background:#f1f5f9;"><th>التاريخ</th><th>النوع</th><th>العداد</th><th>التكلفة</th></tr>
-                ${maintenances.map(m => `<tr><td>${formatDate(m.date)}</td><td>${m.type}</td><td>${formatNumber(m.kilometers)} km</span><span class="badge">💰 ${m.cost.toFixed(2)} SAR</span></div>
-                    <p style="margin-top:8px;">${m.description || 'بدون ملاحظات'}</p>
-                    <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width: ${progressPercent}%"></div></div>
-                    <small>الصيانة القادمة عند ${formatNumber(nextKm)} km (${remaining <= 0 ? 'منتهي' : formatNumber(remaining) + ' km متبقي'})</small>
-                </div>
-                <div><button onclick="generateInvoicePDF(${m.id})" style="background:#10b981;padding:8px 16px;"><i class="fas fa-file-invoice"></i> فاتورة</button>
-                <button onclick="deleteMaintenance(${m.id})" style="background:#ef4444;padding:8px 16px;"><i class="fas fa-trash"></i></button></div>
-            </div>`;
-        }).join('');
-    }
-    
-    function resetFilters() { if(document.getElementById('filterType')) document.getElementById('filterType').value = ''; applyFilters(); }
-    function clearForm() {
-        document.getElementById('kilometers').value = '';
-        document.getElementById('cost').value = '';
-        document.getElementById('date').value = '';
-        document.getElementById('description').value = '';
-    }
-    function openAddTypeModal() {
-        document.getElementById('modalTitle').innerText = 'إضافة نوع صيانة جديد';
-        document.getElementById('typeName').value = '';
-        document.getElementById('typeFrequency').value = '10000';
-        document.getElementById('editingType').value = '';
-        document.getElementById('typeModal').style.display = 'flex';
-    }
-    function editType(type) {
-        document.getElementById('modalTitle').innerText = 'تعديل نوع الصيانة';
-        document.getElementById('typeName').value = type;
-        document.getElementById('typeFrequency').value = frequencies[type];
-        document.getElementById('editingType').value = type;
-        document.getElementById('typeModal').style.display = 'flex';
-    }
-    function closeModal() { document.getElementById('typeModal').style.display = 'none'; }
-    
-    async function generateInvoicePDF(id) {
-        const m = maintenances.find(m => m.id === id);
-        if(!m) return;
-        const element = document.createElement('div');
-        element.style.padding = '40px';
-        element.style.fontFamily = 'Tajawal, sans-serif';
-        element.style.textAlign = 'right';
-        element.style.direction = 'rtl';
-        element.innerHTML = `
-            <div style="border-bottom: 3px solid #10b981; margin-bottom: 20px;">
-                <h1 style="color:#1e293b;">ورشتي</h1>
-                <p style="color:#64748b;">فاتورة صيانة رسمية</p>
-            </div>
-            <div style="margin-bottom:20px;">
-                <p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p>
-                <p><strong>التاريخ:</strong> ${formatDate(new Date())}</p>
-                <p><strong>المركبة:</strong> ${vehicles.find(v => v.id === currentVehicleId)?.name || 'سيارة'}</p>
-            </div>
-            <table style="width:100%; border-collapse:collapse;">
-                <tr style="background:#f1f5f9;"><th style="padding:12px; text-align:right;">نوع الصيانة</th><th style="padding:12px; text-align:right;">العداد</th><th style="padding:12px; text-align:right;">المبلغ</th><tr>
-                <tr><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${m.type}</td><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td`);
-    }
-
+                <tr><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${m.type}</td><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
+    );
     showLogin();
 </script>
 </body>
