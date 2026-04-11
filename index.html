@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ورشتي - نظام صيانة السيارات</title>
-    <!-- Favicon: Coche con llave inglesa -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z'/%3E%3Cpath d='M17.5 9.5L15 7l-2.5 2.5L10 7l-2.5 2.5L5 7v7h14V7l-2.5 2.5z' fill='%2310b981'/%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -202,7 +201,6 @@
         </div>
     </div>
 
-    <!-- Tabla de frecuencias desplegable -->
     <div class="collapsible">
         <div class="collapsible-header" onclick="toggleFrequencyTable()">
             <span><i class="fas fa-cog"></i> إدارة أنواع الصيانة</span>
@@ -260,7 +258,6 @@
 
 <script>
     // ========== SUPABASE CONFIGURATION ==========
-    // ⚠️ REEMPLAZA CON TUS CLAVES REALES DE SUPABASE ⚠️
     const SUPABASE_URL = 'https://eixzktrrtqrzzqqlaqxo.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_XclH1w6kcZcP7HA8lGUvNYhzcblDPyMf';
     
@@ -284,52 +281,6 @@
         "سير التوقيت": 60000, "بواجي": 30000, "فلتر هواء": 15000,
         "ردياتير": 50000, "فحص عام": 15000
     };
-    
-    // ========== CREAR TABLAS NECESARIAS ==========
-    async function createTablesIfNotExist() {
-        // Crear tabla vehicles
-        const { error: createVehiclesError } = await supabaseClient.rpc('create_vehicles_table', {}, {
-            body: {
-                query: `CREATE TABLE IF NOT EXISTS vehicles (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                    name TEXT NOT NULL,
-                    current_km INTEGER DEFAULT 0,
-                    last_update DATE DEFAULT CURRENT_DATE
-                );`
-            }
-        }).catch(async () => {
-            // Si RPC no existe, ejecutar SQL directamente (solo funciona en el dashboard, pero lo intentamos)
-            console.log("Intentando crear tabla vehicles...");
-        });
-        
-        // Verificar si la tabla vehicles existe, si no, crearla con SQL raw
-        const { error: checkError } = await supabaseClient.from('vehicles').select('id').limit(1);
-        if (checkError && checkError.message.includes('does not exist')) {
-            // Necesitamos que el usuario ejecute SQL manualmente una vez
-            showToast("⚠️ الرجاء تنفيذ SQL التالي في Supabase Dashboard (SQL Editor):\n\nCREATE TABLE IF NOT EXISTS vehicles (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, current_km INTEGER DEFAULT 0, last_update DATE DEFAULT CURRENT_DATE);\n\nALTER TABLE maintenances ADD COLUMN IF NOT EXISTS vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;");
-        }
-        
-        // Asegurar que maintenances tenga vehicle_id
-        const { error: alterError } = await supabaseClient.rpc('add_vehicle_id', {}, {
-            body: {
-                query: `ALTER TABLE maintenances ADD COLUMN IF NOT EXISTS vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;`
-            }
-        }).catch(() => {});
-    }
-    
-    async function ensureVehiclesTable() {
-        // Intentamos insertar un vehículo de prueba para ver si la tabla existe
-        const { error: testError } = await supabaseClient.from('vehicles').select('id').limit(1);
-        if (testError && testError.message.includes('does not exist')) {
-            console.warn("La tabla 'vehicles' no existe. Por favor, créala manualmente en Supabase SQL Editor con:");
-            console.warn("CREATE TABLE IF NOT EXISTS vehicles (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, current_km INTEGER DEFAULT 0, last_update DATE DEFAULT CURRENT_DATE);");
-            console.warn("ALTER TABLE maintenances ADD COLUMN IF NOT EXISTS vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;");
-            showToast("⚠️ Se necesita crear la tabla 'vehicles' en Supabase. Revisa la consola (F12) para más detalles.");
-            return false;
-        }
-        return true;
-    }
     
     function showToast(msg) {
         let t = document.createElement('div');
@@ -384,15 +335,17 @@
     }
     
     async function loadVehicles() {
-        const tableExists = await ensureVehiclesTable();
-        if (!tableExists) return;
-        
         const { data, error } = await supabaseClient.from('vehicles').select('*').eq('user_id', currentUserId);
-        if (error) { console.error(error); return; }
+        if (error) { 
+            console.error(error);
+            showToast("خطأ في تحميل المركبات: " + error.message);
+            return;
+        }
         vehicles = data || [];
         if (vehicles.length === 0) {
             await addVehicle('سيارتي');
             await loadVehicles();
+            return;
         }
         if (vehicles.length > 0 && !currentVehicleId) {
             currentVehicleId = vehicles[0].id;
@@ -422,11 +375,7 @@
             last_update: new Date().toISOString().split('T')[0]
         }).select();
         if (error) { 
-            if (error.message.includes('does not exist')) {
-                alert("⚠️ La tabla 'vehicles' no existe. Por favor, créala en Supabase SQL Editor con el siguiente SQL:\n\nCREATE TABLE vehicles (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, name TEXT NOT NULL, current_km INTEGER DEFAULT 0, last_update DATE DEFAULT CURRENT_DATE);\n\nALTER TABLE maintenances ADD COLUMN vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;");
-            } else {
-                alert("خطأ: " + error.message);
-            }
+            alert("خطأ: " + error.message);
             return; 
         }
         if (document.getElementById('newVehicleName')) document.getElementById('newVehicleName').value = '';
@@ -832,11 +781,6 @@
             return; 
         }
         
-        // Añadir columna email si no existe
-        await supabaseClient.rpc('add_email_column', {}, {
-            body: { query: "ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;" }
-        }).catch(() => {});
-        
         const { error } = await supabaseClient.from('users').insert({ 
             username, 
             email,
@@ -882,7 +826,6 @@
         document.getElementById('currentUser').innerText = currentUsername;
         document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${data[0].vehicle_name || 'سيارة'} ☁️`;
         
-        await ensureVehiclesTable();
         await loadVehicles();
         
         document.getElementById('loginContainer').style.display = 'none';
