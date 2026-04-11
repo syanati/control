@@ -182,28 +182,37 @@
 <body>
 
 <div class="login-container" id="loginContainer">
-    <div class="login-card">
-        <i class="fas fa-car-wrench"></i>
-        <h2>ورشتي</h2>
-        <p>نظام صيانة سيارات - سحابي بالكامل</p>
-        <div id="loginForm">
-            <input type="text" id="loginUsername" placeholder="اسم المستخدم">
-            <input type="password" id="loginPassword" placeholder="كلمة المرور">
-            <div class="loading-spinner" id="loginSpinner"></div>
-            <button onclick="login()">دخول</button>
-            <div class="switch-form" onclick="showRegister()">ليس لديك حساب؟ سجل الآن</div>
+<div class="login-card">
+    <!-- Logo moderno en la pantalla de login -->
+    <div class="login-logo">
+        <div class="login-logo-icon">
+            <i class="fas fa-car"></i>
+            <i class="fas fa-wrench"></i>
         </div>
-        <div id="registerForm" style="display:none;">
-            <input type="text" id="regUsername" placeholder="اسم المستخدم">
-            <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
-            <input type="password" id="regPassword" placeholder="كلمة المرور">
-            <input type="text" id="regVehicle" placeholder="اسم السيارة">
-            <div class="loading-spinner" id="registerSpinner"></div>
-            <button onclick="register()">تسجيل حساب جديد</button>
-            <div class="switch-form" onclick="showLogin()">لديك حساب؟ سجل دخول</div>
+        <div class="login-logo-text">
+            <span class="login-logo-name">ورشتي</span>
+            <span class="login-logo-tagline">صيانة سيارات</span>
         </div>
-        <div style="margin-top:1rem; font-size:0.7rem; color:#94a3b8;">Developed by Hicham El Khamlichi © 2026</div>
     </div>
+    <p style="margin-top: 10px; margin-bottom: 20px; color: #64748b;">نظام صيانة سيارات - سحابي بالكامل</p>
+    <div id="loginForm">
+        <input type="text" id="loginUsername" placeholder="اسم المستخدم">
+        <input type="password" id="loginPassword" placeholder="كلمة المرور">
+        <div class="loading-spinner" id="loginSpinner"></div>
+        <button onclick="login()">دخول</button>
+        <div class="switch-form" onclick="showRegister()">ليس لديك حساب؟ سجل الآن</div>
+    </div>
+    <div id="registerForm" style="display:none;">
+        <input type="text" id="regUsername" placeholder="اسم المستخدم">
+        <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
+        <input type="password" id="regPassword" placeholder="كلمة المرور">
+        <input type="text" id="regVehicle" placeholder="اسم السيارة">
+        <div class="loading-spinner" id="registerSpinner"></div>
+        <button onclick="register()">تسجيل حساب جديد</button>
+        <div class="switch-form" onclick="showLogin()">لديك حساب؟ سجل دخول</div>
+    </div>
+    <div style="margin-top:1rem; font-size:0.7rem; color:#94a3b8;">Developed by Hicham El Khamlichi © 2026</div>
+</div>
 </div>
 
 <div class="app" id="app">
