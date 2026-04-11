@@ -3,180 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>جراج كنترول برو - نظام صيانة السيارات</title>
+    <title>ورشتي - نظام صيانة السيارات</title>
+    <!-- Favicon: Coche con llave inglesa -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z'/%3E%3Cpath d='M17.5 9.5L15 7l-2.5 2.5L10 7l-2.5 2.5L5 7v7h14V7l-2.5 2.5z' fill='%2310b981'/%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', sans-serif;
-        }
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
-            min-height: 100vh;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%); min-height: 100vh; }
         .login-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1e293b, #0f172a);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
         .login-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 32px;
+            background: white; padding: 2rem; border-radius: 32px;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            width: 90%;
-            max-width: 420px;
-            text-align: center;
+            width: 90%; max-width: 420px; text-align: center;
         }
         .login-card i { font-size: 4rem; color: #10b981; margin-bottom: 1rem; }
         .login-card input {
-            width: 100%;
-            padding: 14px 16px;
-            margin: 12px 0;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            font-size: 1rem;
+            width: 100%; padding: 14px 16px; margin: 12px 0;
+            border: 2px solid #e2e8f0; border-radius: 16px; font-size: 1rem;
         }
         .login-card button {
-            width: 100%;
-            padding: 14px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 8px;
+            width: 100%; padding: 14px; background: #10b981; color: white;
+            border: none; border-radius: 16px; font-weight: 600; cursor: pointer;
         }
-        .switch-form {
-            margin-top: 1rem;
-            color: #10b981;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        .app {
-            display: none;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
+        .switch-form { margin-top: 1rem; color: #10b981; cursor: pointer; font-size: 0.9rem; }
+        .app { display: none; max-width: 1400px; margin: 0 auto; padding: 1rem; }
         .header {
-            background: white;
-            border-radius: 24px;
-            padding: 1rem 2rem;
-            margin-bottom: 2rem;
+            background: white; border-radius: 24px; padding: 1rem 2rem; margin-bottom: 2rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
         }
         .logo h1 { font-size: 1.5rem; color: #1e293b; }
         .logo span { color: #10b981; }
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
         }
         .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            text-align: center;
+            background: white; padding: 1.5rem; border-radius: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center;
         }
         .stat-card .value { font-size: 1.8rem; font-weight: 700; color: #1e293b; }
         .section {
-            background: white;
-            border-radius: 24px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+            background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 2rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         }
         .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem; margin-bottom: 1rem;
         }
         input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-family: 'Tajawal', sans-serif;
+            width: 100%; padding: 12px; border: 2px solid #e2e8f0;
+            border-radius: 12px; font-size: 0.9rem; font-family: 'Tajawal', sans-serif;
         }
         button {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
+            background: #10b981; color: white; border: none; padding: 12px 24px;
+            border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
         }
-        .frequency-table {
-            overflow-x: auto;
-        }
-        .frequency-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .frequency-table th, .frequency-table td {
-            padding: 12px;
-            text-align: right;
-            border-bottom: 1px solid #e2e8f0;
-        }
+        button:hover { background: #059669; transform: translateY(-2px); }
+        .frequency-table { overflow-x: auto; margin-top: 1rem; }
+        .frequency-table table { width: 100%; border-collapse: collapse; }
+        .frequency-table th, .frequency-table td { padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0; }
         .maintenance-item {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-right: 4px solid #10b981;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
+            background: #f8fafc; border-radius: 16px; padding: 1rem; margin-bottom: 1rem;
+            border-right: 4px solid #10b981; display: flex; justify-content: space-between;
+            flex-wrap: wrap; gap: 1rem;
         }
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #10b981;
-            transition: width 0.3s;
-        }
+        .progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; background: #10b981; transition: width 0.3s; }
+        .progress-fill.warning { background: #f59e0b; }
+        .progress-fill.danger { background: #ef4444; }
         .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            z-index: 3000;
+            position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white;
+            padding: 12px 24px; border-radius: 12px; z-index: 3000;
             animation: fadeInOut 3s ease-in-out;
         }
         @keyframes fadeInOut {
@@ -190,41 +98,40 @@
             .header { flex-direction: column; text-align: center; }
         }
         .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #e2e8f0;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            margin-left: 8px;
+            display: inline-block; padding: 4px 12px; background: #e2e8f0;
+            border-radius: 12px; font-size: 0.75rem; margin-left: 8px;
         }
-        .btn-icon {
-            padding: 6px 12px;
-            margin: 0 4px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
+        .btn-icon { padding: 6px 12px; margin: 0 4px; border-radius: 8px; cursor: pointer; }
         .loading-spinner {
-            display: none;
-            margin: 10px auto;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #e2e8f0;
-            border-top: 3px solid #10b981;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            display: none; margin: 10px auto; width: 30px; height: 30px;
+            border: 3px solid #e2e8f0; border-top: 3px solid #10b981;
+            border-radius: 50%; animation: spin 1s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000;
         }
+        .modal-content { background: white; padding: 2rem; border-radius: 24px; width: 90%; max-width: 500px; }
+        .chart-container { max-width: 400px; margin: 0 auto; }
+        .export-buttons { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .vehicle-card { background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 16px; padding: 1rem; margin-bottom: 1rem; }
+        .vehicle-card select, .vehicle-card button { background: white; color: #1e293b; margin-top: 0.5rem; }
+        .collapsible { background: #f1f5f9; border-radius: 12px; margin-bottom: 1rem; }
+        .collapsible-header {
+            background: #10b981; color: white; padding: 12px 20px; cursor: pointer;
+            border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .collapsible-content { display: none; padding: 1rem; }
+        .collapsible-content.show { display: block; }
     </style>
 </head>
 <body>
 
 <div class="login-container" id="loginContainer">
     <div class="login-card">
-        <i class="fas fa-cloud-upload-alt"></i>
-        <h2>جراج كنترول برو</h2>
+        <i class="fas fa-car-wrench"></i>
+        <h2>ورشتي</h2>
         <p>نظام صيانة سيارات - سحابي بالكامل</p>
         <div id="loginForm">
             <input type="text" id="loginUsername" placeholder="اسم المستخدم">
@@ -243,19 +150,29 @@
             <div class="switch-form" onclick="showLogin()">لديك حساب؟ سجل دخول</div>
 			<p style="margin-top: 1rem; font-size: 0.8rem;">Developed by Hicham El Khamlichi @ 2026</p>
         </div>
+        <div style="margin-top:1rem; font-size:0.7rem; color:#94a3b8;">Developed by Hicham El Khamlichi © 2026</div>
     </div>
 </div>
 
 <div class="app" id="app">
     <div class="header">
         <div class="logo">
-            <h1><i class="fas fa-cloud"></i> جراج <span>كنترول برو</span></h1>
+            <h1><i class="fas fa-car-wrench"></i> ورش<span>تي</span></h1>
             <p style="font-size: 0.8rem;" id="vehicleNameDisplay">البيانات متزامنة مع السحاب ☁️</p>
         </div>
         <div class="user-info">
             <i class="fas fa-user-circle"></i>
             <span id="currentUser">-</span>
             <button onclick="logout()" style="background:#ef4444">تسجيل خروج</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fas fa-car"></i> مركباتي</h3>
+        <div id="vehiclesList" class="vehicle-card"></div>
+        <div class="form-grid">
+            <input type="text" id="newVehicleName" placeholder="اسم المركبة الجديدة">
+            <button onclick="addVehicle()"><i class="fas fa-plus"></i> إضافة مركبة</button>
         </div>
     </div>
 
@@ -280,15 +197,28 @@
     </div>
 
     <div class="section">
-        <h3><i class="fas fa-cog"></i> إدارة أنواع الصيانة</h3>
-        <button onclick="openAddTypeModal()" style="margin-bottom:1rem;"><i class="fas fa-plus"></i> إضافة نوع جديد</button>
-        <div class="frequency-table">
-            <table id="frequencyTable">
-                <thead><tr><th>نوع الصيانة</th><th>المسافة (km)</th><th>آخر صيانة</th><th>الصيانة القادمة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
-                <tbody id="frequencyBody"></tbody>
-            </table>
+        <h3><i class="fas fa-chart-line"></i> تحليل المصروفات</h3>
+        <div class="chart-container">
+            <canvas id="expensesChart"></canvas>
         </div>
-        <button onclick="saveFrequencies()"><i class="fas fa-save"></i> حفظ الترددات</button>
+    </div>
+
+    <!-- Tabla de frecuencias desplegable -->
+    <div class="collapsible">
+        <div class="collapsible-header" onclick="toggleFrequencyTable()">
+            <span><i class="fas fa-cog"></i> إدارة أنواع الصيانة</span>
+            <span><i class="fas fa-chevron-down" id="toggleIcon"></i></span>
+        </div>
+        <div class="collapsible-content" id="frequencyContent">
+            <button onclick="openAddTypeModal()" style="margin-bottom:1rem;"><i class="fas fa-plus"></i> إضافة نوع جديد</button>
+            <div class="frequency-table">
+                <table id="frequencyTable">
+                    <thead><tr><th>نوع الصيانة</th><th>المسافة (km)</th><th>آخر صيانة</th><th>الصيانة القادمة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+                    <tbody id="frequencyBody"></tbody>
+                </table>
+            </div>
+            <button onclick="saveFrequencies()"><i class="fas fa-save"></i> حفظ الترددات</button>
+        </div>
     </div>
 
     <div class="section">
@@ -305,18 +235,21 @@
 
     <div class="section">
         <h3><i class="fas fa-history"></i> سجل الصيانة</h3>
+        <div class="export-buttons">
+            <button onclick="exportToExcel()" style="background:#f59e0b"><i class="fas fa-file-excel"></i> تصدير إلى Excel</button>
+            <button onclick="generateFullReport()" style="background:#10b981"><i class="fas fa-file-pdf"></i> تقرير PDF</button>
+        </div>
         <div class="form-grid">
             <select id="filterType"><option value="">جميع الأنواع</option></select>
             <button onclick="applyFilters()">تصفية</button>
             <button onclick="resetFilters()" style="background:#64748b">إلغاء التصفية</button>
-            <button onclick="generateFullReport()" style="background:#10b981">تقرير PDF</button>
         </div>
         <div id="maintenanceList"></div>
     </div>
 </div>
 
-<div id="typeModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:2000;">
-    <div style="background:white; padding:2rem; border-radius:24px; width:90%; max-width:500px;">
+<div id="typeModal" class="modal">
+    <div class="modal-content">
         <h3 id="modalTitle">إضافة نوع صيانة جديد</h3>
         <input type="text" id="typeName" placeholder="نوع الصيانة" style="margin:1rem 0; width:100%;">
         <input type="number" id="typeFrequency" placeholder="المسافة (كم)" value="10000" style="margin-bottom:1rem; width:100%;">
@@ -328,20 +261,21 @@
 
 <script>
     // ========== SUPABASE CONFIGURATION ==========
-    // ⚠️ IMPORTANTE: Reemplaza con tus datos de Supabase ⚠️
     const SUPABASE_URL = 'https://eixzktrrtqrzzqqlaqxo.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_XcIH1w6kcZcP7HA8mXW-yg_402H1CVY';
     
-    // Crear cliente de Supabase (solo una vez)
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     let currentUserId = null;
     let currentUsername = null;
+    let currentVehicleId = null;
+    let vehicles = [];
     let maintenances = [];
     let frequencies = {};
     let vehicleKm = 0;
     let lastKmDate = "";
     let currentFilter = "";
+    let expensesChart = null;
     
     const defaultTypes = ["تغيير زيت", "فرامل", "إطارات", "سير التوقيت", "بواجي", "فلتر هواء", "ردياتير", "فحص عام"];
     const defaultFreqs = {
@@ -349,6 +283,31 @@
         "سير التوقيت": 60000, "بواجي": 30000, "فلتر هواء": 15000,
         "ردياتير": 50000, "فحص عام": 15000
     };
+    
+    // Crear tablas si no existen
+    async function initTables() {
+        // Crear tabla vehicles
+        await supabaseClient.rpc('create_vehicles_table_if_not_exists').catch(async () => {
+            const { error } = await supabaseClient.query(`
+                CREATE TABLE IF NOT EXISTS vehicles (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    name TEXT NOT NULL,
+                    current_km INTEGER DEFAULT 0,
+                    last_update DATE DEFAULT CURRENT_DATE
+                );
+            `);
+            if (error) console.error("Error creating vehicles table:", error);
+        });
+        
+        // Asegurar que maintenances tenga vehicle_id
+        await supabaseClient.rpc('add_vehicle_id_to_maintenances').catch(async () => {
+            const { error } = await supabaseClient.query(`
+                ALTER TABLE maintenances ADD COLUMN IF NOT EXISTS vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE;
+            `);
+            if (error) console.error("Error adding vehicle_id column:", error);
+        });
+    }
     
     function showToast(msg) {
         let t = document.createElement('div');
@@ -369,144 +328,117 @@
     
     function formatNumber(num) { return num.toLocaleString('en-US'); }
     
-    async function register() {
-        const username = document.getElementById('regUsername').value.trim();
-        const password = document.getElementById('regPassword').value;
-        const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
-        
-        if (!username || !password) {
-            alert("الرجاء إدخال اسم المستخدم وكلمة المرور");
-            return;
-        }
-        
-        const spinner = document.getElementById('registerSpinner');
-        spinner.style.display = 'block';
-        
-        try {
-            const { data: existing } = await supabaseClient.from('users').select('id').eq('username', username);
-            
-            if (existing && existing.length > 0) {
-                alert("اسم المستخدم موجود بالفعل");
-                spinner.style.display = 'none';
-                return;
+    function toggleFrequencyTable() {
+        const content = document.getElementById('frequencyContent');
+        const icon = document.getElementById('toggleIcon');
+        content.classList.toggle('show');
+        icon.classList.toggle('fa-chevron-down');
+        icon.classList.toggle('fa-chevron-up');
+    }
+    
+    function sendEmailReminder(type, remaining) {
+        const subject = `تذكير صيانة: ${type}`;
+        const body = `مرحباً،\n\nموعد صيانة ${type} قد اقترب. المتبقي ${remaining} كم. يرجى التوجه للصيانة قريباً.`;
+        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        showToast("تم فتح بريدك الإلكتروني لإرسال التذكير");
+    }
+    
+    async function checkAndSendReminders() {
+        for (const type of Object.keys(frequencies)) {
+            const remaining = getKmRemaining(type);
+            if (remaining <= 1000 && remaining > 0) {
+                const lastSent = localStorage.getItem(`reminder_${type}_${currentVehicleId}`);
+                const now = Date.now();
+                if (!lastSent || (now - parseInt(lastSent)) > 24 * 60 * 60 * 1000) {
+                    localStorage.setItem(`reminder_${type}_${currentVehicleId}`, now);
+                    sendEmailReminder(type, remaining);
+                }
             }
-            
-            const { error } = await supabaseClient.from('users').insert({
-                username: username,
-                password: password,
-                vehicle_name: vehicleName
-            });
-            
-            spinner.style.display = 'none';
-            
-            if (error) {
-                alert("خطأ في التسجيل: " + error.message);
-                return;
-            }
-            
-            showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
-            showLogin();
-        } catch (err) {
-            spinner.style.display = 'none';
-            alert("خطأ: " + err.message);
         }
     }
     
-    async function login() {
-        const username = document.getElementById('loginUsername').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        
-        if (!username || !password) {
-            alert("الرجاء إدخال اسم المستخدم وكلمة المرور");
-            return;
+    async function loadVehicles() {
+        const { data, error } = await supabaseClient.from('vehicles').select('*').eq('user_id', currentUserId);
+        if (error) { console.error(error); return; }
+        vehicles = data || [];
+        if (vehicles.length === 0) {
+            await addVehicle('سيارتي');
+            await loadVehicles();
         }
-        
-        const spinner = document.getElementById('loginSpinner');
-        spinner.style.display = 'block';
-        
-        try {
-            const { data, error } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('username', username)
-                .eq('password', password);
-            
-            spinner.style.display = 'none';
-            
-            if (error) {
-                alert("خطأ: " + error.message);
-                return;
-            }
-            
-            if (!data || data.length === 0) {
-                alert("اسم المستخدم أو كلمة المرور غير صحيحة");
-                return;
-            }
-            
-            currentUserId = data[0].id;
-            currentUsername = data[0].username;
-            document.getElementById('currentUser').innerText = currentUsername;
-            document.getElementById('vehicleNameDisplay').innerHTML = '<i class="fas fa-car"></i> ' + (data[0].vehicle_name || 'سيارة') + ' ☁️ متزامن';
-            
-            await loadUserData();
-            
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-        } catch (err) {
-            spinner.style.display = 'none';
-            alert("خطأ في الاتصال: " + err.message);
+        if (vehicles.length > 0 && !currentVehicleId) {
+            currentVehicleId = vehicles[0].id;
         }
+        renderVehiclesList();
+        if (currentVehicleId) await loadVehicleData();
     }
     
-    async function loadUserData() {
-        await loadFrequencies();
-        await loadVehicleKm();
+    function renderVehiclesList() {
+        const container = document.getElementById('vehiclesList');
+        if (!container) return;
+        container.innerHTML = `
+            <select id="vehicleSelect" style="width:100%; padding:8px; border-radius:12px;">
+                ${vehicles.map(v => `<option value="${v.id}" ${v.id === currentVehicleId ? 'selected' : ''}>${v.name} (${formatNumber(v.current_km || 0)} km)</option>`).join('')}
+            </select>
+            <button onclick="changeVehicle(document.getElementById('vehicleSelect').value)" style="margin-top:8px; width:100%; background:white; color:#10b981;">تغيير المركبة</button>
+        `;
+    }
+    
+    async function addVehicle(name = null) {
+        const vehicleName = name || document.getElementById('newVehicleName')?.value.trim();
+        if (!vehicleName) { alert("الرجاء إدخال اسم المركبة"); return; }
+        const { data, error } = await supabaseClient.from('vehicles').insert({
+            user_id: currentUserId,
+            name: vehicleName,
+            current_km: 0,
+            last_update: new Date().toISOString().split('T')[0]
+        }).select();
+        if (error) { alert("خطأ: " + error.message); return; }
+        if (document.getElementById('newVehicleName')) document.getElementById('newVehicleName').value = '';
+        await loadVehicles();
+        if (data && data[0]) {
+            currentVehicleId = data[0].id;
+            await loadVehicleData();
+        }
+        showToast("تم إضافة المركبة بنجاح");
+    }
+    
+    async function changeVehicle(vehicleId) {
+        currentVehicleId = parseInt(vehicleId);
+        await loadVehicleData();
+        renderVehiclesList();
+        showToast("تم التبديل إلى المركبة المحددة");
+    }
+    
+    async function loadVehicleData() {
+        if (!currentVehicleId) return;
+        const { data: vehicleData, error: vehicleError } = await supabaseClient.from('vehicles').select('*').eq('id', currentVehicleId).single();
+        if (!vehicleError && vehicleData) {
+            vehicleKm = vehicleData.current_km || 0;
+            lastKmDate = formatDate(vehicleData.last_update);
+        }
         await loadMaintenances();
+        await loadFrequencies();
         updateDisplay();
+        updateChart();
+        await checkAndSendReminders();
+    }
+    
+    async function loadMaintenances() {
+        const { data, error } = await supabaseClient.from('maintenances').select('*').eq('vehicle_id', currentVehicleId).order('date', { ascending: false });
+        if (error) { console.error(error); return; }
+        maintenances = data || [];
     }
     
     async function loadFrequencies() {
         const { data, error } = await supabaseClient.from('frequencies').select('*').eq('user_id', currentUserId);
-        
         if (error) { console.error(error); return; }
-        
         frequencies = {};
+        for (const type of defaultTypes) frequencies[type] = defaultFreqs[type];
+        if (data) for (const row of data) frequencies[row.maintenance_type] = row.frequency_km;
+        // Ensure all default types exist in frequencies for this user
         for (const type of defaultTypes) {
-            frequencies[type] = defaultFreqs[type];
+            if (!frequencies[type]) frequencies[type] = defaultFreqs[type];
         }
-        
-        if (data) {
-            for (const row of data) {
-                frequencies[row.maintenance_type] = row.frequency_km;
-            }
-        }
-    }
-    
-    async function loadVehicleKm() {
-        const { data, error } = await supabaseClient.from('vehicle_info').select('*').eq('user_id', currentUserId);
-        
-        if (error) { console.error(error); return; }
-        
-        if (data && data.length > 0) {
-            vehicleKm = data[0].current_km;
-            lastKmDate = formatDate(data[0].last_update);
-        } else {
-            vehicleKm = 15000;
-            lastKmDate = formatDate(new Date());
-            await supabaseClient.from('vehicle_info').insert({
-                user_id: currentUserId,
-                current_km: vehicleKm,
-                last_update: new Date().toISOString().split('T')[0]
-            });
-        }
-    }
-    
-    async function loadMaintenances() {
-        const { data, error } = await supabaseClient.from('maintenances').select('*').eq('user_id', currentUserId).order('date', { ascending: false });
-        
-        if (error) { console.error(error); return; }
-        
-        maintenances = data || [];
     }
     
     async function saveFrequencies() {
@@ -516,7 +448,6 @@
                 maintenance_type: type,
                 frequency_km: freq
             }, { onConflict: 'user_id, maintenance_type' });
-            
             if (error) console.error(error);
         }
         showToast("تم حفظ الترددات في السحاب");
@@ -526,15 +457,12 @@
     async function updateTotalKilometers() {
         const newKm = parseInt(document.getElementById('newKmInput').value);
         if (!newKm || newKm <= vehicleKm) { alert("الرجاء إدخال قيمة أكبر"); return; }
-        
         vehicleKm = newKm;
         lastKmDate = formatDate(new Date());
-        
-        await supabaseClient.from('vehicle_info').update({
+        await supabaseClient.from('vehicles').update({
             current_km: vehicleKm,
             last_update: new Date().toISOString().split('T')[0]
-        }).eq('user_id', currentUserId);
-        
+        }).eq('id', currentVehicleId);
         document.getElementById('newKmInput').value = '';
         updateDisplay();
         showToast("تم تحديث العداد إلى " + formatNumber(vehicleKm) + " km");
@@ -546,45 +474,40 @@
         const cost = parseFloat(document.getElementById('cost').value);
         const date = document.getElementById('date').value;
         const description = document.getElementById('description').value;
-        
         if (!type) { alert("اختر نوع الصيانة"); return; }
         if (!kilometers || kilometers < vehicleKm) { alert("العداد يجب أن يكون ≥ " + formatNumber(vehicleKm) + " km"); return; }
-        
         const { data, error } = await supabaseClient.from('maintenances').insert({
             user_id: currentUserId,
+            vehicle_id: currentVehicleId,
             type: type,
             kilometers: kilometers,
             cost: cost || 0,
             date: date || new Date().toISOString().split('T')[0],
             description: description || ""
         }).select();
-        
         if (error) { alert("خطأ: " + error.message); return; }
-        
-        if (data && data[0]) {
-            maintenances.unshift(data[0]);
-        }
-        
+        if (data && data[0]) maintenances.unshift(data[0]);
         if (kilometers > vehicleKm) {
             vehicleKm = kilometers;
             lastKmDate = formatDate(new Date());
-            await supabaseClient.from('vehicle_info').update({
+            await supabaseClient.from('vehicles').update({
                 current_km: vehicleKm,
                 last_update: new Date().toISOString().split('T')[0]
-            }).eq('user_id', currentUserId);
+            }).eq('id', currentVehicleId);
         }
-        
         clearForm();
         updateDisplay();
+        updateChart();
         showToast("تم تسجيل الصيانة ومزامنتها مع السحاب");
+        await checkAndSendReminders();
     }
     
     async function deleteMaintenance(id) {
         if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) return;
-        
-        await supabaseClient.from('maintenances').delete().eq('id', id).eq('user_id', currentUserId);
+        await supabaseClient.from('maintenances').delete().eq('id', id);
         maintenances = maintenances.filter(m => m.id !== id);
         updateDisplay();
+        updateChart();
         showToast("تم حذف السجل");
     }
     
@@ -592,10 +515,8 @@
         const newName = document.getElementById('typeName').value.trim();
         const frequency = parseInt(document.getElementById('typeFrequency').value);
         const editingOld = document.getElementById('editingType').value;
-        
         if (!newName) { alert("الرجاء إدخال اسم نوع الصيانة"); return; }
         if (isNaN(frequency) || frequency <= 0) { alert("الرجاء إدخال مسافة صحيحة"); return; }
-        
         if (editingOld && editingOld !== newName) {
             delete frequencies[editingOld];
             frequencies[newName] = frequency;
@@ -605,13 +526,11 @@
         } else {
             frequencies[editingOld] = frequency;
         }
-        
         await supabaseClient.from('frequencies').upsert({
             user_id: currentUserId,
             maintenance_type: newName,
             frequency_km: frequency
         }, { onConflict: 'user_id, maintenance_type' });
-        
         closeModal();
         updateDisplay();
         showToast("تم حفظ نوع الصيانة في السحاب");
@@ -619,13 +538,12 @@
     
     async function deleteType(type) {
         if (!confirm('هل أنت متأكد من حذف نوع "' + type + '"؟ سيتم حذف جميع سجلات الصيانة المرتبطة به.')) return;
-        
         delete frequencies[type];
         await supabaseClient.from('frequencies').delete().eq('user_id', currentUserId).eq('maintenance_type', type);
-        await supabaseClient.from('maintenances').delete().eq('user_id', currentUserId).eq('type', type);
-        
+        await supabaseClient.from('maintenances').delete().eq('user_id', currentUserId).eq('type', type).eq('vehicle_id', currentVehicleId);
         maintenances = maintenances.filter(m => m.type !== type);
         updateDisplay();
+        updateChart();
         showToast("تم حذف نوع \"" + type + "\"");
     }
     
@@ -642,50 +560,78 @@
         return Math.max(0, getNextKmForType(type) - vehicleKm);
     }
     
+    function updateChart() {
+        const monthlyData = {};
+        maintenances.forEach(m => {
+            const month = m.date.substring(0, 7);
+            monthlyData[month] = (monthlyData[month] || 0) + m.cost;
+        });
+        const months = Object.keys(monthlyData).sort();
+        const costs = months.map(m => monthlyData[m]);
+        const ctx = document.getElementById('expensesChart').getContext('2d');
+        if (expensesChart) expensesChart.destroy();
+        expensesChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: months, datasets: [{ label: 'المصروفات (SAR)', data: costs, backgroundColor: '#10b981' }] },
+            options: { responsive: true, plugins: { legend: { position: 'top' } } }
+        });
+    }
+    
+    function exportToExcel() {
+        const wsData = [["التاريخ", "نوع الصيانة", "العداد (كم)", "التكلفة (SAR)", "الملاحظات"]];
+        maintenances.forEach(m => {
+            wsData.push([formatDate(m.date), m.type, m.kilometers, m.cost, m.description || ""]);
+        });
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "الصيانات");
+        XLSX.writeFile(wb, `تقرير_الصيانات_${Date.now()}.xlsx`);
+        showToast("تم تصدير البيانات إلى Excel");
+    }
+    
     function updateDisplay() {
         document.getElementById('totalKmDisplay').innerHTML = formatNumber(vehicleKm) + ' km';
         document.getElementById('lastKmUpdate').innerText = lastKmDate || formatDate(new Date());
-        
         const tbody = document.getElementById('frequencyBody');
-        tbody.innerHTML = "";
-        for (const [type, freq] of Object.entries(frequencies)) {
-            const lastKm = getLastKmForType(type);
-            const nextKm = getNextKmForType(type);
-            const remaining = getKmRemaining(type);
-            let status = "";
-            if (remaining <= 0) status = "⚠️ منتهي!";
-            else if (remaining <= 1000) status = "🔴 " + formatNumber(remaining) + " km - عاجل";
-            else if (remaining <= 3000) status = "🟡 " + formatNumber(remaining) + " km - قريب";
-            else status = "✅ متبقي " + formatNumber(remaining) + " km";
-            
-            tbody.innerHTML += `<tr>
-                <td>${type}</td>
-                <td><input type="number" id="freq_${type.replace(/\s/g, '_')}" value="${freq}" style="width:100px" step="1000"></td>
-                <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</td>
-                <td><strong>${formatNumber(nextKm)} km</strong></td>
-                <td>${status}</td>
-                <td>
-                    <button class="btn-icon" onclick="editType('${type}')" style="background:#f59e0b;color:white;padding:6px 12px;margin:0 4px;"><i class="fas fa-edit"></i></button>
-                    <button onclick="deleteType('${type}')" style="background:#ef4444;color:white;padding:6px 12px;"><i class="fas fa-trash"></i></button>
-                  </td>
-                </tr>`;
+        if (tbody) {
+            tbody.innerHTML = "";
+            for (const [type, freq] of Object.entries(frequencies)) {
+                const lastKm = getLastKmForType(type);
+                const nextKm = getNextKmForType(type);
+                const remaining = getKmRemaining(type);
+                let status = "";
+                let statusColor = "";
+                if (remaining <= 0) { status = "⚠️ منتهي!"; statusColor = "danger"; }
+                else if (remaining <= 1000) { status = "🔴 " + formatNumber(remaining) + " km - عاجل"; statusColor = "danger"; }
+                else if (remaining <= 3000) { status = "🟡 " + formatNumber(remaining) + " km - قريب"; statusColor = "warning"; }
+                else { status = "✅ متبقي " + formatNumber(remaining) + " km"; statusColor = "ok"; }
+                tbody.innerHTML += `<tr style="${statusColor === 'danger' ? 'background:#fee2e2' : statusColor === 'warning' ? 'background:#fef3c7' : ''}">
+                    <td>${type}</td>
+                    <td><input type="number" id="freq_${type.replace(/\s/g, '_')}" value="${freq}" style="width:100px" step="1000"></td>
+                    <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</td>
+                    <td><strong>${formatNumber(nextKm)} km</strong></td>
+                    <td>${status}</td>
+                    <td>
+                        <button class="btn-icon" onclick="editType('${type}')" style="background:#f59e0b;color:white;padding:6px 12px;"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteType('${type}')" style="background:#ef4444;color:white;padding:6px 12px;"><i class="fas fa-trash"></i></button>
+                     </td>
+                 </tr>`;
+            }
         }
-        
         const select = document.getElementById('maintenanceTypeSelect');
         const filterSelect = document.getElementById('filterType');
-        select.innerHTML = '<option value="">اختر نوع الصيانة</option>';
-        filterSelect.innerHTML = '<option value="">جميع الأنواع</option>';
-        for (const type of Object.keys(frequencies)) {
-            select.innerHTML += `<option value="${type}">${type}</option>`;
-            filterSelect.innerHTML += `<option value="${type}">${type}</option>`;
+        if (select) {
+            select.innerHTML = '<option value="">اختر نوع الصيانة</option>';
+            filterSelect.innerHTML = '<option value="">جميع الأنواع</option>';
+            for (const type of Object.keys(frequencies)) {
+                select.innerHTML += `<option value="${type}">${type}</option>`;
+                filterSelect.innerHTML += `<option value="${type}">${type}</option>`;
+            }
         }
-        
         updateAlertsGrid();
-        
         const totalCost = maintenances.reduce((s, m) => s + m.cost, 0);
         document.getElementById('totalCount').innerText = maintenances.length;
         document.getElementById('totalCost').innerHTML = totalCost.toFixed(2) + ' SAR';
-        
         applyFilters();
     }
     
@@ -693,7 +639,6 @@
         const grid = document.getElementById('alertsGrid');
         let alerts = [];
         let alertCount = 0;
-        
         for (const type of Object.keys(frequencies)) {
             const remaining = getKmRemaining(type);
             if (remaining <= 3000) {
@@ -701,39 +646,42 @@
                 alerts.push({ type, remaining });
             }
         }
-        
         document.getElementById('alertCount').innerText = alertCount;
-        
+        if (!grid) return;
         if (alerts.length === 0) {
             grid.innerHTML = '<div class="stat-card"><i class="fas fa-check-circle"></i><h3>التنبيهات</h3><div class="value">✅ كل شيء على ما يرام</div><p>لا توجد تنبيهات</p></div>';
             return;
         }
-        
         grid.innerHTML = alerts.map(a => `<div class="stat-card" style="${a.remaining <= 1000 ? 'background:#fee2e2' : 'background:#fef3c7'}">
             <i class="fas fa-bell"></i><h3>🔔 ${a.type}</h3>
             <div class="value">${a.remaining <= 0 ? 'منتهي!' : formatNumber(a.remaining) + ' km'}</div>
             <p>${a.remaining <= 0 ? 'مطلوب الآن' : (a.remaining <= 1000 ? 'أقل من 1000 km - عاجل' : 'يحتاج صيانة قريباً')}</p>
+            <button onclick="sendEmailReminder('${a.type}', ${a.remaining})" style="margin-top:8px; background:#f59e0b; padding:6px 12px;">📧 تذكير</button>
         </div>`).join('');
     }
     
     function applyFilters() {
-        currentFilter = document.getElementById('filterType').value;
+        currentFilter = document.getElementById('filterType')?.value || '';
         let filtered = currentFilter ? maintenances.filter(m => m.type === currentFilter) : [...maintenances];
         filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
-        
         const container = document.getElementById('maintenanceList');
+        if (!container) return;
         if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center; padding:2rem;">لا توجد سجلات</div>'; return; }
-        
         container.innerHTML = filtered.map(m => {
             const nextKm = getNextKmForType(m.type);
             const remaining = getKmRemaining(m.type);
+            let progressPercent = Math.min(100, (m.kilometers / nextKm) * 100);
+            let progressClass = "";
+            if (remaining <= 0) progressClass = "danger";
+            else if (remaining <= 1000) progressClass = "danger";
+            else if (remaining <= 3000) progressClass = "warning";
             return `<div class="maintenance-item">
                 <div style="flex:2">
                     <h4><i class="fas fa-wrench"></i> ${m.type}</h4>
                     <div><span class="badge">📅 ${formatDate(m.date)}</span><span class="badge">🔧 ${formatNumber(m.kilometers)} km</span><span class="badge">💰 ${m.cost.toFixed(2)} SAR</span></div>
                     <p style="margin-top:8px;">${m.description || 'بدون ملاحظات'}</p>
-                    <div class="progress-bar"><div class="progress-fill" style="width: ${Math.min(100, (m.kilometers / nextKm) * 100)}%"></div></div>
-                    <small>الصيانة القادمة عند ${formatNumber(nextKm)} km</small>
+                    <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width: ${progressPercent}%"></div></div>
+                    <small>الصيانة القادمة عند ${formatNumber(nextKm)} km (${remaining <= 0 ? 'منتهي' : formatNumber(remaining) + ' km متبقي'})</small>
                 </div>
                 <div><button onclick="generateInvoicePDF(${m.id})" style="background:#10b981;padding:8px 16px;"><i class="fas fa-file-invoice"></i> فاتورة</button>
                 <button onclick="deleteMaintenance(${m.id})" style="background:#ef4444;padding:8px 16px;"><i class="fas fa-trash"></i></button></div>
@@ -741,128 +689,13 @@
         }).join('');
     }
     
-    function resetFilters() { document.getElementById('filterType').value = ''; applyFilters(); }
-    
-    async function generateInvoicePDF(id) {
-        const m = maintenances.find(m => m.id === id);
-        if(!m) return;
-        
-        const element = document.createElement('div');
-        element.style.padding = '40px';
-        element.style.fontFamily = 'Tajawal, sans-serif';
-        element.style.textAlign = 'right';
-        element.style.direction = 'rtl';
-        element.innerHTML = `
-            <div style="border-bottom: 3px solid #10b981; margin-bottom: 20px; padding-bottom: 10px;">
-                <h1 style="color: #1e293b; margin: 0;">جراج كنترول برو</h1>
-                <p style="color: #64748b; margin: 0;">فاتورة صيانة رسمية</p>
-            </div>
-            <div style="margin-bottom: 20px;">
-                <p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p>
-                <p><strong>التاريخ:</strong> ${formatDate(new Date())}</p>
-                <p><strong>السيارة:</strong> ${document.getElementById('vehicleNameDisplay').innerText || 'سيارة'}</p>
-            </div>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                <tr style="background: #f1f5f9;">
-                    <th style="padding: 12px; text-align: right;">نوع الصيانة</th>
-                    <th style="padding: 12px; text-align: right;">العداد</th>
-                    <th style="padding: 12px; text-align: right;">المبلغ</th>
-                 </tr>
-                 <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.type}</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.cost.toFixed(2)} SAR</td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="padding: 12px; text-align: left;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td>
-                </tr>
-            </table>
-            <div style="margin-top: 30px; text-align: center; font-size: 0.8rem; color: #94a3b8;">
-                شكراً لثقتكم بنا - وثيقة رسمية صادرة عن جراج كنترول برو
-            </div>
-        `;
-        
-        const opt = {
-            margin: [0.5, 0.5, 0.5, 0.5],
-            filename: `invoice_${m.type}_${m.id}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, logging: false },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-        
-        html2pdf().set(opt).from(element).save();
-        showToast("جاري إنشاء الفاتورة...");
-    }
-    
-    async function generateFullReport() {
-        const totalCost = maintenances.reduce((sum, m) => sum + m.cost, 0);
-        
-        const element = document.createElement('div');
-        element.style.padding = '40px';
-        element.style.fontFamily = 'Tajawal, sans-serif';
-        element.style.textAlign = 'right';
-        element.style.direction = 'rtl';
-        element.innerHTML = `
-            <div style="border-bottom: 3px solid #10b981; margin-bottom: 20px; padding-bottom: 10px;">
-                <h1 style="color: #1e293b; margin: 0;">جراج كنترول برو</h1>
-                <p style="color: #64748b; margin: 0;">تقرير الصيانة الشامل</p>
-            </div>
-            <div style="margin-bottom: 20px;">
-                <p><strong>تاريخ التقرير:</strong> ${formatDate(new Date())}</p>
-                <p><strong>السيارة:</strong> ${document.getElementById('vehicleNameDisplay').innerText || 'سيارة'}</p>
-                <p><strong>العداد الحالي:</strong> ${formatNumber(vehicleKm)} km</p>
-                <p><strong>آخر تحديث:</strong> ${lastKmDate}</p>
-            </div>
-            <h3>إحصائيات عامة</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                <tr style="background: #f1f5f9;">
-                    <th style="padding: 12px; text-align: right;">البيان</th>
-                    <th style="padding: 12px; text-align: right;">القيمة</th>
-                </tr>
-                <tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">إجمالي الصيانات</td><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${maintenances.length}</td></tr>
-                <tr><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">إجمالي المصروفات</td><td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${totalCost.toFixed(2)} SAR</td></tr>
-            </table>
-            <h3>تفاصيل الصيانات</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr style="background: #f1f5f9;">
-                    <th style="padding: 12px; text-align: right;">التاريخ</th>
-                    <th style="padding: 12px; text-align: right;">النوع</th>
-                    <th style="padding: 12px; text-align: right;">العداد</th>
-                    <th style="padding: 12px; text-align: right;">التكلفة</th>
-                </tr>
-                ${maintenances.map(m => `
-                <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${formatDate(m.date)}</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.type}</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${m.cost.toFixed(2)} SAR</td>
-                </tr>
-                `).join('')}
-            </table>
-            <div style="margin-top: 30px; text-align: center; font-size: 0.8rem; color: #94a3b8;">
-                * هذا التقرير صادر بشكل آلي من نظام جراج كنترول برو
-            </div>
-        `;
-        
-        const opt = {
-            margin: [0.5, 0.5, 0.5, 0.5],
-            filename: `report_${Date.now()}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, logging: false },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-        
-        html2pdf().set(opt).from(element).save();
-        showToast("جاري إنشاء التقرير...");
-    }
-    
+    function resetFilters() { if(document.getElementById('filterType')) document.getElementById('filterType').value = ''; applyFilters(); }
     function clearForm() {
         document.getElementById('kilometers').value = '';
         document.getElementById('cost').value = '';
         document.getElementById('date').value = '';
         document.getElementById('description').value = '';
     }
-    
     function openAddTypeModal() {
         document.getElementById('modalTitle').innerText = 'إضافة نوع صيانة جديد';
         document.getElementById('typeName').value = '';
@@ -870,7 +703,6 @@
         document.getElementById('editingType').value = '';
         document.getElementById('typeModal').style.display = 'flex';
     }
-    
     function editType(type) {
         document.getElementById('modalTitle').innerText = 'تعديل نوع الصيانة';
         document.getElementById('typeName').value = type;
@@ -878,32 +710,98 @@
         document.getElementById('editingType').value = type;
         document.getElementById('typeModal').style.display = 'flex';
     }
-    
     function closeModal() { document.getElementById('typeModal').style.display = 'none'; }
     
-    function logout() {
-        currentUserId = null;
-        document.getElementById('loginContainer').style.display = 'flex';
-        document.getElementById('app').style.display = 'none';
-        showLogin();
+    async function generateInvoicePDF(id) {
+        const m = maintenances.find(m => m.id === id);
+        if(!m) return;
+        const element = document.createElement('div');
+        element.style.padding = '40px';
+        element.style.fontFamily = 'Tajawal, sans-serif';
+        element.style.textAlign = 'right';
+        element.style.direction = 'rtl';
+        element.innerHTML = `
+            <div style="border-bottom: 3px solid #10b981; margin-bottom: 20px;">
+                <h1 style="color:#1e293b;">ورشتي</h1>
+                <p style="color:#64748b;">فاتورة صيانة رسمية</p>
+            </div>
+            <div style="margin-bottom:20px;">
+                <p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p>
+                <p><strong>التاريخ:</strong> ${formatDate(new Date())}</p>
+                <p><strong>المركبة:</strong> ${vehicles.find(v => v.id === currentVehicleId)?.name || 'سيارة'}</p>
+            </div>
+            <table style="width:100%; border-collapse:collapse;">
+                <tr style="background:#f1f5f9;"><th style="padding:12px; text-align:right;">نوع الصيانة</th><th style="padding:12px; text-align:right;">العداد</th><th style="padding:12px; text-align:right;">المبلغ</th></tr>
+                <tr><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${m.type}</td><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td><td style="padding:12px; border-bottom:1px solid #e2e8f0;">${m.cost.toFixed(2)} SAR</td></tr>
+                <tr><td colspan="2" style="padding:12px;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td></tr>
+            </table>
+            <div style="margin-top:30px; text-align:center; font-size:0.8rem;">شكراً لثقتكم بنا</div>
+        `;
+        const opt = { margin: [0.5,0.5,0.5,0.5], filename: `invoice_${m.id}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+        showToast("جاري إنشاء الفاتورة...");
     }
     
-    function showRegister() {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('registerForm').style.display = 'block';
+    async function generateFullReport() {
+        const totalCost = maintenances.reduce((s, m) => s + m.cost, 0);
+        const element = document.createElement('div');
+        element.style.padding = '40px';
+        element.style.fontFamily = 'Tajawal, sans-serif';
+        element.style.textAlign = 'right';
+        element.style.direction = 'rtl';
+        element.innerHTML = `
+            <div style="border-bottom:3px solid #10b981;"><h1>تقرير الصيانة الشامل</h1></div>
+            <p><strong>المركبة:</strong> ${vehicles.find(v => v.id === currentVehicleId)?.name || 'سيارة'}</p>
+            <p><strong>العداد الحالي:</strong> ${formatNumber(vehicleKm)} km</p>
+            <p><strong>إجمالي الصيانات:</strong> ${maintenances.length}</p>
+            <p><strong>إجمالي المصروفات:</strong> ${totalCost.toFixed(2)} SAR</p>
+            <h3>تفاصيل الصيانات</h3>
+            <table style="width:100%; border-collapse:collapse;">
+                <tr style="background:#f1f5f9;"><th>التاريخ</th><th>النوع</th><th>العداد</th><th>التكلفة</th></tr>
+                ${maintenances.map(m => `<tr><td>${formatDate(m.date)}</td><td>${m.type}</td><td>${formatNumber(m.kilometers)} km</td><td>${m.cost.toFixed(2)} SAR</td></tr>`).join('')}
+            </table>
+        `;
+        const opt = { margin: [0.5,0.5,0.5,0.5], filename: `report_${Date.now()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+        showToast("جاري إنشاء التقرير...");
     }
     
-    function showLogin() {
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('registerForm').style.display = 'none';
-        document.getElementById('loginUsername').value = '';
-        document.getElementById('loginPassword').value = '';
-        document.getElementById('regUsername').value = '';
-        document.getElementById('regPassword').value = '';
-        document.getElementById('regVehicle').value = '';
+    async function register() {
+        const username = document.getElementById('regUsername').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
+        if (!username || !password) { alert("الرجاء إدخال اسم المستخدم وكلمة المرور"); return; }
+        document.getElementById('registerSpinner').style.display = 'block';
+        const { data: existing } = await supabaseClient.from('users').select('id').eq('username', username);
+        if (existing && existing.length > 0) { alert("اسم المستخدم موجود بالفعل"); document.getElementById('registerSpinner').style.display = 'none'; return; }
+        const { error } = await supabaseClient.from('users').insert({ username, password, vehicle_name: vehicleName });
+        document.getElementById('registerSpinner').style.display = 'none';
+        if (error) { alert("خطأ: " + error.message); return; }
+        showToast("تم إنشاء الحساب بنجاح"); showLogin();
     }
     
-    // Inicializar
+    async function login() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if (!username || !password) { alert("الرجاء إدخال اسم المستخدم وكلمة المرور"); return; }
+        document.getElementById('loginSpinner').style.display = 'block';
+        const { data, error } = await supabaseClient.from('users').select('*').eq('username', username).eq('password', password);
+        document.getElementById('loginSpinner').style.display = 'none';
+        if (error || !data || data.length === 0) { alert("بيانات الدخول غير صحيحة"); return; }
+        currentUserId = data[0].id;
+        currentUsername = data[0].username;
+        document.getElementById('currentUser').innerText = currentUsername;
+        document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${data[0].vehicle_name || 'سيارة'} ☁️`;
+        await initTables();
+        await loadVehicles();
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+    }
+    
+    function logout() { currentUserId = null; document.getElementById('loginContainer').style.display = 'flex'; document.getElementById('app').style.display = 'none'; showLogin(); }
+    function showRegister() { document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; }
+    function showLogin() { document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('loginUsername').value = ''; document.getElementById('loginPassword').value = ''; document.getElementById('regUsername').value = ''; document.getElementById('regPassword').value = ''; document.getElementById('regVehicle').value = ''; }
+    
     showLogin();
 </script>
 </body>
