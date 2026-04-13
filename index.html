@@ -196,7 +196,7 @@
     </div>
     <p style="margin-top: 10px; margin-bottom: 20px; color: #64748b;">نظام صيانة سيارات - سحابي بالكامل</p>
     <div id="loginForm">
-        <input type="text" id="loginUsername" placeholder="اسم المستخدم">
+		<input type="text" id="loginUsername" placeholder="اسم المستخدم / البريد الإلكتروني / رقم الهاتف">
         <input type="password" id="loginPassword" placeholder="كلمة المرور">
         <div class="loading-spinner" id="loginSpinner"></div>
         <button onclick="login()">دخول</button>
@@ -205,6 +205,7 @@
     <div id="registerForm" style="display:none;">
         <input type="text" id="regUsername" placeholder="اسم المستخدم">
         <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
+		<input type="tel" id="regPhone" placeholder="رقم الهاتف (مثال: 05xxxxxxxx)" dir="ltr">
         <input type="password" id="regPassword" placeholder="كلمة المرور">
         <input type="text" id="regVehicle" placeholder="اسم السيارة">
         <div class="loading-spinner" id="registerSpinner"></div>
@@ -347,11 +348,12 @@
     let currentFilter = "";
     let expensesChart = null;
     
-    const defaultTypes = ["تغيير زيت", "فرامل", "إطارات", "سير التوقيت", "بواجي", "فلتر هواء", "ردياتير", "فحص عام"];
-    const defaultFreqs = {
-        "تغيير زيت": 10000, "فرامل": 20000, "إطارات": 40000,
-        "سير التوقيت": 60000, "بواجي": 30000, "فلتر هواء": 15000,
-        "ردياتير": 50000, "فحص عام": 15000
+    const defaultTypes = ["تغيير زيت", "فرامل", "إطارات", "سير المكينة", "بواجي", "فلتر هواء", "مياه ردياتير", "فحص عام"];
+     const defaultFreqs = {
+    "تغيير زيت": 10000, "فرامل": 20000, "إطارات": 40000,
+    "سير المكينة": 100000, "بواجي": 30000, "فلتر هواء": 15000,
+    "مياه ردياتير": 80000, "فحص عام": 15000
+
     };
     
     function showToast(msg) {
@@ -821,87 +823,106 @@
         showToast("جاري إنشاء التقرير...");
     }
     
-    async function register() {
-        const username = document.getElementById('regUsername').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const password = document.getElementById('regPassword').value;
-        const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
-        
-        if (!username || !email || !password) { 
-            alert("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور"); 
-            return; 
-        }
-        
-        if (!email.includes('@') || !email.includes('.')) {
-            alert("الرجاء إدخال بريد إلكتروني صحيح");
-            return;
-        }
-        
-        document.getElementById('registerSpinner').style.display = 'block';
-        
-        const { data: existing } = await supabaseClient.from('users').select('id').eq('username', username);
-        if (existing && existing.length > 0) { 
-            alert("اسم المستخدم موجود بالفعل"); 
+async function register() {
+    const username = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
+    
+    if (!username || !email || !password) { 
+        alert("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور"); 
+        return; 
+    }
+    
+    if (!email.includes('@') || !email.includes('.')) {
+        alert("الرجاء إدخال بريد إلكتروني صحيح");
+        return;
+    }
+    
+    document.getElementById('registerSpinner').style.display = 'block';
+    
+    // Verificar si username ya existe
+    const { data: existingUser } = await supabaseClient.from('users').select('id').eq('username', username);
+    if (existingUser && existingUser.length > 0) { 
+        alert("اسم المستخدم موجود بالفعل"); 
+        document.getElementById('registerSpinner').style.display = 'none'; 
+        return; 
+    }
+    
+    // Verificar si email ya existe
+    const { data: existingEmail } = await supabaseClient.from('users').select('id').eq('email', email);
+    if (existingEmail && existingEmail.length > 0) { 
+        alert("البريد الإلكتروني مستخدم بالفعل"); 
+        document.getElementById('registerSpinner').style.display = 'none'; 
+        return; 
+    }
+    
+    // Verificar si phone ya existe (si se proporcionó)
+    if (phone) {
+        const { data: existingPhone } = await supabaseClient.from('users').select('id').eq('phone', phone);
+        if (existingPhone && existingPhone.length > 0) { 
+            alert("رقم الهاتف مستخدم بالفعل"); 
             document.getElementById('registerSpinner').style.display = 'none'; 
             return; 
         }
-        
-        const { data: existingEmail } = await supabaseClient.from('users').select('id').eq('email', email);
-        if (existingEmail && existingEmail.length > 0) { 
-            alert("البريد الإلكتروني مستخدم بالفعل"); 
-            document.getElementById('registerSpinner').style.display = 'none'; 
-            return; 
-        }
-        
-        const { error } = await supabaseClient.from('users').insert({ 
-            username, 
-            email,
-            password, 
-            vehicle_name: vehicleName 
-        });
-        
-        document.getElementById('registerSpinner').style.display = 'none';
-        
-        if (error) { 
-            alert("خطأ في التسجيل: " + error.message); 
-            return; 
-        }
-        
-        showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
-        showLogin();
+    }
+    
+    const { error } = await supabaseClient.from('users').insert({ 
+        username, 
+        email,
+        phone: phone || null,
+        password, 
+        vehicle_name: vehicleName 
+    });
+    
+    document.getElementById('registerSpinner').style.display = 'none';
+    
+    if (error) { 
+        alert("خطأ في التسجيل: " + error.message); 
+        return; 
+    }
+    
+    showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
+    showLogin();
     }
     
     async function login() {
-        const username = document.getElementById('loginUsername').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        
-        if (!username || !password) { 
-            alert("الرجاء إدخال اسم المستخدم وكلمة المرور"); 
-            return; 
-        }
-        
-        document.getElementById('loginSpinner').style.display = 'block';
-        
-        const { data, error } = await supabaseClient.from('users').select('*').eq('username', username).eq('password', password);
-        
-        document.getElementById('loginSpinner').style.display = 'none';
-        
-        if (error || !data || data.length === 0) { 
-            alert("بيانات الدخول غير صحيحة"); 
-            return; 
-        }
-        
-        currentUserId = data[0].id;
-        currentUsername = data[0].username;
-        currentUserEmail = data[0].email || '';
-        
-        document.getElementById('currentUser').innerText = currentUsername;
-        document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${data[0].vehicle_name || 'سيارة'} ☁️`;
-        
-        await loadVehicles();
-        
-        document.getElementById('loginContainer').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
+      const loginValue = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+    
+    if (!loginValue || !password) { 
+        alert("الرجاء إدخال اسم المستخدم / البريد الإلكتروني / رقم الهاتف وكلمة المرور"); 
+        return; 
+    }
+    
+    document.getElementById('loginSpinner').style.display = 'block';
+    
+    // Buscar por username OR email OR phone
+    const { data, error } = await supabaseClient
+        .from('users')
+        .select('*')
+        .or(`username.eq.${loginValue},email.eq.${loginValue},phone.eq.${loginValue}`)
+        .eq('password', password);
+    
+    document.getElementById('loginSpinner').style.display = 'none';
+    
+    if (error || !data || data.length === 0) { 
+        alert("بيانات الدخول غير صحيحة"); 
+        return; 
+    }
+    
+    currentUserId = data[0].id;
+    currentUsername = data[0].username;
+    currentUserEmail = data[0].email || '';
+    
+    document.getElementById('currentUser').innerText = currentUsername;
+    document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${data[0].vehicle_name || 'سيارة'} ☁️`;
+    
+    await loadVehicles();
+    
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
     }
     
     function logout() { 
@@ -918,15 +939,16 @@
     }
     
     function showLogin() { 
-        document.getElementById('loginForm').style.display = 'block'; 
-        document.getElementById('registerForm').style.display = 'none'; 
-        document.getElementById('loginUsername').value = ''; 
-        document.getElementById('loginPassword').value = ''; 
-        document.getElementById('regUsername').value = ''; 
-        document.getElementById('regEmail').value = '';
-        document.getElementById('regPassword').value = ''; 
-        document.getElementById('regVehicle').value = ''; 
-    }
+		document.getElementById('loginForm').style.display = 'block'; 
+		document.getElementById('registerForm').style.display = 'none'; 
+		document.getElementById('loginUsername').value = ''; 
+		document.getElementById('loginPassword').value = ''; 
+		document.getElementById('regUsername').value = ''; 
+		document.getElementById('regEmail').value = '';
+		document.getElementById('regPhone').value = '';
+		document.getElementById('regPassword').value = ''; 
+		document.getElementById('regVehicle').value = ''; 
+	}
     
     showLogin();
 </script>
