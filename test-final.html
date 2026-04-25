@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Supabase</title>
+</head>
+<body>
+    <h1>Test de conexión a Supabase</h1>
+    <button onclick="testConnection()">Probar conexión</button>
+    <div id="resultado"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Usar la misma configuración que tu index.html
+       const SUPABASE_URL = 'https://eixzktrrtqrzzqqlaqxo.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_XcIH1w6kcZcP7HA8mXW-yg_402H1CVY';
+        
+        // Crear el cliente dentro de una función para evitar conflictos
+        let supabase = null;
+        
+        function initSupabase() {
+            if (!supabase && window.supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log("Supabase inicializado correctamente");
+                return true;
+            }
+            return false;
+        }
+        
+        async function testConnection() {
+            const resultDiv = document.getElementById('resultado');
+            resultDiv.innerHTML = '🔄 Conectando a Supabase...';
+            
+            if (!initSupabase()) {
+                resultDiv.innerHTML = '❌ Error: No se pudo inicializar Supabase. Espera un momento y vuelve a intentar.';
+                return;
+            }
+            
+            try {
+                const { data, error, count } = await supabase
+                    .from('users')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (error) {
+                    resultDiv.innerHTML = '❌ Error de Supabase: ' + error.message;
+                } else {
+                    resultDiv.innerHTML = '✅ Conexión exitosa! Hay ' + count + ' usuarios registrados en la base de datos.';
+                }
+            } catch (err) {
+                resultDiv.innerHTML = '❌ Excepción: ' + err.message;
+            }
+        }
+        
+        // Inicializar automáticamente cuando la página cargue
+        window.addEventListener('load', function() {
+            initSupabase();
+            console.log('Página cargada, Supabase listo para usar');
+        });
+    </script>
+</body>
+</html>
