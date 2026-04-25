@@ -7,13 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
         body { background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%); min-height: 100vh; }
         
-        /* Login del panel */
         .admin-login {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1e293b, #0f172a);
@@ -34,7 +31,6 @@
             border: none; border-radius: 16px; font-weight: 600; cursor: pointer;
         }
         
-        /* Panel principal */
         .admin-panel { display: none; max-width: 1400px; margin: 0 auto; padding: 1rem; }
         .header {
             background: white; border-radius: 24px; padding: 1rem 2rem; margin-bottom: 2rem;
@@ -92,7 +88,6 @@
 </head>
 <body>
 
-<!-- Pantalla de login del panel -->
 <div class="admin-login" id="adminLogin">
     <div class="admin-login-card">
         <i class="fas fa-lock"></i>
@@ -103,51 +98,41 @@
     </div>
 </div>
 
-<!-- Panel principal -->
 <div class="admin-panel" id="adminPanel">
     <div class="header">
         <h1><i class="fas fa-chart-line"></i> لوحة تحكم <span>ورشتي</span></h1>
         <button onclick="logout()" style="background:#ef4444"><i class="fas fa-sign-out-alt"></i> خروج</button>
     </div>
 
-    <!-- Estadísticas -->
     <div class="stats-grid" id="statsGrid"></div>
 
-    <!-- Tabs -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('users')"><i class="fas fa-users"></i> المستخدمين</button>
-        <button class="tab-btn" onclick="showTab('maintenances')"><i class="fas fa-tools"></i> الصيانات</button>
-        <button class="tab-btn" onclick="showTab('types')"><i class="fas fa-cog"></i> أنواع الصيانة</button>
+        <button class="tab-btn active" onclick="showTab('users', this)"><i class="fas fa-users"></i> المستخدمين</button>
+        <button class="tab-btn" onclick="showTab('maintenances', this)"><i class="fas fa-tools"></i> الصيانات</button>
+        <button class="tab-btn" onclick="showTab('types', this)"><i class="fas fa-cog"></i> أنواع الصيانة</button>
     </div>
 
-    <!-- Sección Usuarios -->
     <div id="tabUsers" class="section">
         <h3><i class="fas fa-users"></i> إدارة المستخدمين</h3>
         <input type="text" id="searchUser" class="search-box" placeholder="بحث باسم المستخدم أو البريد..." onkeyup="filterUsers()">
         <div style="overflow-x: auto;">
             <table id="usersTable">
-                <thead>
-                    <tr><th>ID</th><th>الاسم</th><th>البريد</th><th>الهاتف</th><th>السيارة</th><th>تاريخ التسجيل</th><th>إجراءات</th></tr>
-                </thead>
+                <thead><tr><th>ID</th><th>الاسم</th><th>البريد</th><th>الهاتف</th><th>السيارة</th><th>تاريخ التسجيل</th><th>إجراءات</th></tr></thead>
                 <tbody id="usersList"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- Sección Mantenimientos -->
     <div id="tabMaintenances" class="section" style="display:none;">
         <h3><i class="fas fa-tools"></i> جميع الصيانات</h3>
         <div style="overflow-x: auto;">
             <table id="maintenancesTable">
-                <thead>
-                    <tr><th>ID</th><th>المستخدم</th><th>النوع</th><th>العدد (كم)</th><th>التكلفة</th><th>التاريخ</th><th>الملاحظات</th></tr>
-                </thead>
+                <thead><tr><th>ID</th><th>المستخدم</th><th>النوع</th><th>العدد (كم)</th><th>التكلفة</th><th>التاريخ</th><th>الملاحظات</th></tr></thead>
                 <tbody id="maintenancesList"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- Sección Tipos de mantenimiento -->
     <div id="tabTypes" class="section" style="display:none;">
         <h3><i class="fas fa-cog"></i> أنواع الصيانة (للمستخدمين الجدد)</h3>
         <button onclick="openAddTypeModal()"><i class="fas fa-plus"></i> إضافة نوع جديد</button>
@@ -160,7 +145,6 @@
     </div>
 </div>
 
-<!-- Modal para editar teléfono -->
 <div id="phoneModal" class="modal">
     <div class="modal-content">
         <h3>تعديل رقم الهاتف</h3>
@@ -171,7 +155,6 @@
     </div>
 </div>
 
-<!-- Modal para añadir/editar tipo -->
 <div id="typeModal" class="modal">
     <div class="modal-content">
         <h3 id="typeModalTitle">إضافة نوع صيانة جديد</h3>
@@ -184,20 +167,18 @@
 </div>
 
 <script>
-    // ========== SUPABASE CONFIGURATION ==========
+    // ========== SUPABASE CONFIGURATION (copia de index.html) ==========
     const SUPABASE_URL = 'https://eixzktrrtqrzzqqlaqxo.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_XclH1w6kcZcP7HA8mXW-yg_402H1CVY';
+    const SUPABASE_ANON_KEY = 'sb_publishable_XcIH1w6kcZcP7HA8mXW-yg_402H1CVY';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // Contraseña del panel (cámbiala por la que quieras)
-    const ADMIN_PASSWORD = 'Hixam741';
+    const ADMIN_PASSWORD = 'admin123';
     
     let allUsers = [];
     let allMaintenances = [];
-    let defaultTypes = ["تغيير زيت", "فرامل", "إطارات", "سير المكينة", "بواجي", "فلتر هواء", "مياه ردياتير", "فحص عام"];
     let defaultFreqs = {
-      "تغيير زيت": 10000, "فرامل": 100000, "إطارات": 60000,
-       "سير المكينة": 100000, "بواجي": 30000, "فلتر هواء": 20000,
+        "تغيير زيت": 10000, "فرامل": 100000, "إطارات": 60000,
+        "سير المكينة": 100000, "بواجي": 30000, "فلتر هواء": 20000,
         "مياه ردياتير": 80000, "فحص عام": 15000
     };
     
@@ -358,7 +339,6 @@
         
         if (oldName) {
             delete defaultFreqs[oldName];
-            // Actualizar en la base de datos para usuarios existentes
             await supabase.from('frequencies').update({ maintenance_type: newName, frequency_km: freq }).eq('maintenance_type', oldName);
             await supabase.from('maintenances').update({ type: newName }).eq('type', oldName);
         }
@@ -366,8 +346,6 @@
         
         closeModal('typeModal');
         loadTypesTable();
-        // Guardar cambios en localStorage para nuevos usuarios
-        localStorage.setItem('adminDefaultTypes', JSON.stringify(defaultFreqs));
         showToast("تم حفظ التغييرات");
     }
     
@@ -379,13 +357,13 @@
         showToast("تم حذف النوع");
     }
     
-    function showTab(tab) {
+    function showTab(tab, btn) {
         document.getElementById('tabUsers').style.display = tab === 'users' ? 'block' : 'none';
         document.getElementById('tabMaintenances').style.display = tab === 'maintenances' ? 'block' : 'none';
         document.getElementById('tabTypes').style.display = tab === 'types' ? 'block' : 'none';
         
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
     }
     
     function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
@@ -398,7 +376,6 @@
         setTimeout(() => t.remove(), 3000);
     }
     
-    // Cerrar modal al hacer clic fuera
     window.onclick = function(e) {
         if (e.target.classList.contains('modal')) e.target.style.display = 'none';
     }
