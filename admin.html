@@ -12,7 +12,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
         body { background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); min-height: 100vh; }
         
-        /* شاشة الدخول */
         .admin-login {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #0f172a, #1e293b);
@@ -32,7 +31,6 @@
         }
         .admin-login-card button:hover { background: #059669; transform: translateY(-2px);}
         
-        /* اللوحة الرئيسية */
         .admin-panel { display: none; max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
         .header {
             background: white; border-radius: 28px; padding: 1rem 2rem; margin-bottom: 2rem;
@@ -44,7 +42,6 @@
         .header button { background: #ef4444; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 40px; font-weight: bold; cursor: pointer; transition: 0.2s;}
         .header button:hover { background: #dc2626; transform: scale(0.98);}
         
-        /* الإحصائيات */
         .stats-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem; margin-bottom: 2rem;
@@ -58,7 +55,6 @@
         .stat-card .value { font-size: 2.2rem; font-weight: 800; color: #0f172a; }
         .stat-card h3 { color: #475569; font-size: 1rem; margin-top: 0.5rem;}
         
-        /* التبويبات */
         .tabs {
             display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;
             flex-wrap: wrap;
@@ -70,7 +66,6 @@
         .tab-btn i { margin-left: 8px; }
         .tab-btn.active { background: #10b981; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);}
         
-        /* أقسام المحتوى */
         .section { background: white; border-radius: 28px; padding: 1.8rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
         .section-header {
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
@@ -86,7 +81,6 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 1rem 0.5rem; text-align: right; border-bottom: 1px solid #e2e8f0; }
         th { color: #1e293b; font-weight: 700; }
-        .badge { background: #e2e8f0; padding: 4px 10px; border-radius: 40px; font-size: 0.75rem;}
         button.small { background: #f1f5f9; color: #0f172a; border: none; padding: 5px 12px; border-radius: 30px; cursor: pointer; font-size: 0.75rem; transition: 0.2s;}
         button.small:hover { background: #e2e8f0; }
         button.edit-btn { background: #f59e0b; color: white; }
@@ -114,6 +108,10 @@
             from { opacity: 0; transform: translateY(20px);}
             to { opacity: 1; transform: translateY(0);}
         }
+        .user-stats {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white; padding: 1rem; border-radius: 20px; margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -134,10 +132,8 @@
         <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> خروج</button>
     </div>
 
-    <!-- كارتات الإحصائيات -->
     <div class="stats-grid" id="statsGrid"></div>
     
-    <!-- تبويبات متقدمة -->
     <div class="tabs">
         <button class="tab-btn active" data-tab="users"><i class="fas fa-users"></i> المستخدمين</button>
         <button class="tab-btn" data-tab="maintenances"><i class="fas fa-clipboard-list"></i> الصيانات</button>
@@ -162,7 +158,7 @@
         <div style="overflow-x: auto;">
             <table style="width:100%">
                 <thead>
-                    <tr><th>المعرف</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>رقم الهاتف</th><th>السيارة</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr>
+                    <tr><th>المعرف</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>رقم الهاتف</th><th>كلمة المرور</th><th>السيارة</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr>
                 </thead>
                 <tbody id="usersList"></tbody>
             </table>
@@ -176,12 +172,16 @@
             <button class="small" id="refreshMaints"><i class="fas fa-rotate-right"></i> تحديث</button>
         </div>
         <div class="filters">
-            <input type="text" id="searchMaintInput" placeholder="بحث حسب النوع أو المستخدم..." style="flex:2;">
+            <select id="filterUserSelect" style="min-width: 200px;">
+                <option value="">جميع المستخدمين</option>
+            </select>
+            <input type="text" id="searchMaintInput" placeholder="بحث حسب النوع..." style="flex:2;">
             <input type="date" id="filterDateStart" placeholder="من تاريخ">
             <input type="date" id="filterDateEnd" placeholder="إلى تاريخ">
             <button class="small" id="filterMaintBtn"><i class="fas fa-filter"></i> تصفية</button>
             <button class="small" id="resetMaintBtn"><i class="fas fa-undo"></i> مسح</button>
         </div>
+        <div id="userStatsContainer" class="user-stats" style="display:none;"></div>
         <div style="overflow-x: auto;">
             <table style="width:100%">
                 <thead>
@@ -200,13 +200,13 @@
         </div>
         <div style="overflow-x: auto;">
             <table style="width:100%">
-                <thead><tr><th>نوع الصيانة</th><th>المسافة الموصى بها (كم)</th><th>الإجراءات</th></tr></thead>
+                <thead><tr><th>نوع الصيانة</th><th>المسافة الموصى بها (كم)</th><th>الإجراءات</th></table></thead>
                 <tbody id="typesList"></tbody>
             </table>
         </div>
     </div>
     
-    <!-- تبويب الرسوم البيانية والتقارير -->
+    <!-- تبويب الرسوم البيانية -->
     <div id="tabCharts" class="section" style="display:none;">
         <h3><i class="fas fa-chart-simple"></i> التحليلات والتقارير المتقدمة</h3>
         <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
@@ -226,6 +226,7 @@
         <input type="text" id="editUserName" placeholder="اسم المستخدم">
         <input type="email" id="editUserEmail" placeholder="البريد الإلكتروني">
         <input type="tel" id="editUserPhone" placeholder="رقم الهاتف">
+        <input type="password" id="editUserPassword" placeholder="كلمة المرور (اتركه فارغاً إذا لا تريد التغيير)">
         <input type="text" id="editUserVehicle" placeholder="اسم السيارة">
         <input type="hidden" id="editUserId">
         <div class="flex-buttons">
@@ -252,16 +253,29 @@
     </div>
 </div>
 
+<!-- مودال تعديل نوع الصيانة -->
+<div id="editTypeModal" class="modal">
+    <div class="modal-content">
+        <h3>تعديل نوع الصيانة</h3>
+        <input type="text" id="editTypeName" placeholder="نوع الصيانة">
+        <input type="number" id="editTypeFreq" placeholder="المسافة الموصى بها (كم)">
+        <input type="hidden" id="editTypeOldName">
+        <div class="flex-buttons">
+            <button class="save-btn" id="confirmEditType">حفظ التغييرات</button>
+            <button class="delete-btn" id="closeTypeModal">إلغاء</button>
+        </div>
+    </div>
+</div>
+
 <script>
     (function(){
-        // ---------- تهيئة Supabase بنفس طريقة الموقع الرئيسي ----------
+        // ---------- تهيئة Supabase ----------
         const SUPABASE_URL = 'https://eixzktrrtqrzzqqlaqxo.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_XcIH1w6kcZcP7HA8mXW-yg_402H1CVY';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         const ADMIN_PASSWORD = 'Hixam741';
         
-        // ---------- المتغيرات العامة ----------
         let allUsers = [];
         let allMaintenances = [];
         let defaultFreqs = {
@@ -272,7 +286,16 @@
         
         let monthlyChart = null, topMaintChart = null;
         
-        // ---------- دوال مساعدة ----------
+        // دالة لتنسيق التاريخ بالأرقام اللاتينية
+        function formatDate(dateStr) {
+            if(!dateStr) return '-';
+            let d = new Date(dateStr);
+            let day = d.getDate();
+            let month = d.getMonth() + 1;
+            let year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        
         function showToast(msg, isError = false) {
             let t = document.createElement('div');
             t.className = 'toast';
@@ -282,12 +305,17 @@
             setTimeout(() => t.remove(), 3000);
         }
         
-        // ---------- تحميل البيانات الأساسية ----------
+        // تحميل المستخدمين
         async function loadUsers() {
             const { data, error } = await supabaseClient.from('users').select('*').order('id', { ascending: false });
             if (error) { console.error(error); showToast("خطأ في تحميل المستخدمين", true); return; }
             allUsers = data || [];
             renderUsersTable();
+            // تحديث قائمة المستخدمين في فلتر الصيانات
+            const filterSelect = document.getElementById('filterUserSelect');
+            if(filterSelect) {
+                filterSelect.innerHTML = '<option value="">جميع المستخدمين</option>' + allUsers.map(u => `<option value="${u.id}">${u.username}</option>`).join('');
+            }
         }
         
         function renderUsersTable() {
@@ -305,8 +333,9 @@
                     <td>${u.username}</td>
                     <td>${u.email || '-'}</td>
                     <td>${u.phone || '-'}</td>
+                    <td>•••••••</span> <button class="small edit-btn" onclick="window.openPasswordModal(${u.id}, '${u.password.replace(/'/g, "\\'")}')" style="padding:2px 8px; font-size:0.7rem;">تعديل</button></td>
                     <td>${u.vehicle_name || '-'}</td>
-                    <td>${new Date(u.created_at).toLocaleDateString('ar-SA')}</td>
+                    <td>${formatDate(u.created_at)}</span></td>
                     <td>
                         <button class="small edit-btn" onclick="window.editUserFunc(${u.id})"><i class="fas fa-pen"></i> تعديل</button>
                         <button class="small delete-btn" onclick="window.deleteUserFunc(${u.id})"><i class="fas fa-trash"></i> حذف</button>
@@ -315,16 +344,31 @@
             `).join('');
         }
         
+        // تعديل المستخدم
         window.editUserFunc = async (userId) => {
             const user = allUsers.find(u => u.id === userId);
             if(!user) return;
             document.getElementById('editUserName').value = user.username;
             document.getElementById('editUserEmail').value = user.email || '';
             document.getElementById('editUserPhone').value = user.phone || '';
+            document.getElementById('editUserPassword').value = '';
             document.getElementById('editUserVehicle').value = user.vehicle_name || '';
             document.getElementById('editUserId').value = user.id;
             document.getElementById('editUserModal').style.display = 'flex';
         };
+        
+        window.openPasswordModal = (userId, currentPass) => {
+            let newPass = prompt("أدخل كلمة المرور الجديدة للمستخدم", "");
+            if(newPass && newPass.trim() !== "") {
+                updatePassword(userId, newPass);
+            }
+        };
+        
+        async function updatePassword(userId, newPassword) {
+            const { error } = await supabaseClient.from('users').update({ password: newPassword }).eq('id', userId);
+            if(error) { showToast("خطأ في تحديث كلمة المرور", true); return; }
+            showToast("تم تحديث كلمة المرور بنجاح");
+        }
         
         window.deleteUserFunc = async (userId) => {
             if(!confirm("هل أنت متأكد من حذف هذا المستخدم؟ سيتم حذف جميع صياناته نهائياً.")) return;
@@ -341,14 +385,22 @@
             const username = document.getElementById('editUserName').value;
             const email = document.getElementById('editUserEmail').value;
             const phone = document.getElementById('editUserPhone').value;
+            const newPassword = document.getElementById('editUserPassword').value;
             const vehicle = document.getElementById('editUserVehicle').value;
-            const { error } = await supabaseClient.from('users').update({ username, email, phone, vehicle_name: vehicle }).eq('id', userId);
+            
+            let updateData = { username, email, phone, vehicle_name: vehicle };
+            if(newPassword && newPassword.trim() !== "") {
+                updateData.password = newPassword;
+            }
+            
+            const { error } = await supabaseClient.from('users').update(updateData).eq('id', userId);
             if(error) { showToast("خطأ في التحديث", true); return; }
             showToast("تم تحديث المستخدم");
             document.getElementById('editUserModal').style.display = 'none';
             await loadUsers();
         }
         
+        // تحميل الصيانات
         async function loadMaintenances() {
             const { data, error } = await supabaseClient.from('maintenances').select('*, users(username)').order('date', { ascending: false });
             if (error) { console.error(error); return; }
@@ -357,13 +409,29 @@
         }
         
         function renderMaintenancesTable() {
+            const selectedUserId = document.getElementById('filterUserSelect')?.value;
             const searchText = document.getElementById('searchMaintInput')?.value.toLowerCase() || '';
             const startDate = document.getElementById('filterDateStart')?.value;
             const endDate = document.getElementById('filterDateEnd')?.value;
+            
             let filtered = allMaintenances.filter(m => 
+                (!selectedUserId || m.user_id == selectedUserId) &&
                 (m.type.toLowerCase().includes(searchText) || (m.users?.username || '').toLowerCase().includes(searchText)) &&
                 (!startDate || m.date >= startDate) && (!endDate || m.date <= endDate)
             );
+            
+            // إحصائيات المستخدم المحدد
+            const userStatsDiv = document.getElementById('userStatsContainer');
+            if(selectedUserId && selectedUserId !== "") {
+                const user = allUsers.find(u => u.id == selectedUserId);
+                const userMaints = filtered;
+                const totalCost = userMaints.reduce((s,m) => s + m.cost, 0);
+                userStatsDiv.style.display = 'block';
+                userStatsDiv.innerHTML = `<i class="fas fa-chart-line"></i> إحصائيات المستخدم: <strong>${user?.username || 'غير معروف'}</strong> | عدد الصيانات: ${userMaints.length} | إجمالي التكلفة: ${totalCost.toFixed(2)} ريال`;
+            } else {
+                userStatsDiv.style.display = 'none';
+            }
+            
             const tbody = document.getElementById('maintenancesList');
             tbody.innerHTML = filtered.map(m => `
                 <tr>
@@ -372,7 +440,7 @@
                     <td>${m.type}</td>
                     <td>${m.kilometers.toLocaleString()} كم</td>
                     <td>${m.cost.toFixed(2)}</td>
-                    <td>${new Date(m.date).toLocaleDateString('ar-SA')}</td>
+                    <td>${formatDate(m.date)}</td>
                     <td>${m.description || '-'}</td>
                     <td>
                         <button class="small edit-btn" onclick="window.editMaintFunc(${m.id})"><i class="fas fa-pen"></i> تعديل</button>
@@ -417,16 +485,50 @@
             await loadStatsAndCharts();
         }
         
-        // ---------- إدارة أنواع الصيانة ----------
+        // إدارة أنواع الصيانة
         function loadTypesTable() {
             const tbody = document.getElementById('typesList');
             tbody.innerHTML = Object.entries(defaultFreqs).map(([type, freq]) => `
                 <tr>
                     <td>${type}</td>
                     <td>${freq.toLocaleString()} كم</td>
-                    <td><button class="small delete-btn" onclick="window.deleteGlobalType('${type}')"><i class="fas fa-trash"></i> حذف</button></td>
+                    <td>
+                        <button class="small edit-btn" onclick="window.openEditTypeModal('${type}', ${freq})"><i class="fas fa-pen"></i> تعديل</button>
+                        <button class="small delete-btn" onclick="window.deleteGlobalType('${type}')"><i class="fas fa-trash"></i> حذف</button>
+                    </td>
                 </tr>
             `).join('');
+        }
+        
+        window.openEditTypeModal = (type, freq) => {
+            document.getElementById('editTypeName').value = type;
+            document.getElementById('editTypeFreq').value = freq;
+            document.getElementById('editTypeOldName').value = type;
+            document.getElementById('editTypeModal').style.display = 'flex';
+        };
+        
+        async function saveTypeEdit() {
+            const oldName = document.getElementById('editTypeOldName').value;
+            const newName = document.getElementById('editTypeName').value.trim();
+            const newFreq = parseInt(document.getElementById('editTypeFreq').value);
+            
+            if(!newName) { showToast("الرجاء إدخال اسم النوع", true); return; }
+            if(isNaN(newFreq) || newFreq <= 0) { showToast("الرجاء إدخال مسافة صحيحة", true); return; }
+            
+            if(oldName !== newName) {
+                delete defaultFreqs[oldName];
+                defaultFreqs[newName] = newFreq;
+                // تحديث في قاعدة البيانات للمستخدمين الحاليين
+                await supabaseClient.from('frequencies').update({ maintenance_type: newName, frequency_km: newFreq }).eq('maintenance_type', oldName);
+                await supabaseClient.from('maintenances').update({ type: newName }).eq('type', oldName);
+            } else {
+                defaultFreqs[oldName] = newFreq;
+                await supabaseClient.from('frequencies').update({ frequency_km: newFreq }).eq('maintenance_type', oldName);
+            }
+            
+            document.getElementById('editTypeModal').style.display = 'none';
+            loadTypesTable();
+            showToast("تم تحديث نوع الصيانة بنجاح");
         }
         
         window.deleteGlobalType = async (type) => {
@@ -446,7 +548,7 @@
             showToast(`تم إضافة "${newType}" بنجاح`);
         };
         
-        // ---------- الإحصائيات والرسوم البيانية ----------
+        // الإحصائيات والرسوم البيانية
         async function loadStatsAndCharts() {
             const totalUsers = allUsers.length;
             const totalMaint = allMaintenances.length;
@@ -458,14 +560,20 @@
                 <div class="stat-card"><i class="fas fa-chart-line"></i><div class="value">${(totalMaint/totalUsers||0).toFixed(1)}</div><h3>معدل الصيانة لكل مستخدم</h3></div>
             `;
             document.getElementById('financialSummary').innerHTML = `💰 إجمالي المصروفات: ${totalCost.toFixed(2)} ريال | 🛠️ أعلى صيانة مسجلة: ${allMaintenances.sort((a,b)=>b.cost - a.cost)[0]?.type || 'لا يوجد'}`;
+            
             // رسم بياني للمصروفات الشهرية
             const monthlyMap = new Map();
-            allMaintenances.forEach(m => { let d = new Date(m.date); let key = `${d.getFullYear()}-${d.getMonth()+1}`; monthlyMap.set(key, (monthlyMap.get(key)||0) + m.cost); });
+            allMaintenances.forEach(m => { 
+                let d = new Date(m.date); 
+                let key = `${d.getFullYear()}-${d.getMonth()+1}`; 
+                monthlyMap.set(key, (monthlyMap.get(key)||0) + m.cost); 
+            });
             const months = Array.from(monthlyMap.keys()).sort();
             const costs = months.map(m => monthlyMap.get(m));
             if(monthlyChart) monthlyChart.destroy();
             const ctx = document.getElementById('monthlyExpensesChart').getContext('2d');
             monthlyChart = new Chart(ctx, { type: 'bar', data: { labels: months, datasets: [{ label: 'المصروفات (SAR)', data: costs, backgroundColor: '#10b981' }] } });
+            
             // أنواع الصيانة الأكثر تكراراً
             const typeCount = new Map();
             allMaintenances.forEach(m => typeCount.set(m.type, (typeCount.get(m.type)||0)+1));
@@ -475,7 +583,7 @@
             topMaintChart = new Chart(ctx2, { type: 'pie', data: { labels: topTypes.map(t=>t[0]), datasets: [{ data: topTypes.map(t=>t[1]), backgroundColor: ['#10b981','#f59e0b','#3b82f6','#ef4444','#8b5cf6'] }] } });
         }
         
-        // ---------- ربط الأحداث ----------
+        // ربط الأحداث
         document.getElementById('loginBtn').onclick = () => {
             if(document.getElementById('adminPassword').value === ADMIN_PASSWORD) {
                 document.getElementById('adminLogin').style.display = 'none';
@@ -493,13 +601,22 @@
         document.getElementById('searchUserInput')?.addEventListener('keyup', renderUsersTable);
         document.getElementById('sortUsersSelect')?.addEventListener('change', renderUsersTable);
         document.getElementById('searchMaintInput')?.addEventListener('keyup', renderMaintenancesTable);
+        document.getElementById('filterUserSelect')?.addEventListener('change', renderMaintenancesTable);
         document.getElementById('filterMaintBtn')?.addEventListener('click', renderMaintenancesTable);
-        document.getElementById('resetMaintBtn')?.addEventListener('click', () => { document.getElementById('searchMaintInput').value = ''; document.getElementById('filterDateStart').value = ''; document.getElementById('filterDateEnd').value = ''; renderMaintenancesTable(); });
+        document.getElementById('resetMaintBtn')?.addEventListener('click', () => { 
+            document.getElementById('searchMaintInput').value = ''; 
+            document.getElementById('filterDateStart').value = ''; 
+            document.getElementById('filterDateEnd').value = ''; 
+            document.getElementById('filterUserSelect').value = '';
+            renderMaintenancesTable(); 
+        });
         document.getElementById('addTypeBtn')?.addEventListener('click', () => window.addNewGlobalType());
         document.getElementById('confirmEditUser')?.addEventListener('click', saveUserEdit);
         document.getElementById('closeUserModal')?.addEventListener('click', () => document.getElementById('editUserModal').style.display = 'none');
         document.getElementById('confirmEditMaint')?.addEventListener('click', saveMaintEdit);
         document.getElementById('closeMaintModal')?.addEventListener('click', () => document.getElementById('editMaintModal').style.display = 'none');
+        document.getElementById('confirmEditType')?.addEventListener('click', saveTypeEdit);
+        document.getElementById('closeTypeModal')?.addEventListener('click', () => document.getElementById('editTypeModal').style.display = 'none');
         
         // التنقل بين التبويبات
         document.querySelectorAll('.tab-btn').forEach(btn => {
