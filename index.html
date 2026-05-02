@@ -3,16 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ورشتي - نظام صيانة السيارات</title>
-	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z'/%3E%3Cpath d='M17.5 9.5L15 7l-2.5 2.5L10 7l-2.5 2.5L5 7v7h14V7l-2.5 2.5z' fill='%2310b981'/%3E%3C/svg%3E">
+    
+    <!-- ========== SEO BÁSICO (Multilingüe) ========== -->
+    <title>ورشتي | Warchati | Sistema de mantenimiento de coches - Car Maintenance System</title>
+    
+    <!-- Descripción en varios idiomas -->
+    <meta name="description" content="ورشتي - نظام متكامل لصيانة السيارات. سجل الصيانات، وتحكم في الكيلومترات، واستلم تنبيهات. Warchati - Complete car maintenance management system. Register services, track mileage, receive alerts.">
+    
+    <!-- Palabras clave en ÁRABE, ESPAÑOL e INGLÉS -->
+    <meta name="keywords" content="ورشتي, warchati, صيانة السيارات, mantenimiento coches, car maintenance, gestión taller, vehicle repair, control kilometraje, نظام صيانة, automotive maintenance, Saudi Arabia, mechanic shop, talleres, reparación de coches">
+    
+    <meta name="author" content="Hicham El Khamlichi">
+    <meta name="robots" content="index, follow">
+    
+    <!-- ========== OPEN GRAPH (Redes Sociales) ========== -->
+    <meta property="og:title" content="ورشتي | Warchati - Sistema de Mantenimiento de Coches">
+    <meta property="og:description" content="نظام متكامل لصيانة السيارات. Complete car maintenance management system. Sistema profesional para talleres.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://warchati.com">
+    <meta property="og:image" content="https://warchati.com/logo-preview.png">
+    <meta property="og:locale" content="ar_SA">
+    <meta property="og:locale:alternate" content="es_ES">
+    <meta property="og:locale:alternate" content="en_US">
+    
+    <!-- ========== TWITTER CARDS ========== -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ورشتي | Warchati - Car Maintenance System">
+    <meta name="twitter:description" content="Sistema profesional para gestión de mantenimiento de vehículos. Professional car maintenance management system.">
+    
+    <!-- ========== ENLACES CANÓNICOS E IDIOMAS ========== -->
+    <link rel="canonical" href="https://warchati.com">
+    <link rel="alternate" hreflang="ar" href="https://warchati.com">
+    <link rel="alternate" hreflang="es" href="https://warchati.com">
+    <link rel="alternate" hreflang="en" href="https://warchati.com">
+    
+    <!-- ========== FAVICON ========== -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z'/%3E%3Cpath d='M17.5 9.5L15 7l-2.5 2.5L10 7l-2.5 2.5L5 7v7h14V7l-2.5 2.5z' fill='%2310b981'/%3E%3C/svg%3E">
+    
+    <!-- ========== SCRIPTS Y STYLES (tus archivos actuales) ========== -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    
-    <style>
+
+   <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
         body { background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%); min-height: 100vh; }
         .login-container {
@@ -183,20 +219,19 @@
 
 <div class="login-container" id="loginContainer">
 <div class="login-card">
-    <!-- Logo moderno en la pantalla de login -->
-    <div class="login-logo">
-        <div class="login-logo-icon">
-            <i class="fas fa-car"></i>
-            <i class="fas fa-wrench"></i>
-        </div>
-        <div class="login-logo-text">
-            <span class="login-logo-name">ورشتي</span>
-            <span class="login-logo-tagline">صيانة سيارات</span>
-        </div>
+    <i class="fas fa-car-wrench"></i>
+    <h2>ورشتي</h2>
+    <p>نظام صيانة سيارات - سحابي بالكامل</p>
+    
+    <!-- ========== TEXTO SEO MULTILINGÜE (AÑADIDO) ========== -->
+    <div style="margin: 10px 0 15px 0; font-size: 0.75rem; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 12px;">
+        <p style="font-weight: 500;">Professional Car Maintenance System</p>
+        <p style="font-size: 0.7rem; margin-top: 5px;">Gestiona el mantenimiento de tu vehículo | Manage your vehicle maintenance | إدارة صيانة سيارتك</p>
     </div>
-    <p style="margin-top: 10px; margin-bottom: 20px; color: #64748b;">نظام صيانة سيارات - سحابي بالكامل</p>
+    <!-- ===================================================== -->
+    
     <div id="loginForm">
-		<input type="text" id="loginUsername" placeholder="اسم المستخدم/البريد الإلكتروني/الجوال">
+        <input type="text" id="loginUsername" placeholder="اسم المستخدم / البريد الإلكتروني / رقم الهاتف">
         <input type="password" id="loginPassword" placeholder="كلمة المرور">
         <div class="loading-spinner" id="loginSpinner"></div>
         <button onclick="login()">دخول</button>
@@ -205,7 +240,7 @@
     <div id="registerForm" style="display:none;">
         <input type="text" id="regUsername" placeholder="اسم المستخدم">
         <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
-		<input type="tel" id="regPhone" placeholder="رقم الهاتف (مثال: 05xxxxxxxx)" dir="ltr">
+        <input type="tel" id="regPhone" placeholder="رقم الهاتف (اختياري)" dir="ltr">
         <input type="password" id="regPassword" placeholder="كلمة المرور">
         <input type="text" id="regVehicle" placeholder="اسم السيارة">
         <div class="loading-spinner" id="registerSpinner"></div>
