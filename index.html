@@ -381,7 +381,10 @@
     const SUPABASE_URL = 'https://eixzktrrtqrzzqqlaqxo.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_XcIH1w6kcZcP7HA8mXW-yg_402H1CVY';
     
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Cliente para base de datos y autenticación (única instancia)
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Para mantener compatibilidad con el resto del código
+const supabaseClient = supabase;
     
     let currentUserId = null;
     let currentUsername = null;
@@ -876,109 +879,135 @@ async function register() {
     const phone = document.getElementById('regPhone').value.trim();
     const password = document.getElementById('regPassword').value;
     const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
-    
-    if (!username || !email || !password) { 
-        alert("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور"); 
-        return; 
-    }
-    
-    if (!email.includes('@') || !email.includes('.')) {
-        alert("الرجاء إدخال بريد إلكتروني صحيح");
+
+    if (!username || !email || !password) {
+        alert("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور");
         return;
     }
-    
+
     document.getElementById('registerSpinner').style.display = 'block';
-    
-    // Verificar si username ya existe
-    const { data: existingUser } = await supabaseClient.from('users').select('id').eq('username', username);
-    if (existingUser && existingUser.length > 0) { 
-        alert("اسم المستخدم موجود بالفعل"); 
-        document.getElementById('registerSpinner').style.display = 'none'; 
-        return; 
-    }
-    
-    // Verificar si email ya existe
-    const { data: existingEmail } = await supabaseClient.from('users').select('id').eq('email', email);
-    if (existingEmail && existingEmail.length > 0) { 
-        alert("البريد الإلكتروني مستخدم بالفعل"); 
-        document.getElementById('registerSpinner').style.display = 'none'; 
-        return; 
-    }
-    
-    // Verificar si phone ya existe (si se proporcionó)
-    if (phone) {
-        const { data: existingPhone } = await supabaseClient.from('users').select('id').eq('phone', phone);
-        if (existingPhone && existingPhone.length > 0) { 
-            alert("رقم الهاتف مستخدم بالفعل"); 
-            document.getElementById('registerSpinner').style.display = 'none'; 
-            return; 
+
+    try {
+        // 1. Verificar unicidad en tabla 'users'
+        const { data: existingUser } = await supabase.from('users').select('id').eq('username', username);
+        if (existingUser?.length) {
+            alert("اسم المستخدم موجود بالفعل");
+            document.getElementById('registerSpinner').style.display = 'none';
+            return;
         }
+
+        const { data: existingEmail } = await supabase.from('users').select('id').eq('email', email);
+        if (existingEmail?.length) {
+            alert("البريد الإلكتروني مستخدم بالفعل");
+            document.getElementById('registerSpinner').style.display = 'none';
+            return;
+        }
+
+        // 2. Registrar en Supabase Auth (contraseña encriptada)
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { username, phone, vehicle_name: vehicleName } }
+        });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+            // 3. Guardar también en tu tabla 'users' (para no romper consultas existentes)
+            await supabase.from('users').insert({
+                username,
+                email,
+                phone: phone || null,
+                password,  // Opcional: podrías no guardarla aquí (la seguridad viene de Auth)
+                vehicle_name: vehicleName
+            });
+
+            showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
+            showLogin();
+        } else {
+            alert("خطأ: لم يتم إنشاء المستخدم");
+        }
+    } catch (error) {
+        console.error(error);
+        alert("خطأ في التسجيل: " + error.message);
+    } finally {
+        document.getElementById('registerSpinner').style.display = 'none';
     }
+}
     
-    const { error } = await supabaseClient.from('users').insert({ 
-        username, 
-        email,
-        phone: phone || null,
-        password, 
-        vehicle_name: vehicleName 
-    });
-    
-    document.getElementById('registerSpinner').style.display = 'none';
-    
-    if (error) { 
-        alert("خطأ في التسجيل: " + error.message); 
-        return; 
+async function login() {
+    const loginValue = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!loginValue || !password) {
+        alert("الرجاء إدخال اسم المستخدم / البريد الإلكتروني / رقم الهاتف وكلمة المرور");
+        return;
     }
-    
-    showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
-    showLogin();
-    }
-    
-    async function login() {
-      const loginValue = document.getElementById('loginUsername').value.trim();
-      const password = document.getElementById('loginPassword').value;
-    
-    if (!loginValue || !password) { 
-        alert("الرجاء إدخال اسم المستخدم / البريد الإلكتروني / رقم الهاتف وكلمة المرور"); 
-        return; 
-    }
-    
+
     document.getElementById('loginSpinner').style.display = 'block';
-    
-    // Buscar por username OR email OR phone
-    const { data, error } = await supabaseClient
-        .from('users')
-        .select('*')
-        .or(`username.eq.${loginValue},email.eq.${loginValue},phone.eq.${loginValue}`)
-        .eq('password', password);
-    
-    document.getElementById('loginSpinner').style.display = 'none';
-    
-    if (error || !data || data.length === 0) { 
-        alert("بيانات الدخول غير صحيحة"); 
-        return; 
+
+    try {
+        let email = loginValue;
+
+        // Si no es email, buscar email en tabla 'users'
+        if (!loginValue.includes('@')) {
+            const { data: user, error } = await supabase
+                .from('users')
+                .select('email')
+                .or(`username.eq.${loginValue},phone.eq.${loginValue}`)
+                .maybeSingle();
+
+            if (error || !user?.email) {
+                alert("اسم المستخدم أو رقم الهاتف غير صحيح");
+                document.getElementById('loginSpinner').style.display = 'none';
+                return;
+            }
+            email = user.email;
+        }
+
+        // Autenticar con Supabase Auth
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+
+        if (data.user) {
+            // Obtener datos adicionales de tu tabla 'users'
+            const { data: userInfo } = await supabase
+                .from('users')
+                .select('*')
+                .eq('email', email)
+                .single();
+
+            currentUserId = data.user.id;
+            currentUsername = userInfo?.username || loginValue;
+            currentUserEmail = data.user.email;
+
+            document.getElementById('currentUser').innerText = currentUsername;
+            document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${userInfo?.vehicle_name || 'سيارة'} ☁️`;
+
+            await loadVehicles();
+
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            showToast("مرحباً " + currentUsername);
+        } else {
+            alert("بيانات الدخول غير صحيحة");
+        }
+    } catch (error) {
+        console.error(error);
+        alert("خطأ في الدخول: " + error.message);
+    } finally {
+        document.getElementById('loginSpinner').style.display = 'none';
     }
+}
     
-    currentUserId = data[0].id;
-    currentUsername = data[0].username;
-    currentUserEmail = data[0].email || '';
-    
-    document.getElementById('currentUser').innerText = currentUsername;
-    document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${data[0].vehicle_name || 'سيارة'} ☁️`;
-    
-    await loadVehicles();
-    
-    document.getElementById('loginContainer').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    }
-    
-    function logout() { 
-        currentUserId = null; 
-        currentUserEmail = null;
-        document.getElementById('loginContainer').style.display = 'flex'; 
-        document.getElementById('app').style.display = 'none'; 
-        showLogin(); 
-    }
+async function logout() {
+    await supabase.auth.signOut();
+    currentUserId = null;
+    currentUserEmail = null;
+    document.getElementById('loginContainer').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    showLogin();
+}
     
     function showRegister() { 
         document.getElementById('loginForm').style.display = 'none'; 
