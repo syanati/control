@@ -382,7 +382,9 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_XcIH1w6kcZcP7HA8mXW-yg_402H1CVY';
     
     // Cliente para base de datos y autenticación (única instancia)
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+//const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Para mantener compatibilidad con el resto del código
 // Cliente adicional para autenticación (compatible con tu código actual)
 const supabase = supabaseClient;
