@@ -248,6 +248,7 @@
         <input type="password" id="loginPassword" placeholder="كلمة المرور">
         <div class="loading-spinner" id="loginSpinner"></div>
         <button onclick="login()">دخول</button>
+		<div class="switch-form" onclick="resetPassword()" style="margin-top: 5px; font-size: 0.75rem;">نسيت كلمة المرور؟</div>
         <div class="switch-form" onclick="showRegister()">ليس لديك حساب؟ سجل الآن</div>
     </div>
     <div id="registerForm" style="display:none;">
@@ -1014,7 +1015,43 @@ async function login() {
         document.getElementById('loginSpinner').style.display = 'none';
     }
 }
+   async function resetPassword() {
+    const loginValue = document.getElementById('loginUsername').value.trim();
     
+    if (!loginValue) {
+        alert("الرجاء إدخال بريدك الإلكتروني أو اسم المستخدم أو رقم الهاتف");
+        return;
+    }
+    
+    let email = loginValue;
+    
+    // Si no es email, buscar el email en la tabla 'users'
+    if (!loginValue.includes('@')) {
+        const { data: user, error } = await supabaseClient
+            .from('users')
+            .select('email')
+            .or(`username.eq.${loginValue},phone.eq.${loginValue}`)
+            .maybeSingle();
+        
+        if (error || !user?.email) {
+            alert("لم نتمكن من encontrar tu cuenta. Verifica los datos.");
+            return;
+        }
+        email = user.email;
+    }
+    
+    // Enviar correo de recuperación
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://warchati.com/update-password.html'
+    });
+    
+    if (error) {
+        alert("Error al enviar el correo: " + error.message);
+    } else {
+        alert("تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني");
+    }
+} 
+	
 async function logout() {
     await supabaseClient.auth.signOut();
     currentUserId = null;
