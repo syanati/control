@@ -384,7 +384,8 @@
     // Cliente para base de datos y autenticación (única instancia)
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Para mantener compatibilidad con el resto del código
-const supabaseClient = supabase;
+// Cliente adicional para autenticación (compatible con tu código actual)
+const supabase = supabaseClient;
     
     let currentUserId = null;
     let currentUsername = null;
@@ -888,39 +889,47 @@ async function register() {
     document.getElementById('registerSpinner').style.display = 'block';
 
     try {
-        // 1. Verificar unicidad en tabla 'users'
-        const { data: existingUser } = await supabase.from('users').select('id').eq('username', username);
-        if (existingUser?.length) {
+        // 1. Verificar unicidad en tu tabla 'users'
+        const { data: existingUser } = await supabaseClient.from('users').select('id').eq('username', username);
+        if (existingUser && existingUser.length > 0) {
             alert("اسم المستخدم موجود بالفعل");
             document.getElementById('registerSpinner').style.display = 'none';
             return;
         }
 
-        const { data: existingEmail } = await supabase.from('users').select('id').eq('email', email);
-        if (existingEmail?.length) {
+        const { data: existingEmail } = await supabaseClient.from('users').select('id').eq('email', email);
+        if (existingEmail && existingEmail.length > 0) {
             alert("البريد الإلكتروني مستخدم بالفعل");
             document.getElementById('registerSpinner').style.display = 'none';
             return;
         }
 
-        // 2. Registrar en Supabase Auth (contraseña encriptada)
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: { data: { username, phone, vehicle_name: vehicleName } }
+        // 2. Registrar en Supabase Auth
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    username: username,
+                    phone: phone,
+                    vehicle_name: vehicleName
+                }
+            }
         });
 
         if (authError) throw authError;
 
         if (authData.user) {
-            // 3. Guardar también en tu tabla 'users' (para no romper consultas existentes)
-            await supabase.from('users').insert({
-                username,
-                email,
+            // 3. Guardar también en tu tabla 'users' (mantener compatibilidad)
+            const { error: insertError } = await supabaseClient.from('users').insert({
+                username: username,
+                email: email,
                 phone: phone || null,
-                password,  // Opcional: podrías no guardarla aquí (la seguridad viene de Auth)
+                password: password,
                 vehicle_name: vehicleName
             });
+            
+            if (insertError) console.error("Error al guardar en tabla users:", insertError);
 
             showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
             showLogin();
@@ -949,15 +958,15 @@ async function login() {
     try {
         let email = loginValue;
 
-        // Si no es email, buscar email en tabla 'users'
+        // Si no es email, buscar email en tu tabla 'users'
         if (!loginValue.includes('@')) {
-            const { data: user, error } = await supabase
+            const { data: user, error } = await supabaseClient
                 .from('users')
                 .select('email')
                 .or(`username.eq.${loginValue},phone.eq.${loginValue}`)
                 .maybeSingle();
 
-            if (error || !user?.email) {
+            if (error || !user || !user.email) {
                 alert("اسم المستخدم أو رقم الهاتف غير صحيح");
                 document.getElementById('loginSpinner').style.display = 'none';
                 return;
@@ -966,12 +975,16 @@ async function login() {
         }
 
         // Autenticar con Supabase Auth
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
         if (error) throw error;
 
         if (data.user) {
             // Obtener datos adicionales de tu tabla 'users'
-            const { data: userInfo } = await supabase
+            const { data: userInfo } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('email', email)
@@ -1001,7 +1014,7 @@ async function login() {
 }
     
 async function logout() {
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     currentUserId = null;
     currentUserEmail = null;
     document.getElementById('loginContainer').style.display = 'flex';
