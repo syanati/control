@@ -1837,6 +1837,7 @@ async function generateFullReport() {
 // ========== AUTHENTICATION ==========
 // ========== FUNCIONES DE AUTENTICACIÓN CORREGIDAS ==========
 
+// VERSIÓN SIMPLIFICADA - Solo usa Auth, sin tabla users
 async function register() {
     const username = document.getElementById('regUsername')?.value.trim();
     const email = document.getElementById('regEmail')?.value.trim();
@@ -1844,25 +1845,8 @@ async function register() {
     const password = document.getElementById('regPassword')?.value;
     const vehicleName = document.getElementById('regVehicle')?.value.trim() || 'سيارة';
 
-    // Validaciones
     if (!username || !email || !password) {
-        showToast("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور", "error");
-        return;
-    }
-    
-    if (username.length < 3) {
-        showToast("اسم المستخدم يجب أن يكون 3 أحرف على الأقل", "error");
-        return;
-    }
-    
-    if (password.length < 6) {
-        showToast("كلمة المرور يجب أن تكون 6 أحرف على الأقل", "error");
-        return;
-    }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showToast("الرجاء إدخال بريد إلكتروني صحيح", "error");
+        showToast("Completa todos los campos obligatorios", "error");
         return;
     }
 
@@ -1870,91 +1854,72 @@ async function register() {
     disableButton('registerBtn', true);
 
     try {
-        console.log('1. Registrando en Auth:', email);
-        
-        // 1. Registrar en Supabase Auth primero
-        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+        const { data, error } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
             options: {
                 data: {
                     username: username,
-                    phone: phone || null,
+                    phone: phone,
                     vehicle_name: vehicleName
                 }
             }
         });
 
-        if (authError) {
-            console.error('Error Auth:', authError);
-            if (authError.message.includes('already')) {
-                throw new Error('البريد الإلكتروني مسجل بالفعل');
-            }
-            throw authError;
+        if (error) throw error;
+
+        if (data.user) {
+            showToast("¡Registro exitoso! Inicia sesión.");
+            showLogin();
         }
-
-        if (!authData.user) {
-            throw new Error('No se pudo crear el usuario en Auth');
-        }
-
-        console.log('2. Usuario Auth creado:', authData.user.id);
-
-        // 2. Esperar a que la sesión esté activa
-        console.log('3. Esperando sesión...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // 3. Verificar si tenemos sesión
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        console.log('4. Sesión activa:', !!session);
-
-        if (!session) {
-            console.log('5. Iniciando sesión para crear perfil...');
-            // Iniciar sesión para obtener token
-            const { error: signInError } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
-            
-            if (signInError) {
-                console.warn('No se pudo iniciar sesión automáticamente:', signInError);
-            }
-        }
-
-        // 4. Intentar crear perfil en users
-        try {
-            console.log('6. Creando perfil en tabla users...');
-            const { error: profileError } = await supabaseClient
-                .from('users')
-                .insert({
-                    id: authData.user.id,
-                    username: username,
-                    email: email,
-                    phone: phone || null,
-                    vehicle_name: vehicleName
-                });
-
-            if (profileError) {
-                console.warn('7. Error al crear perfil (no crítico):', profileError.message);
-                // No es crítico, podemos usar metadatos
-            } else {
-                console.log('7. Perfil creado exitosamente');
-            }
-        } catch (profileError) {
-            console.warn('7. Error creando perfil (no crítico):', profileError);
-        }
-
-        // 5. Cerrar sesión para que el usuario haga login manualmente
-        await supabaseClient.auth.signOut();
-        
-        showToast("تم إنشاء الحساب بنجاح! puedes iniciar sesión.");
-        showLogin();
-        
     } catch (error) {
-        console.error('Error en registro:', error);
-        showToast(error.message || "خطأ في التسجيل", "error");
+        showToast("Error: " + error.message, "error");
     } finally {
         setLoading('registerSpinner', false);
         disableButton('registerBtn', false);
+    }
+}
+
+async function login() {
+    const email = document.getElementById('loginUsername')?.value.trim();
+    const password = document.getElementById('loginPassword')?.value;
+
+    if (!email || !password) {
+        showToast("Ingresa email y contraseña", "error");
+        return;
+    }
+
+    setLoading('loginSpinner', true);
+    disableButton('loginBtn', true);
+
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) throw error;
+
+        if (data.user) {
+            AppState.currentUserId = data.user.id;
+            AppState.currentUsername = data.user.user_metadata?.username || email;
+            AppState.currentUserEmail = data.user.email;
+            
+            document.getElementById('currentUser').innerText = AppState.currentUsername;
+            document.getElementById('vehicleNameDisplay').innerHTML = 
+                `<i class="fas fa-car"></i> ${data.user.user_metadata?.vehicle_name || 'سيارة'} ☁️`;
+
+            await loadVehicles();
+            
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            showToast("¡Bienvenido " + AppState.currentUsername + "!");
+        }
+    } catch (error) {
+        showToast("Error: " + error.message, "error");
+    } finally {
+        setLoading('loginSpinner', false);
+        disableButton('loginBtn', false);
     }
 }
 
