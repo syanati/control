@@ -892,7 +892,9 @@ async function register() {
     document.getElementById('registerSpinner').style.display = 'block';
 
     try {
-        // 1. Registrar en Supabase Auth (la verificación de email/username la hace Auth)
+        // ==========================================
+        // 1. Registrar en Supabase Auth (¡IMPORTANTE!)
+        // ==========================================
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
@@ -908,9 +910,11 @@ async function register() {
         if (authError) throw authError;
 
         if (authData.user) {
-            // 2. Crear perfil en la tabla 'users' con el MISMO UUID que auth.users
+            // ==========================================
+            // 2. Crear perfil en la tabla 'users' con el MISMO UUID
+            // ==========================================
             const { error: profileError } = await supabaseClient.from('users').insert({
-                id: authData.user.id,      // ← CLAVE: el mismo UUID
+                id: authData.user.id,      // ← CLAVE: el mismo UUID que auth.users
                 username: username,
                 email: email,
                 phone: phone || null,
@@ -919,7 +923,6 @@ async function register() {
 
             if (profileError) {
                 console.error("Error al crear perfil:", profileError);
-                // Si falla el perfil, el usuario no podrá usar la app
                 alert("Error al crear el perfil: " + profileError.message);
                 return;
             }
