@@ -892,22 +892,7 @@ async function register() {
     document.getElementById('registerSpinner').style.display = 'block';
 
     try {
-        // 1. Verificar unicidad en tu tabla 'users'
-        const { data: existingUser } = await supabaseClient.from('users').select('id').eq('username', username);
-        if (existingUser && existingUser.length > 0) {
-            alert("اسم المستخدم موجود بالفعل");
-            document.getElementById('registerSpinner').style.display = 'none';
-            return;
-        }
-
-        const { data: existingEmail } = await supabaseClient.from('users').select('id').eq('email', email);
-        if (existingEmail && existingEmail.length > 0) {
-            alert("البريد الإلكتروني مستخدم بالفعل");
-            document.getElementById('registerSpinner').style.display = 'none';
-            return;
-        }
-
-        // 2. Registrar en Supabase Auth
+        // 1. Registrar en Supabase Auth (la verificación de email/username la hace Auth)
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
             password: password,
@@ -923,16 +908,21 @@ async function register() {
         if (authError) throw authError;
 
         if (authData.user) {
-            // 3. Guardar también en tu tabla 'users' (mantener compatibilidad)
-            const { error: insertError } = await supabaseClient.from('users').insert({
+            // 2. Crear perfil en la tabla 'users' con el MISMO UUID que auth.users
+            const { error: profileError } = await supabaseClient.from('users').insert({
+                id: authData.user.id,      // ← CLAVE: el mismo UUID
                 username: username,
                 email: email,
                 phone: phone || null,
-                password: password,
                 vehicle_name: vehicleName
             });
-            
-            if (insertError) console.error("Error al guardar en tabla users:", insertError);
+
+            if (profileError) {
+                console.error("Error al crear perfil:", profileError);
+                // Si falla el perfil, el usuario no podrá usar la app
+                alert("Error al crear el perfil: " + profileError.message);
+                return;
+            }
 
             showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
             showLogin();
