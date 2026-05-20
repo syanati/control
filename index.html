@@ -1291,41 +1291,15 @@ function clearForm() {
 
 // ========== MAINTENANCE TYPES MANAGEMENT ==========
 async function saveFrequencies() {
-    const updates = [];
-    
-    for (const [type, freq] of Object.entries(AppState.frequencies)) {
-        const inputElement = document.getElementById(`freq_${type.replace(/\s/g, '_')}`);
-        if (!inputElement) continue;
-        
-        const newFreq = parseInt(inputElement.value);
-        if (newFreq !== freq) {
-            AppState.frequencies[type] = newFreq;
-            updates.push({
-                user_id: AppState.currentUserId,
-                maintenance_type: type,
-                frequency_km: newFreq
-            });
-        }
+    for (const [type, freq] of Object.entries(frequencies)) {
+        const { error } = await supabaseClient.from('frequencies').upsert({
+            user_id: currentUserId,   // ← Asegúrate de que tiene valor
+            maintenance_type: type,
+            frequency_km: freq
+        }, { onConflict: 'user_id, maintenance_type' });
+        if (error) console.error(error);
     }
-    
-    if (updates.length === 0) {
-        showToast("لم يتم تغيير أي قيمة");
-        return;
-    }
-    
-    try {
-        const { error } = await supabaseClient
-            .from('frequencies')
-            .upsert(updates, { onConflict: 'user_id, maintenance_type' });
-            
-        if (error) throw error;
-        
-        showToast("تم حفظ الترددات في السحاب");
-        updateDisplay();
-    } catch (error) {
-        console.error('Error saving frequencies:', error);
-        showToast("خطأ في حفظ الترددات: " + error.message, "error");
-    }
+    showToast("تم حفظ الترددات");
 }
 
 function openAddTypeModal() {
