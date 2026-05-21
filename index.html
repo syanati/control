@@ -224,9 +224,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             <input type="number" id="kmInput" placeholder="العداد الحالي">
             <input type="number" id="costInput" placeholder="التكلفة (SAR)" step="0.01">
             <div class="date-field">
-    <input type="date" id="date">
-    <i class="fas fa-calendar-alt"></i>
-</div>
+            <input type="date" id="date">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
             <textarea id="descInput" placeholder="ملاحظات" rows="2"></textarea>
         </div>
         <button id="addMaintBtn">تسجيل الصيانة</button>
@@ -572,32 +572,53 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
     
     // ========== GESTIÓN DE MANTENIMIENTOS ==========
-    async function addMaintenance() {
-        const type = document.getElementById('maintTypeSelect')?.value;
-        const kilometers = parseInt(document.getElementById('kmInput')?.value);
-        const cost = parseFloat(document.getElementById('costInput')?.value) || 0;
-        const date = document.getElementById('dateInput')?.value || new Date().toISOString().split('T')[0];
-        const description = document.getElementById('descInput')?.value || '';
-        
-        if (!type) {
-            showToast("اختر نوع الصيانة", "error");
-            return;
-        }
-        if (!kilometers || isNaN(kilometers) || kilometers < 0) {
-            showToast("الرجاء إدخال عداد صحيح", "error");
-            return;
-        }
-        if (kilometers < AppState.vehicleKm) {
-            showToast(`العداد يجب أن يكون ≥ ${formatNumber(AppState.vehicleKm)} km`, "error");
-            return;
-        }
-        if (cost < 0) {
-            showToast("التكلفة يجب أن تكون قيمة موجبة", "error");
-            return;
-        }
-        
-        try {
-            const { data, error } = await supabaseClient.from('maintenances').insert({
+async function addMaintenance() {
+    // Obtener referencias a los elementos del formulario
+    const typeEl = document.getElementById('maintenanceTypeSelect');
+    const kmEl = document.getElementById('kilometers');
+    const costEl = document.getElementById('cost');
+    const dateEl = document.getElementById('date');
+    const descEl = document.getElementById('description');
+
+    // Verificar que todos los elementos existen
+    if (!typeEl || !kmEl || !costEl || !dateEl || !descEl) {
+        const faltante = !typeEl ? 'maintenanceTypeSelect' :
+                         !kmEl ? 'kilometers' :
+                         !costEl ? 'cost' :
+                         !dateEl ? 'date' : 'description';
+        showToast("خطأ: عنصر النموذج مفقود (" + faltante + ")", "error");
+        console.error("Falta el elemento con id:", faltante);
+        return;
+    }
+
+    const type = typeEl.value;
+    const kilometers = parseInt(kmEl.value);
+    const cost = parseFloat(costEl.value) || 0;
+    const date = dateEl.value || new Date().toISOString().split('T')[0];
+    const description = descEl.value || '';
+
+    // Validaciones de datos
+    if (!type) {
+        showToast("اختر نوع الصيانة", "error");
+        return;
+    }
+    if (!kilometers || isNaN(kilometers) || kilometers < 0) {
+        showToast("الرجاء إدخال عداد صحيح", "error");
+        return;
+    }
+    if (kilometers < AppState.vehicleKm) {
+        showToast(`العداد يجب أن يكون ≥ ${formatNumber(AppState.vehicleKm)} km`, "error");
+        return;
+    }
+    if (cost < 0) {
+        showToast("التكلفة يجب أن تكون قيمة موجبة", "error");
+        return;
+    }
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('maintenances')
+            .insert({
                 user_id: AppState.currentUserId,
                 vehicle_id: AppState.currentVehicleId,
                 type: type,
@@ -605,27 +626,38 @@ input[type="date"]::-webkit-calendar-picker-indicator {
                 cost: cost,
                 date: date,
                 description: description
-            }).select().single();
-            if (error) throw error;
-            if (data) AppState.maintenances.unshift(data);
-            if (kilometers > AppState.vehicleKm) {
-                AppState.vehicleKm = kilometers;
-                AppState.lastKmDate = new Date().toISOString().split('T')[0];
-                await supabaseClient.from('vehicles').update({
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        if (data) {
+            AppState.maintenances.unshift(data);
+        }
+
+        if (kilometers > AppState.vehicleKm) {
+            AppState.vehicleKm = kilometers;
+            AppState.lastKmDate = new Date().toISOString().split('T')[0];
+            await supabaseClient
+                .from('vehicles')
+                .update({
                     current_km: AppState.vehicleKm,
                     last_update: AppState.lastKmDate
-                }).eq('id', AppState.currentVehicleId);
-            }
-            clearForm();
-            updateDisplay();
-            updateChart();
-            showToast("تم تسجيل الصيانة ومزامنتها مع السحاب");
-            await checkAndSendReminders();
-        } catch (error) {
-            console.error('Error adding maintenance:', error);
-            showToast("خطأ في تسجيل الصيانة: " + error.message, "error");
+                })
+                .eq('id', AppState.currentVehicleId);
         }
+
+        clearForm();
+        updateDisplay();
+        updateChart();
+        showToast("تم تسجيل الصيانة ومزامنتها مع السحاب");
+        await checkAndSendReminders();
+    } catch (error) {
+        console.error('Error adding maintenance:', error);
+        showToast("خطأ في تسجيل الصيانة: " + error.message, "error");
     }
+}
     
     async function deleteMaintenance(id) {
         if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) return;
