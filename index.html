@@ -51,7 +51,7 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 2rem; border-radius: 24px; width: 90%; max-width: 500px; }
-        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; } /* Altura fija para que el gráfico no se mueva */
+        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; } /* Altura fija para gráfico estático */
         .chart-container canvas { width: 100% !important; height: 100% !important; }
         .export-buttons { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
         .vehicle-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 16px; padding: 1rem; margin-bottom: 1rem; }
@@ -127,7 +127,7 @@
         <p>Professional Car Maintenance System</p>
     </div>
     <div id="loginForm">
-        <input type="text" id="loginUsername" placeholder="اسم المستخدم / الإيميل / رقم الجوال">
+        <input type="text" id="loginUsername" placeholder="اسم المستخدم / البريد الإلكتروني / رقم الهاتف">
         <input type="password" id="loginPassword" placeholder="كلمة المرور">
         <div class="loading-spinner" id="loginSpinner"></div>
         <button id="loginBtn">دخول</button>
@@ -218,7 +218,7 @@
             </div>
             <textarea id="description" placeholder="ملاحظات" rows="2"></textarea>
         </div>
-        <button id="addMaintBtn" class="btn btn-primary">تسجيل الصيانة</button>
+        <button id="addMaintBtn">تسجيل الصيانة</button>
     </div>
 
     <div class="section">
@@ -553,6 +553,14 @@
             AppState.lastKmDate = new Date().toISOString().split('T')[0];
             document.getElementById('newKmInput').value = '';
             updateDisplay();
+            // Forzar actualización del campo de kilometraje en el formulario de mantenimiento
+            const kmField = document.getElementById('kilometers');
+            if (kmField) kmField.value = AppState.vehicleKm;
+            showToast(`تم تحديث العداد إلى ${formatNumber(newKm)} km`);
+        } catch (error) {
+            console.error('Error updating kilometers:', error);
+            showToast("خطأ في تحديث العداد: " + error.message, "error");
+        }
     }
 
     // ========== GESTIÓN DE MANTENIMIENTOS ==========
@@ -644,14 +652,13 @@
     }
 
     function clearForm() {
-        // Limpiar campos excepto el kilometraje que se rellena automáticamente
         document.getElementById('cost').value = '';
         document.getElementById('date').value = '';
         document.getElementById('description').value = '';
         // Rellenar automáticamente el kilometraje actual del vehículo
         const kmInput = document.getElementById('kilometers');
         if (kmInput) kmInput.value = AppState.vehicleKm || '';
-        // También restablecer el select de tipo al valor por defecto
+        // Restablecer el select de tipo
         const typeSelect = document.getElementById('maintenanceTypeSelect');
         if (typeSelect) typeSelect.selectedIndex = 0;
     }
@@ -721,11 +728,11 @@
         updateAlertsGrid();
         applyFilters();
 
-        // Rellenar el campo de kilometraje en el formulario de mantenimiento
+        // Actualizar campo de kilometraje en formulario de mantenimiento (si no tiene el foco)
         const kmInput = document.getElementById('kilometers');
-     if (kmInput && !kmInput.value) {
-           kmInput.value = AppState.vehicleKm || '';
-       }
+        if (kmInput && document.activeElement !== kmInput) {
+            kmInput.value = AppState.vehicleKm || '';
+        }
     }
 
     function updateAlertsGrid() {
@@ -827,7 +834,7 @@
         applyFilters();
     }
 
-    // ========== CHART (estático, sin redimensionamientos) ==========
+    // ========== CHART (estático) ==========
     function updateChart() {
         const monthlyData = {};
         AppState.maintenances.forEach(m => {
@@ -844,7 +851,7 @@
             data: { labels: months, datasets: [{ label: 'المصروفات (SAR)', data: costs, backgroundColor: 'var(--primary)', borderRadius: 5 }] },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,   // Para que se ajuste al contenedor sin cambiar de tamaño
+                maintainAspectRatio: false,
                 plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => ctx.parsed.y.toFixed(2) + ' SAR' } } },
                 scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + ' SAR' } } }
             }
@@ -909,7 +916,7 @@
         } catch (error) { console.error(error); showToast("خطأ في تصدير البيانات", "error"); }
     }
 
-    // ========== AUTHENTICATION ==========
+    // ========== AUTHENTICATION (case-insensitive) ==========
     async function register() {
         const username = document.getElementById('regUsername').value.trim();
         const email = document.getElementById('regEmail').value.trim();
@@ -955,7 +962,7 @@
         try {
             let email = loginValue;
             if (!loginValue.includes('@')) {
-                // Búsqueda case-insensitive usando ilike
+                // Búsqueda case-insensitive con ilike
                 const { data: user, error } = await supabaseClient
                     .from('users')
                     .select('email')
@@ -1027,7 +1034,6 @@
         try {
             await supabaseClient.auth.signOut();
         } catch (error) { console.error(error); }
-        // Resetear estado
         Object.assign(AppState, {
             currentUserId: null,
             currentUsername: null,
@@ -1081,7 +1087,6 @@
         window.addEventListener('click', (e) => { if (e.target === document.getElementById('typeModal')) closeModal(); });
     }
 
-    // ========== INICIALIZACIÓN ==========
     initEventListeners();
     showLogin();
 </script>
