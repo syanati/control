@@ -70,6 +70,19 @@
         .login-logo-name { font-size: 1.8rem; font-weight: 800; color: var(--dark); }
         .login-logo-tagline { font-size: 0.7rem; color: #64748b; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+         
+        /* ====== SOLUCIÓN RÁPIDA PARA EL INPUT DE FECHA EN MÓVIL ====== */
+        @media (max-width: 768px) {
+            input[type="date"] {
+                padding-right: 2.2rem;
+                background: white;
+            }
+        
+            input[type="date"]::-webkit-calendar-picker-indicator {
+                position: absolute;
+                right: 0.4rem;
+            }
+        }
     </style>
 </head>
 <body>
