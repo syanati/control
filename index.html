@@ -71,18 +71,25 @@
         .login-logo-tagline { font-size: 0.7rem; color: #64748b; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
          
-        /* ====== SOLUCIÓN RÁPIDA PARA EL INPUT DE FECHA EN MÓVIL ====== */
+              /* ====== SOLUCIÓN RÁPIDA PARA EL INPUT DE FECHA EN MÓVIL ====== */
+        /* Ajuste para el input de fecha sin que se alargue */
+        input[type="date"] {
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+        }
+        
         @media (max-width: 768px) {
             input[type="date"] {
-                padding-right: 2.2rem;
-                background: white;
+                padding-right: 1.8rem;  /* un poco menos para no forzar */
             }
-                input[type="date"] {
-            box-sizing: border-box;
-        }
+        
             input[type="date"]::-webkit-calendar-picker-indicator {
                 position: absolute;
-                right: 0.4rem;
+                right: 0.2rem;
+                /* Opcional: reducir tamaño del icono */
+                /* width: 16px;
+                height: 16px; */
             }
         }
     </style>
