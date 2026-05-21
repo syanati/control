@@ -51,7 +51,8 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 2rem; border-radius: 24px; width: 90%; max-width: 500px; }
-        .chart-container { max-width: 400px; margin: 0 auto; }
+        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; } /* Altura fija para que el gráfico no se mueva */
+        .chart-container canvas { width: 100% !important; height: 100% !important; }
         .export-buttons { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
         .vehicle-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 16px; padding: 1rem; margin-bottom: 1rem; }
         .vehicle-card select, .vehicle-card button { background: white; color: var(--dark); margin-top: 0.5rem; }
@@ -70,60 +71,48 @@
         .login-logo-name { font-size: 1.8rem; font-weight: 800; color: var(--dark); }
         .login-logo-tagline { font-size: 0.7rem; color: #64748b; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
- 
-/* ===================================================
-   CAMPO DE FECHA CORREGIDO (móvil y escritorio)
-   =================================================== */
-input[type="date"] {
-    width: 100%;
-    box-sizing: border-box;
-    -webkit-appearance: none;          /* quita estilos nativos que deforman */
-    min-height: 44px;                 /* altura táctil recomendada */
-    padding: 10px 2.2rem 10px 12px;   /* espacio interno generoso */
-    position: relative;
-}
 
-/* Ajuste extra para el icono nativo (cuadrito gris) */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    position: absolute;
-    right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    margin: 0;
-    padding: 0;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-}
-
-/* En pantallas pequeñas, forzamos una columna y evitamos desbordes */
-@media (max-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .form-grid input,
-    .form-grid select,
-    .form-grid textarea {
-        width: 100% !important;
-        box-sizing: border-box;
-    }
-
-    /* Refuerzo del date en móvil */
-    input[type="date"] {
-        min-height: 46px;             /* ligeramente más alto en móvil */
-        padding: 12px 2.2rem 12px 10px;
-    }
-
-    input[type="date"]::-webkit-calendar-picker-indicator {
-        right: 0.4rem;
-    }
-
-    /* Evita que la sección entera haga scroll horizontal */
-    .section {
-        overflow-x: hidden;
-    }
-}
+        /* CAMPO DE FECHA CORREGIDO (móvil y escritorio) */
+        input[type="date"] {
+            width: 100%;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            min-height: 44px;
+            padding: 10px 2.2rem 10px 12px;
+            position: relative;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .form-grid input,
+            .form-grid select,
+            .form-grid textarea {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+            input[type="date"] {
+                min-height: 46px;
+                padding: 12px 2.2rem 12px 10px;
+            }
+            input[type="date"]::-webkit-calendar-picker-indicator {
+                right: 0.4rem;
+            }
+            .section {
+                overflow-x: hidden;
+            }
+        }
     </style>
 </head>
 <body>
@@ -217,20 +206,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         </div>
     </div>
 
-   <div class="section">
-    <h3><i class="fas fa-plus-circle"></i> تسجيل صيانة جديدة</h3>
-    <div class="form-grid">
-        <select id="maintenanceTypeSelect"><option value="">اختر نوع الصيانة</option></select>
-        <input type="number" id="kilometers" placeholder="العداد الحالي">
-        <input type="number" id="cost" placeholder="التكلفة (SAR)" step="0.01">
-        <div class="date-field">
-            <input type="date" id="date">
-            <i class="fas fa-calendar-alt"></i>
+    <div class="section">
+        <h3><i class="fas fa-plus-circle"></i> تسجيل صيانة جديدة</h3>
+        <div class="form-grid">
+            <select id="maintenanceTypeSelect"><option value="">اختر نوع الصيانة</option></select>
+            <input type="number" id="kilometers" placeholder="العداد الحالي">
+            <input type="number" id="cost" placeholder="التكلفة (SAR)" step="0.01">
+            <div class="date-field">
+                <input type="date" id="date">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <textarea id="description" placeholder="ملاحظات" rows="2"></textarea>
         </div>
-        <textarea id="description" placeholder="ملاحظات" rows="2"></textarea>
+        <button id="addMaintBtn" class="btn btn-primary">تسجيل الصيانة</button>
     </div>
-    <button id="addMaintBtn" onclick="addMaintenance()" class="btn btn-primary">تسجيل الصيانة</button>
-</div>
 
     <div class="section">
         <h3><i class="fas fa-history"></i> سجل الصيانة</h3>
@@ -254,9 +243,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 <script>
     // ========== CONFIGURACIÓN ==========
     const SUPABASE_URL = 'https://gaqecppjjdcuzdsxgqqg.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_TsAOyGFDraRXOpIKegrhbA_IzPgVCh6';  // ⚠️ REEMPLAZA CON TU ANON KEY
+    const SUPABASE_ANON_KEY = 'sb_publishable_TsAOyGFDraRXOpIKegrhbA_IzPgVCh6';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
+
     // ========== ESTADO GLOBAL ==========
     const AppState = {
         currentUserId: null,
@@ -271,14 +260,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         currentFilter: "",
         expensesChart: null
     };
-    
+
     const DEFAULT_TYPES = ["تغيير زيت", "فرامل", "إطارات", "سير المكينة", "بواجي", "فلتر هواء", "مياه ردياتير", "فحص عام"];
     const DEFAULT_FREQUENCIES = {
         "تغيير زيت": 10000, "فرامل": 200000, "إطارات": 60000,
         "سير المكينة": 100000, "بواجي": 40000, "فلتر هواء": 20000,
         "مياه ردياتير": 80000, "فحص عام": 10000
     };
-    
+
     // ========== FUNCIONES AUXILIARES ==========
     function showToast(msg, type = 'success') {
         const existingToast = document.querySelector('.toast');
@@ -289,7 +278,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         document.body.appendChild(t);
         setTimeout(() => t.remove(), 3000);
     }
-    
+
     function formatDate(date) {
         if (!date) return '';
         try {
@@ -303,7 +292,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             return '';
         }
     }
-    
+
     function formatNumber(num) {
         try {
             return num.toLocaleString('en-US');
@@ -311,26 +300,26 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             return num.toString();
         }
     }
-    
+
     function setLoading(spinnerId, loading) {
         const spinner = document.getElementById(spinnerId);
         if (spinner) spinner.style.display = loading ? 'block' : 'none';
     }
-    
+
     // ========== GESTIÓN DE FRECUENCIAS ==========
     function getLastKmForType(type) {
         const lastMaint = AppState.maintenances.find(m => m.type === type);
         return lastMaint ? lastMaint.kilometers : 0;
     }
-    
+
     function getNextKmForType(type) {
         return getLastKmForType(type) + (AppState.frequencies[type] || 10000);
     }
-    
+
     function getKmRemaining(type) {
         return Math.max(0, getNextKmForType(type) - AppState.vehicleKm);
     }
-    
+
     function toggleFrequencyTable() {
         const content = document.getElementById('frequencyContent');
         const icon = document.getElementById('toggleIcon');
@@ -339,7 +328,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         icon.classList.toggle('fa-chevron-down');
         icon.classList.toggle('fa-chevron-up');
     }
-    
+
     async function saveFrequencies() {
         if (!AppState.currentUserId) {
             showToast("⚠️ Error: usuario no identificado", "error");
@@ -355,7 +344,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         }
         showToast("تم حفظ الترددات");
     }
-    
+
     function openAddTypeModal() {
         document.getElementById('modalTitle').innerText = 'إضافة نوع صيانة جديد';
         document.getElementById('typeName').value = '';
@@ -363,7 +352,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         document.getElementById('editTypeOld').value = '';
         document.getElementById('typeModal').classList.add('active');
     }
-    
+
     function editType(type) {
         document.getElementById('modalTitle').innerText = 'تعديل نوع الصيانة';
         document.getElementById('typeName').value = type;
@@ -371,16 +360,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         document.getElementById('editTypeOld').value = type;
         document.getElementById('typeModal').classList.add('active');
     }
-    
+
     function closeModal() {
         document.getElementById('typeModal').classList.remove('active');
     }
-    
+
     async function saveType() {
         const newName = document.getElementById('typeName').value.trim();
         const frequency = parseInt(document.getElementById('typeFreq').value);
         const editingOld = document.getElementById('editTypeOld').value;
-        
+
         if (!newName) {
             showToast("الرجاء إدخال اسم نوع الصيانة", "error");
             return;
@@ -389,7 +378,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             showToast("الرجاء إدخال مسافة صحيحة (بين 1000 و 1000000 كم)", "error");
             return;
         }
-        
+
         if (editingOld && editingOld !== newName) {
             delete AppState.frequencies[editingOld];
             AppState.frequencies[newName] = frequency;
@@ -402,7 +391,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         } else {
             AppState.frequencies[editingOld] = frequency;
         }
-        
+
         try {
             const { error } = await supabaseClient.from('frequencies').upsert({
                 user_id: AppState.currentUserId,
@@ -418,7 +407,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             showToast("خطأ في حفظ نوع الصيانة: " + error.message, "error");
         }
     }
-    
+
     async function deleteType(type) {
         if (!confirm(`هل أنت متأكد من حذف نوع "${type}"؟ سيتم حذف جميع سجلات الصيانة المرتبطة به.`)) return;
         try {
@@ -434,7 +423,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             showToast("خطأ في حذف النوع: " + error.message, "error");
         }
     }
-    
+
     // ========== GESTIÓN DE VEHÍCULOS ==========
     async function loadVehicles() {
         try {
@@ -459,7 +448,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             showToast("خطأ في تحميل المركبات: " + error.message, "error");
         }
     }
-    
+
     function renderVehiclesList() {
         const container = document.getElementById('vehiclesList');
         if (!container) return;
@@ -475,7 +464,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         `;
         document.getElementById('changeVehicleBtn')?.addEventListener('click', () => changeVehicle(document.getElementById('vehicleSelect').value));
     }
-    
+
     async function addVehicle(name = null) {
         const vehicleName = name || document.getElementById('newVehicleName')?.value.trim();
         if (!vehicleName) {
@@ -504,7 +493,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             return null;
         }
     }
-    
+
     async function changeVehicle(vehicleId) {
         if (!vehicleId) return;
         AppState.currentVehicleId = parseInt(vehicleId);
@@ -512,7 +501,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         renderVehiclesList();
         showToast("تم التبديل إلى المركبة المحددة");
     }
-    
+
     async function loadVehicleData() {
         if (!AppState.currentVehicleId) return;
         try {
@@ -543,7 +532,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             showToast("خطأ في تحميل بيانات المركبة: " + error.message, "error");
         }
     }
-    
+
     async function updateTotalKilometers() {
         const newKm = parseInt(document.getElementById('newKmInput')?.value);
         if (!newKm || isNaN(newKm)) {
@@ -570,55 +559,45 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             showToast("خطأ في تحديث العداد: " + error.message, "error");
         }
     }
-    
+
     // ========== GESTIÓN DE MANTENIMIENTOS ==========
-async function addMaintenance() {
-    // Obtener referencias a los elementos del formulario
-    const typeEl = document.getElementById('maintenanceTypeSelect');
-    const kmEl = document.getElementById('kilometers');
-    const costEl = document.getElementById('cost');
-    const dateEl = document.getElementById('date');
-    const descEl = document.getElementById('description');
+    async function addMaintenance() {
+        const typeEl = document.getElementById('maintenanceTypeSelect');
+        const kmEl = document.getElementById('kilometers');
+        const costEl = document.getElementById('cost');
+        const dateEl = document.getElementById('date');
+        const descEl = document.getElementById('description');
 
-    // Verificar que todos los elementos existen
-    if (!typeEl || !kmEl || !costEl || !dateEl || !descEl) {
-        const faltante = !typeEl ? 'maintenanceTypeSelect' :
-                         !kmEl ? 'kilometers' :
-                         !costEl ? 'cost' :
-                         !dateEl ? 'date' : 'description';
-        showToast("خطأ: عنصر النموذج مفقود (" + faltante + ")", "error");
-        console.error("Falta el elemento con id:", faltante);
-        return;
-    }
+        if (!typeEl || !kmEl || !costEl || !dateEl || !descEl) {
+            showToast("خطأ: عنصر النموذج مفقود", "error");
+            return;
+        }
 
-    const type = typeEl.value;
-    const kilometers = parseInt(kmEl.value);
-    const cost = parseFloat(costEl.value) || 0;
-    const date = dateEl.value || new Date().toISOString().split('T')[0];
-    const description = descEl.value || '';
+        const type = typeEl.value;
+        const kilometers = parseInt(kmEl.value);
+        const cost = parseFloat(costEl.value) || 0;
+        const date = dateEl.value || new Date().toISOString().split('T')[0];
+        const description = descEl.value || '';
 
-    // Validaciones de datos
-    if (!type) {
-        showToast("اختر نوع الصيانة", "error");
-        return;
-    }
-    if (!kilometers || isNaN(kilometers) || kilometers < 0) {
-        showToast("الرجاء إدخال عداد صحيح", "error");
-        return;
-    }
-    if (kilometers < AppState.vehicleKm) {
-        showToast(`العداد يجب أن يكون ≥ ${formatNumber(AppState.vehicleKm)} km`, "error");
-        return;
-    }
-    if (cost < 0) {
-        showToast("التكلفة يجب أن تكون قيمة موجبة", "error");
-        return;
-    }
+        if (!type) {
+            showToast("اختر نوع الصيانة", "error");
+            return;
+        }
+        if (!kilometers || isNaN(kilometers) || kilometers < 0) {
+            showToast("الرجاء إدخال عداد صحيح", "error");
+            return;
+        }
+        if (kilometers < AppState.vehicleKm) {
+            showToast(`العداد يجب أن يكون ≥ ${formatNumber(AppState.vehicleKm)} km`, "error");
+            return;
+        }
+        if (cost < 0) {
+            showToast("التكلفة يجب أن تكون قيمة موجبة", "error");
+            return;
+        }
 
-    try {
-        const { data, error } = await supabaseClient
-            .from('maintenances')
-            .insert({
+        try {
+            const { data, error } = await supabaseClient.from('maintenances').insert({
                 user_id: AppState.currentUserId,
                 vehicle_id: AppState.currentVehicleId,
                 type: type,
@@ -626,39 +605,34 @@ async function addMaintenance() {
                 cost: cost,
                 date: date,
                 description: description
-            })
-            .select()
-            .single();
+            }).select().single();
 
-        if (error) throw error;
+            if (error) throw error;
 
-        if (data) {
-            AppState.maintenances.unshift(data);
-        }
+            if (data) {
+                AppState.maintenances.unshift(data);
+            }
 
-        if (kilometers > AppState.vehicleKm) {
-            AppState.vehicleKm = kilometers;
-            AppState.lastKmDate = new Date().toISOString().split('T')[0];
-            await supabaseClient
-                .from('vehicles')
-                .update({
+            if (kilometers > AppState.vehicleKm) {
+                AppState.vehicleKm = kilometers;
+                AppState.lastKmDate = new Date().toISOString().split('T')[0];
+                await supabaseClient.from('vehicles').update({
                     current_km: AppState.vehicleKm,
                     last_update: AppState.lastKmDate
-                })
-                .eq('id', AppState.currentVehicleId);
-        }
+                }).eq('id', AppState.currentVehicleId);
+            }
 
-        clearForm();
-        updateDisplay();
-        updateChart();
-        showToast("تم تسجيل الصيانة ومزامنتها مع السحاب");
-        await checkAndSendReminders();
-    } catch (error) {
-        console.error('Error adding maintenance:', error);
-        showToast("خطأ في تسجيل الصيانة: " + error.message, "error");
+            clearForm();
+            updateDisplay();
+            updateChart();
+            showToast("تم تسجيل الصيانة ومزامنتها مع السحاب");
+            await checkAndSendReminders();
+        } catch (error) {
+            console.error('Error adding maintenance:', error);
+            showToast("خطأ في تسجيل الصيانة: " + error.message, "error");
+        }
     }
-}
-    
+
     async function deleteMaintenance(id) {
         if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) return;
         try {
@@ -673,19 +647,25 @@ async function addMaintenance() {
             showToast("خطأ في حذف السجل: " + error.message, "error");
         }
     }
-    
+
     function clearForm() {
-        document.getElementById('kmInput').value = '';
-        document.getElementById('costInput').value = '';
-        document.getElementById('dateInput').value = '';
-        document.getElementById('descInput').value = '';
+        // Limpiar campos excepto el kilometraje que se rellena automáticamente
+        document.getElementById('cost').value = '';
+        document.getElementById('date').value = '';
+        document.getElementById('description').value = '';
+        // Rellenar automáticamente el kilometraje actual del vehículo
+        const kmInput = document.getElementById('kilometers');
+        if (kmInput) kmInput.value = AppState.vehicleKm || '';
+        // También restablecer el select de tipo al valor por defecto
+        const typeSelect = document.getElementById('maintenanceTypeSelect');
+        if (typeSelect) typeSelect.selectedIndex = 0;
     }
-    
+
     // ========== ACTUALIZACIÓN DE INTERFAZ ==========
     function updateDisplay() {
         document.getElementById('totalKmDisplay').innerHTML = formatNumber(AppState.vehicleKm) + ' km';
         document.getElementById('lastKmUpdate').innerText = formatDate(AppState.lastKmDate) || formatDate(new Date());
-        
+
         const tbody = document.getElementById('freqBody');
         if (tbody) {
             tbody.innerHTML = '';
@@ -713,18 +693,16 @@ async function addMaintenance() {
                 `;
                 tbody.appendChild(tr);
             }
-            // Asignar eventos después de crear los botones
             document.querySelectorAll('.edit-type-btn').forEach(btn => {
-                btn.removeEventListener('click', () => editType(btn.getAttribute('data-type')));
-                btn.addEventListener('click', () => editType(btn.getAttribute('data-type')));
+                btn.onclick = () => editType(btn.getAttribute('data-type'));
             });
             document.querySelectorAll('.delete-type-btn').forEach(btn => {
-                btn.removeEventListener('click', () => deleteType(btn.getAttribute('data-type')));
-                btn.addEventListener('click', () => deleteType(btn.getAttribute('data-type')));
+                btn.onclick = () => deleteType(btn.getAttribute('data-type'));
             });
         }
-        
-        const select = document.getElementById('maintTypeSelect');
+
+        // Actualizar selectores
+        const select = document.getElementById('maintenanceTypeSelect');
         const filterSelect = document.getElementById('filterSelect');
         if (select) {
             select.innerHTML = '<option value="">اختر نوع الصيانة</option>';
@@ -740,15 +718,21 @@ async function addMaintenance() {
             }
             filterSelect.value = currentValue;
         }
-        
+
         const totalCost = AppState.maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
         document.getElementById('totalCount').innerText = AppState.maintenances.length;
         document.getElementById('totalCost').innerHTML = totalCost.toFixed(2) + ' SAR';
-        
+
         updateAlertsGrid();
         applyFilters();
+
+        // Rellenar el campo de kilometraje en el formulario de mantenimiento
+        const kmInput = document.getElementById('kilometers');
+        if (kmInput && !kmInput.value) {
+            kmInput.value = AppState.vehicleKm || '';
+        }
     }
-    
+
     function updateAlertsGrid() {
         const grid = document.getElementById('alertsGrid');
         if (!grid) return;
@@ -772,11 +756,10 @@ async function addMaintenance() {
             </div>
         `).join('');
         document.querySelectorAll('.reminder-btn').forEach(btn => {
-            btn.removeEventListener('click', () => sendEmailReminder(btn.getAttribute('data-type'), parseInt(btn.getAttribute('data-remaining'))));
-            btn.addEventListener('click', () => sendEmailReminder(btn.getAttribute('data-type'), parseInt(btn.getAttribute('data-remaining'))));
+            btn.onclick = () => sendEmailReminder(btn.getAttribute('data-type'), parseInt(btn.getAttribute('data-remaining')));
         });
     }
-    
+
     function sendEmailReminder(type, remaining) {
         if (!AppState.currentUserEmail) {
             showToast("⚠️ لا يوجد بريد إلكتروني مسجل لهذا المستخدم", "error");
@@ -787,7 +770,7 @@ async function addMaintenance() {
         window.location.href = `mailto:${AppState.currentUserEmail}?subject=${subject}&body=${body}`;
         showToast("تم فتح بريدك الإلكتروني لإرسال التذكير");
     }
-    
+
     async function checkAndSendReminders() {
         const REMINDER_COOLDOWN = 24 * 60 * 60 * 1000;
         for (const type of Object.keys(AppState.frequencies)) {
@@ -804,7 +787,7 @@ async function addMaintenance() {
             }
         }
     }
-    
+
     function applyFilters() {
         AppState.currentFilter = document.getElementById('filterSelect')?.value || '';
         let filtered = AppState.currentFilter ? AppState.maintenances.filter(m => m.type === AppState.currentFilter) : [...AppState.maintenances];
@@ -836,22 +819,20 @@ async function addMaintenance() {
             `;
         }).join('');
         document.querySelectorAll('.invoice-btn').forEach(btn => {
-            btn.removeEventListener('click', () => generateInvoicePDF(parseInt(btn.getAttribute('data-id'))));
-            btn.addEventListener('click', () => generateInvoicePDF(parseInt(btn.getAttribute('data-id'))));
+            btn.onclick = () => generateInvoicePDF(parseInt(btn.getAttribute('data-id')));
         });
         document.querySelectorAll('.delete-maint-btn').forEach(btn => {
-            btn.removeEventListener('click', () => deleteMaintenance(parseInt(btn.getAttribute('data-id'))));
-            btn.addEventListener('click', () => deleteMaintenance(parseInt(btn.getAttribute('data-id'))));
+            btn.onclick = () => deleteMaintenance(parseInt(btn.getAttribute('data-id')));
         });
     }
-    
+
     function resetFilters() {
         const filterSelect = document.getElementById('filterSelect');
         if (filterSelect) filterSelect.value = '';
         applyFilters();
     }
-    
-    // ========== CHART ==========
+
+    // ========== CHART (estático, sin redimensionamientos) ==========
     function updateChart() {
         const monthlyData = {};
         AppState.maintenances.forEach(m => {
@@ -866,10 +847,15 @@ async function addMaintenance() {
         AppState.expensesChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: months, datasets: [{ label: 'المصروفات (SAR)', data: costs, backgroundColor: 'var(--primary)', borderRadius: 5 }] },
-            options: { responsive: true, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => ctx.parsed.y.toFixed(2) + ' SAR' } } }, scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + ' SAR' } } } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,   // Para que se ajuste al contenedor sin cambiar de tamaño
+                plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => ctx.parsed.y.toFixed(2) + ' SAR' } } },
+                scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + ' SAR' } } }
+            }
         });
     }
-    
+
     // ========== PDF Y EXCEL ==========
     async function generateInvoicePDF(id) {
         const m = AppState.maintenances.find(m => m.id === id);
@@ -893,7 +879,7 @@ async function addMaintenance() {
             showToast("جاري إنشاء الفاتورة...");
         } catch (error) { console.error(error); showToast("خطأ في إنشاء الفاتورة", "error"); }
     }
-    
+
     async function generateFullReport() {
         const totalCost = AppState.maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
         const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
@@ -915,7 +901,7 @@ async function addMaintenance() {
             showToast("جاري إنشاء التقرير...");
         } catch (error) { console.error(error); showToast("خطأ في إنشاء التقرير", "error"); }
     }
-    
+
     function exportToExcel() {
         try {
             const wsData = [["التاريخ", "نوع الصيانة", "العداد (كم)", "التكلفة (SAR)", "الملاحظات"]];
@@ -927,7 +913,7 @@ async function addMaintenance() {
             showToast("تم تصدير البيانات إلى Excel");
         } catch (error) { console.error(error); showToast("خطأ في تصدير البيانات", "error"); }
     }
-    
+
     // ========== AUTHENTICATION ==========
     async function register() {
         const username = document.getElementById('regUsername').value.trim();
@@ -962,7 +948,7 @@ async function addMaintenance() {
             setLoading('registerSpinner', false);
         }
     }
-    
+
     async function login() {
         const loginValue = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value;
@@ -974,7 +960,12 @@ async function addMaintenance() {
         try {
             let email = loginValue;
             if (!loginValue.includes('@')) {
-                const { data: user, error } = await supabaseClient.from('users').select('email').or(`username.eq.${loginValue},phone.eq.${loginValue}`).maybeSingle();
+                // Búsqueda case-insensitive usando ilike
+                const { data: user, error } = await supabaseClient
+                    .from('users')
+                    .select('email')
+                    .or(`username.ilike.${loginValue},phone.ilike.${loginValue}`)
+                    .maybeSingle();
                 if (error || !user?.email) throw new Error("اسم المستخدم أو رقم الهاتف غير صحيح");
                 email = user.email;
             }
@@ -1002,7 +993,7 @@ async function addMaintenance() {
             setLoading('loginSpinner', false);
         }
     }
-    
+
     async function resetPassword() {
         const loginValue = document.getElementById('loginUsername')?.value.trim();
         if (!loginValue) {
@@ -1012,7 +1003,11 @@ async function addMaintenance() {
         let email = loginValue;
         if (!loginValue.includes('@')) {
             try {
-                const { data: user, error } = await supabaseClient.from('users').select('email').or(`username.eq.${loginValue},phone.eq.${loginValue}`).maybeSingle();
+                const { data: user, error } = await supabaseClient
+                    .from('users')
+                    .select('email')
+                    .or(`username.ilike.${loginValue},phone.ilike.${loginValue}`)
+                    .maybeSingle();
                 if (error || !user?.email) throw new Error("لم نتمكن من إيجاد حسابك");
                 email = user.email;
             } catch (error) {
@@ -1032,36 +1027,42 @@ async function addMaintenance() {
             setLoading('loginSpinner', false);
         }
     }
-    
+
     async function logout() {
         try {
             await supabaseClient.auth.signOut();
         } catch (error) { console.error(error); }
-        AppState.currentUserId = null;
-        AppState.currentUsername = null;
-        AppState.currentUserEmail = null;
-        AppState.currentVehicleId = null;
-        AppState.vehicles = [];
-        AppState.maintenances = [];
-        AppState.frequencies = {};
-        AppState.vehicleKm = 0;
+        // Resetear estado
+        Object.assign(AppState, {
+            currentUserId: null,
+            currentUsername: null,
+            currentUserEmail: null,
+            currentVehicleId: null,
+            vehicles: [],
+            maintenances: [],
+            frequencies: {},
+            vehicleKm: 0,
+            lastKmDate: "",
+            currentFilter: "",
+            expensesChart: null
+        });
         document.getElementById('loginContainer').style.display = 'flex';
         document.getElementById('app').style.display = 'none';
         showLogin();
     }
-    
+
     function showRegister() {
         document.getElementById('loginForm').style.display = 'none';
         document.getElementById('registerForm').style.display = 'block';
     }
-    
+
     function showLogin() {
         document.getElementById('loginForm').style.display = 'block';
         document.getElementById('registerForm').style.display = 'none';
         const fields = ['loginUsername', 'loginPassword', 'regUsername', 'regEmail', 'regPhone', 'regPassword', 'regVehicle'];
         fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     }
-    
+
     // ========== EVENT LISTENERS ==========
     function initEventListeners() {
         document.getElementById('loginBtn')?.addEventListener('click', login);
@@ -1084,7 +1085,7 @@ async function addMaintenance() {
         document.getElementById('resetFilterBtn')?.addEventListener('click', resetFilters);
         window.addEventListener('click', (e) => { if (e.target === document.getElementById('typeModal')) closeModal(); });
     }
-    
+
     // ========== INICIALIZACIÓN ==========
     initEventListeners();
     showLogin();
