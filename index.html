@@ -71,16 +71,37 @@
         .login-logo-tagline { font-size: 0.7rem; color: #64748b; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
  
-    /* ===================================================
-   SOLUCIÓN DEFINITIVA: fecha en móvil sin desbordar
+/* ===================================================
+   CAMPO DE FECHA CORREGIDO (móvil y escritorio)
    =================================================== */
+input[type="date"] {
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-appearance: none;          /* quita estilos nativos que deforman */
+    min-height: 44px;                 /* altura táctil recomendada */
+    padding: 10px 2.2rem 10px 12px;   /* espacio interno generoso */
+    position: relative;
+}
+
+/* Ajuste extra para el icono nativo (cuadrito gris) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* En pantallas pequeñas, forzamos una columna y evitamos desbordes */
 @media (max-width: 768px) {
-    /* Obligamos una sola columna para que nada se salga */
     .form-grid {
         grid-template-columns: 1fr !important;
     }
 
-    /* Todos los campos ocupan el 100% y respetan los bordes */
     .form-grid input,
     .form-grid select,
     .form-grid textarea {
@@ -88,24 +109,19 @@
         box-sizing: border-box;
     }
 
-    /* Preparamos el campo de fecha */
+    /* Refuerzo del date en móvil */
     input[type="date"] {
-        position: relative;
-        padding-right: 2.2rem;      /* espacio para el icono */
-        -webkit-appearance: none;   /* quitamos estilos nativos que empujan */
+        min-height: 46px;             /* ligeramente más alto en móvil */
+        padding: 12px 2.2rem 12px 10px;
     }
 
-    /* Movemos el icono nativo dentro del campo, sin que estire nada */
     input[type="date"]::-webkit-calendar-picker-indicator {
-        position: absolute;
         right: 0.4rem;
-        top: 50%;
-        transform: translateY(-50%);
-        margin: 0;
-        padding: 0;
-        /* Si aún se ve grande, reduce el tamaño con: */
-        /* width: 18px;
-        height: 18px; */
+    }
+
+    /* Evita que la sección entera haga scroll horizontal */
+    .section {
+        overflow-x: hidden;
     }
 }
     </style>
