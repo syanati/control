@@ -217,20 +217,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         </div>
     </div>
 
-    <div class="section">
-        <h3><i class="fas fa-plus-circle"></i> تسجيل صيانة جديدة</h3>
-        <div class="form-grid">
-            <select id="maintTypeSelect"><option value="">اختر نوع الصيانة</option></select>
-            <input type="number" id="kmInput" placeholder="العداد الحالي">
-            <input type="number" id="costInput" placeholder="التكلفة (SAR)" step="0.01">
-            <div class="date-field">
+   <div class="section">
+    <h3><i class="fas fa-plus-circle"></i> تسجيل صيانة جديدة</h3>
+    <div class="form-grid">
+        <select id="maintenanceTypeSelect"><option value="">اختر نوع الصيانة</option></select>
+        <input type="number" id="kilometers" placeholder="العداد الحالي">
+        <input type="number" id="cost" placeholder="التكلفة (SAR)" step="0.01">
+        <div class="date-field">
             <input type="date" id="date">
             <i class="fas fa-calendar-alt"></i>
         </div>
-            <textarea id="descInput" placeholder="ملاحظات" rows="2"></textarea>
-        </div>
-        <button id="addMaintBtn">تسجيل الصيانة</button>
+        <textarea id="description" placeholder="ملاحظات" rows="2"></textarea>
     </div>
+    <button id="addMaintBtn" onclick="addMaintenance()" class="btn btn-primary">تسجيل الصيانة</button>
+</div>
 
     <div class="section">
         <h3><i class="fas fa-history"></i> سجل الصيانة</h3>
