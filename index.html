@@ -553,19 +553,6 @@
             AppState.lastKmDate = new Date().toISOString().split('T')[0];
             document.getElementById('newKmInput').value = '';
             updateDisplay();
-
-                     // Forzar actualización del campo en el formulario de mantenimiento
-            const kmField = document.getElementById('kilometers');
-            if (kmField) kmField.value = AppState.vehicleKm;
-            showToast(`تم تحديث العداد إلى ${formatNumber(newKm)} km`);
-        }
-
-        
-            showToast(`تم تحديث العداد إلى ${formatNumber(newKm)} km`);
-        } catch (error) {
-            console.error('Error updating kilometers:', error);
-            showToast("خطأ في تحديث العداد: " + error.message, "error");
-        }
     }
 
     // ========== GESTIÓN DE MANTENIMIENTOS ==========
@@ -736,13 +723,9 @@
 
         // Rellenar el campo de kilometraje en el formulario de mantenimiento
         const kmInput = document.getElementById('kilometers');
-        //if (kmInput && !kmInput.value) {
-         //   kmInput.value = AppState.vehicleKm || '';
-       // }
-                const kmInput = document.getElementById('kilometers');
-        if (kmInput && document.activeElement !== kmInput) {
-            kmInput.value = AppState.vehicleKm || '';
-        }
+     if (kmInput && !kmInput.value) {
+           kmInput.value = AppState.vehicleKm || '';
+       }
     }
 
     function updateAlertsGrid() {
