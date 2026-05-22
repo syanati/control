@@ -882,50 +882,136 @@
     }
 
     // ========== PDF Y EXCEL ==========
-    async function generateInvoicePDF(id) {
-        const m = AppState.maintenances.find(m => m.id === id);
-        if (!m) return;
-        const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
-        const element = document.createElement('div');
-        element.style.padding = '40px';
-        element.style.fontFamily = 'Tajawal, sans-serif';
-        element.style.textAlign = 'right';
-        element.style.direction = 'rtl';
-        element.innerHTML = `
-            <div style="border-bottom:3px solid var(--primary);margin-bottom:20px;"><h1 style="color:var(--dark);">ورشتي</h1><p style="color:#64748b;">فاتورة صيانة رسمية</p></div>
-            <div style="margin-bottom:20px;"><p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p><p><strong>التاريخ:</strong> ${formatDate(new Date())}</p><p><strong>المركبة:</strong> ${vehicleName}</p></div>
-            <table style="width:100%;border-collapse:collapse;"><tr style="background:#f1f5f9;"><th style="padding:12px;text-align:right;">نوع الصيانة</th><th style="padding:12px;text-align:right;">العداد</th><th style="padding:12px;text-align:right;">المبلغ</th></tr>
-            <tr><td style="padding:12px;border-bottom:1px solid #e2e8f0;">${m.type}</td><td style="padding:12px;border-bottom:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td><td style="padding:12px;border-bottom:1px solid #e2e8f0;">${(m.cost || 0).toFixed(2)} SAR</td></tr>
-            <tr><td colspan="2" style="padding:12px;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td></tr></table>
-            <div style="margin-top:30px;text-align:center;">شكراً لثقتكم بنا</div>
-        `;
-        try {
-            await html2pdf().set({ margin: [0.5,0.5,0.5,0.5], filename: `invoice_${m.id}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(element).save();
-            showToast("جاري إنشاء الفاتورة...");
-        } catch (error) { console.error(error); showToast("خطأ في إنشاء الفاتورة", "error"); }
-    }
+  async function generateInvoicePDF(id) {
+    const m = AppState.maintenances.find(m => m.id === id);
+    if (!m) return;
+    const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
 
-    async function generateFullReport() {
-        const totalCost = AppState.maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
-        const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
-        const element = document.createElement('div');
-        element.style.padding = '40px';
-        element.style.fontFamily = 'Tajawal, sans-serif';
-        element.style.textAlign = 'right';
-        element.style.direction = 'rtl';
-        element.innerHTML = `
-            <div style="border-bottom:3px solid var(--primary);"><h1>تقرير الصيانة الشامل</h1></div>
-            <div style="margin:20px 0;"><p><strong>المركبة:</strong> ${vehicleName}</p><p><strong>العداد الحالي:</strong> ${formatNumber(AppState.vehicleKm)} km</p><p><strong>إجمالي الصيانات:</strong> ${AppState.maintenances.length}</p><p><strong>إجمالي المصروفات:</strong> ${totalCost.toFixed(2)} SAR</p></div>
-            <h3>تفاصيل الصيانات</h3>
-            <table style="width:100%;border-collapse:collapse;"><tr style="background:#f1f5f9;"><th>التاريخ</th><th>النوع</th><th>العداد</th><th>التكلفة</th></tr>
-            ${AppState.maintenances.map(m => `<tr><td>${formatDate(m.date)}</td><td>${m.type}</td><td>${formatNumber(m.kilometers)} km</td><td>${(m.cost || 0).toFixed(2)} SAR</td></tr>`).join('')}</table>
-            <div style="margin-top:30px;text-align:center;">تم إنشاء التقرير في ${formatDate(new Date())}</div>
-        `;
-        try {
-            await html2pdf().set({ margin: [0.5,0.5,0.5,0.5], filename: `report_${Date.now()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } }).from(element).save();
-            showToast("جاري إنشاء التقرير...");
-        } catch (error) { console.error(error); showToast("خطأ في إنشاء التقرير", "error"); }
+    const element = document.createElement('div');
+    element.style.padding = '40px';
+    element.style.fontFamily = 'Tajawal, sans-serif';
+    element.style.textAlign = 'right';
+    element.style.direction = 'rtl';
+    element.style.color = '#1e293b';
+    element.style.background = 'white';
+    element.style.position = 'absolute';
+    element.style.left = '-9999px';  // oculto pero en el DOM para html2canvas
+    element.innerHTML = `
+        <div style="border-bottom:3px solid #10b981;margin-bottom:20px;">
+            <h1 style="color:#1e293b;">ورشتي</h1>
+            <p style="color:#64748b;">فاتورة صيانة رسمية</p>
+        </div>
+        <div style="margin-bottom:20px;">
+            <p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p>
+            <p><strong>التاريخ:</strong> ${formatDate(new Date())}</p>
+            <p><strong>المركبة:</strong> ${vehicleName}</p>
+        </div>
+        <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
+            <tr style="background:#f1f5f9;">
+                <th style="padding:12px;text-align:right;">نوع الصيانة</th>
+                <th style="padding:12px;text-align:right;">العداد</th>
+                <th style="padding:12px;text-align:right;">المبلغ</th>
+            </tr>
+            <tr>
+                <td style="padding:12px;border-top:1px solid #e2e8f0;">${m.type}</td>
+                <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
+                <td style="padding:12px;border-top:1px solid #e2e8f0;">${(m.cost || 0).toFixed(2)} SAR</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="padding:12px;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td>
+            </tr>
+        </table>
+        <div style="margin-top:30px;text-align:center;color:#64748b;">شكراً لثقتكم بنا</div>
+    `;
+
+    // Agregar al DOM temporalmente
+    document.body.appendChild(element);
+
+    try {
+        await html2pdf()
+            .set({
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `invoice_${m.id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            })
+            .from(element)
+            .save();
+        showToast("جاري إنشاء الفاتورة...");
+    } catch (error) {
+        console.error(error);
+        showToast("خطأ في إنشاء الفاتورة", "error");
+    } finally {
+        // Eliminar el elemento temporal
+        document.body.removeChild(element);
     }
+}
+
+async function generateFullReport() {
+    const totalCost = AppState.maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
+    const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
+
+    const element = document.createElement('div');
+    element.style.padding = '40px';
+    element.style.fontFamily = 'Tajawal, sans-serif';
+    element.style.textAlign = 'right';
+    element.style.direction = 'rtl';
+    element.style.color = '#1e293b';
+    element.style.background = 'white';
+    element.style.position = 'absolute';
+    element.style.left = '-9999px';
+    element.innerHTML = `
+        <div style="border-bottom:3px solid #10b981;">
+            <h1>تقرير الصيانة الشامل</h1>
+        </div>
+        <div style="margin:20px 0;">
+            <p><strong>المركبة:</strong> ${vehicleName}</p>
+            <p><strong>العداد الحالي:</strong> ${formatNumber(AppState.vehicleKm)} km</p>
+            <p><strong>إجمالي الصيانات:</strong> ${AppState.maintenances.length}</p>
+            <p><strong>إجمالي المصروفات:</strong> ${totalCost.toFixed(2)} SAR</p>
+        </div>
+        <h3>تفاصيل الصيانات</h3>
+        <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
+            <tr style="background:#f1f5f9;">
+                <th style="padding:12px;">التاريخ</th>
+                <th style="padding:12px;">النوع</th>
+                <th style="padding:12px;">العداد</th>
+                <th style="padding:12px;">التكلفة</th>
+            </tr>
+            ${AppState.maintenances.map(m => `
+                <tr>
+                    <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatDate(m.date)}</td>
+                    <td style="padding:12px;border-top:1px solid #e2e8f0;">${m.type}</td>
+                    <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
+                    <td style="padding:12px;border-top:1px solid #e2e8f0;">${(m.cost || 0).toFixed(2)} SAR</td>
+                </tr>
+            `).join('')}
+        </table>
+        <div style="margin-top:30px;text-align:center;color:#64748b;">تم إنشاء التقرير في ${formatDate(new Date())}</div>
+    `;
+
+    document.body.appendChild(element);
+
+    try {
+        await html2pdf()
+            .set({
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `report_${Date.now()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            })
+            .from(element)
+            .save();
+        showToast("جاري إنشاء التقرير...");
+    } catch (error) {
+        console.error(error);
+        showToast("خطأ في إنشاء التقرير", "error");
+    } finally {
+        document.body.removeChild(element);
+    }
+}
 
     function exportToExcel() {
         try {
