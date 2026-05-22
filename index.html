@@ -882,20 +882,28 @@
     }
 
     // ========== PDF Y EXCEL ==========
-  async function generateInvoicePDF(id) {
+ async function generateInvoicePDF(id) {
     const m = AppState.maintenances.find(m => m.id === id);
     if (!m) return;
     const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
 
+    // Crear el elemento de forma visible pero casi invisible (para que html2canvas lo capture)
     const element = document.createElement('div');
-    element.style.padding = '40px';
+    element.style.position = 'fixed';
+    element.style.top = '0';
+    element.style.left = '0';
+    element.style.width = '210mm'; // ancho A4
+    element.style.backgroundColor = 'white';
+    element.style.color = '#1e293b';
     element.style.fontFamily = 'Tajawal, sans-serif';
     element.style.textAlign = 'right';
     element.style.direction = 'rtl';
-    element.style.color = '#1e293b';
-    element.style.background = 'white';
-    element.style.position = 'absolute';
-    element.style.left = '-9999px';  // oculto pero en el DOM para html2canvas
+    element.style.padding = '15mm';
+    element.style.boxSizing = 'border-box';
+    element.style.zIndex = '-1';
+    element.style.opacity = '0.01';  // casi invisible, pero renderizado
+    element.style.pointerEvents = 'none';
+
     element.innerHTML = `
         <div style="border-bottom:3px solid #10b981;margin-bottom:20px;">
             <h1 style="color:#1e293b;">ورشتي</h1>
@@ -924,17 +932,19 @@
         <div style="margin-top:30px;text-align:center;color:#64748b;">شكراً لثقتكم بنا</div>
     `;
 
-    // Agregar al DOM temporalmente
     document.body.appendChild(element);
+
+    // Pequeño retraso para que el navegador renderice el elemento
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
         await html2pdf()
             .set({
-                margin: [0.5, 0.5, 0.5, 0.5],
+                margin: 0,
                 filename: `invoice_${m.id}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                html2canvas: { scale: 2, logging: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             })
             .from(element)
             .save();
@@ -943,7 +953,6 @@
         console.error(error);
         showToast("خطأ في إنشاء الفاتورة", "error");
     } finally {
-        // Eliminar el elemento temporal
         document.body.removeChild(element);
     }
 }
@@ -953,14 +962,21 @@ async function generateFullReport() {
     const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
 
     const element = document.createElement('div');
-    element.style.padding = '40px';
+    element.style.position = 'fixed';
+    element.style.top = '0';
+    element.style.left = '0';
+    element.style.width = '210mm';
+    element.style.backgroundColor = 'white';
+    element.style.color = '#1e293b';
     element.style.fontFamily = 'Tajawal, sans-serif';
     element.style.textAlign = 'right';
     element.style.direction = 'rtl';
-    element.style.color = '#1e293b';
-    element.style.background = 'white';
-    element.style.position = 'absolute';
-    element.style.left = '-9999px';
+    element.style.padding = '15mm';
+    element.style.boxSizing = 'border-box';
+    element.style.zIndex = '-1';
+    element.style.opacity = '0.01';
+    element.style.pointerEvents = 'none';
+
     element.innerHTML = `
         <div style="border-bottom:3px solid #10b981;">
             <h1>تقرير الصيانة الشامل</h1>
@@ -993,14 +1009,16 @@ async function generateFullReport() {
 
     document.body.appendChild(element);
 
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     try {
         await html2pdf()
             .set({
-                margin: [0.5, 0.5, 0.5, 0.5],
+                margin: 0,
                 filename: `report_${Date.now()}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                html2canvas: { scale: 2, logging: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             })
             .from(element)
             .save();
@@ -1012,7 +1030,6 @@ async function generateFullReport() {
         document.body.removeChild(element);
     }
 }
-
     function exportToExcel() {
         try {
             const wsData = [["التاريخ", "نوع الصيانة", "العداد (كم)", "التكلفة (SAR)", "الملاحظات"]];
