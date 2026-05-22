@@ -8,7 +8,12 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/mi-icono.png">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Librerías para PDF (html2canvas + jsPDF directos) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Otras librerías -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -51,7 +56,7 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 2rem; border-radius: 24px; width: 90%; max-width: 500px; }
-        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; } /* Altura fija para evitar movimientos */
+        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; } /* Altura fija para gráfico estático */
         .chart-container canvas { width: 100% !important; height: 100% !important; }
         .export-buttons { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
         .vehicle-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 16px; padding: 1rem; margin-bottom: 1rem; }
@@ -114,39 +119,38 @@
             }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
 <div class="login-container" id="loginContainer">
-    <div class="login-card">
-        <div class="login-logo">
-            <div class="login-logo-icon"><i class="fas fa-car"></i><i class="fas fa-wrench"></i></div>
-            <div class="login-logo-text"><span class="login-logo-name">ورشتي</span><span class="login-logo-tagline">صيانة سيارات</span></div>
-        </div>
-        <div style="margin:10px 0;font-size:0.75rem;color:#64748b;border-top:1px solid var(--gray);padding-top:12px;">
-            <p>Professional Car Maintenance System</p>
-        </div>
-        <div id="loginForm">
-            <input type="text" id="loginUsername" placeholder="اسم المستخدم / الإيميل / رقم الجوال">
-            <input type="password" id="loginPassword" placeholder="كلمة المرور">
-            <div class="loading-spinner" id="loginSpinner"></div>
-            <button id="loginBtn">دخول</button>
-            <div class="switch-form" id="showRegisterBtn">ليس لديك حساب؟ سجل الآن</div>
-            <div class="switch-form" id="forgotPasswordBtn" style="margin-top:5px; font-size:0.75rem;">نسيت كلمة المرور؟</div>
-        </div>
-        <div id="registerForm" style="display:none;">
-            <input type="text" id="regUsername" placeholder="اسم المستخدم">
-            <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
-            <input type="tel" id="regPhone" placeholder="رقم الهاتف">
-            <input type="password" id="regPassword" placeholder="كلمة المرور">
-            <input type="text" id="regVehicle" placeholder="اسم السيارة">
-            <div class="loading-spinner" id="registerSpinner"></div>
-            <button id="registerBtn">تسجيل حساب جديد</button>
-            <div class="switch-form" id="showLoginBtn">لديك حساب؟ سجل دخول</div>
-        </div>
-        <div style="margin-top:1rem;font-size:0.7rem;color:#94a3b8;">Developed by Hicham El Khamlichi © 2026</div>
+<div class="login-card">
+    <div class="login-logo">
+        <div class="login-logo-icon"><i class="fas fa-car"></i><i class="fas fa-wrench"></i></div>
+        <div class="login-logo-text"><span class="login-logo-name">ورشتي</span><span class="login-logo-tagline">صيانة سيارات</span></div>
     </div>
+    <div style="margin:10px 0;font-size:0.75rem;color:#64748b;border-top:1px solid var(--gray);padding-top:12px;">
+        <p>Professional Car Maintenance System</p>
+    </div>
+    <div id="loginForm">
+        <input type="text" id="loginUsername" placeholder="اسم المستخدم / الإيميل / رقم الجوال">
+        <input type="password" id="loginPassword" placeholder="كلمة المرور">
+        <div class="loading-spinner" id="loginSpinner"></div>
+        <button id="loginBtn">دخول</button>
+        <div class="switch-form" id="showRegisterBtn">ليس لديك حساب؟ سجل الآن</div>
+        <div class="switch-form" id="forgotPasswordBtn" style="margin-top:5px; font-size:0.75rem;">نسيت كلمة المرور؟</div>
+    </div>
+    <div id="registerForm" style="display:none;">
+        <input type="text" id="regUsername" placeholder="اسم المستخدم">
+        <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
+        <input type="tel" id="regPhone" placeholder="رقم الهاتف">
+        <input type="password" id="regPassword" placeholder="كلمة المرور">
+        <input type="text" id="regVehicle" placeholder="اسم السيارة">
+        <div class="loading-spinner" id="registerSpinner"></div>
+        <button id="registerBtn">تسجيل حساب جديد</button>
+        <div class="switch-form" id="showLoginBtn">لديك حساب؟ سجل دخول</div>
+    </div>
+    <div style="margin-top:1rem;font-size:0.7rem;color:#94a3b8;">Developed by Hicham El Khamlichi © 2026</div>
+</div>
 </div>
 
 <div class="app" id="app">
@@ -833,16 +837,14 @@
         applyFilters();
     }
 
-    // ========== CHART (con destrucción segura) ==========
+    // ========== CHART (estático) ==========
     function updateChart() {
         const canvas = document.getElementById('expensesChart');
         if (!canvas) return;
 
-        // Destruir cualquier gráfico existente en el lienzo, incluso si no está en AppState
         const existingChart = Chart.getChart(canvas);
         if (existingChart) existingChart.destroy();
 
-        // Preparar datos mensuales
         const monthlyData = {};
         AppState.maintenances.forEach(m => {
             const month = m.date.substring(0, 7);
@@ -861,7 +863,7 @@
                 datasets: [{
                     label: 'المصروفات (SAR)',
                     data: costs,
-                    backgroundColor: 'var(--primary)',
+                    backgroundColor: '#10b981',
                     borderRadius: 5
                 }]
             },
@@ -882,162 +884,161 @@
         });
     }
 
-    // ========== PDF Y EXCEL ==========
-async function generateInvoicePDF(id) {
-    const m = AppState.maintenances.find(m => m.id === id);
-    if (!m) return;
-    const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
+    // ========== PDF (html2canvas + jsPDF directos) ==========
+    async function generateInvoicePDF(id) {
+        const m = AppState.maintenances.find(m => m.id === id);
+        if (!m) return;
+        const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
 
-    // Crear elemento visible con baja opacidad (como en la prueba)
-    const element = document.createElement('div');
-    element.style.position = 'fixed';
-    element.style.top = '0';
-    element.style.left = '0';
-    element.style.width = '210mm';
-    element.style.backgroundColor = 'white';
-    element.style.color = '#1e293b';
-    element.style.padding = '15mm';
-    element.style.zIndex = '99999';
-    element.style.opacity = '0.7'; // semi-transparente
-    element.style.fontFamily = 'Tajawal, sans-serif';
-    element.style.textAlign = 'right';
-    element.style.direction = 'rtl';
-    element.style.boxSizing = 'border-box';
-    element.innerHTML = `
-        <div style="border-bottom:3px solid #10b981;margin-bottom:20px;">
-            <h1 style="color:#1e293b;">ورشتي</h1>
-            <p style="color:#64748b;">فاتورة صيانة رسمية</p>
-        </div>
-        <div style="margin-bottom:20px;">
-            <p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p>
-            <p><strong>التاريخ:</strong> ${formatDate(new Date())}</p>
-            <p><strong>المركبة:</strong> ${vehicleName}</p>
-        </div>
-        <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
-            <tr style="background:#f1f5f9;">
-                <th style="padding:12px;text-align:right;">نوع الصيانة</th>
-                <th style="padding:12px;text-align:right;">العداد</th>
-                <th style="padding:12px;text-align:right;">المبلغ</th>
-            </tr>
-            <tr>
-                <td style="padding:12px;border-top:1px solid #e2e8f0;">${m.type}</td>
-                <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
-                <td style="padding:12px;border-top:1px solid #e2e8f0;">${(m.cost || 0).toFixed(2)} SAR</td>
-            </tr>
-            <tr>
-                <td colspan="2" style="padding:12px;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td>
-            </tr>
-        </table>
-        <div style="margin-top:30px;text-align:center;color:#64748b;">شكراً لثقتكم بنا</div>
-    `;
-
-    document.body.appendChild(element);
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    try {
-        const canvas = await html2canvas(element, { scale: 2, logging: false });
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgRatio = canvas.height / canvas.width;
-        let imgWidth = pdfWidth;
-        let imgHeight = pdfWidth * imgRatio;
-
-        // Si la imagen es más alta que la página, la ajustamos
-        if (imgHeight > pdfHeight) {
-            imgHeight = pdfHeight;
-            imgWidth = imgHeight / imgRatio;
-        }
-
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-        pdf.save(`invoice_${m.id}.pdf`);
-        showToast("تم إنشاء الفاتورة بنجاح");
-    } catch (error) {
-        console.error(error);
-        showToast("خطأ في إنشاء الفاتورة: " + error.message, "error");
-    } finally {
-        document.body.removeChild(element);
-    }
-}
-async function generateFullReport() {
-    const totalCost = AppState.maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
-    const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
-
-    const element = document.createElement('div');
-    element.style.position = 'fixed';
-    element.style.top = '0';
-    element.style.left = '0';
-    element.style.width = '210mm';
-    element.style.backgroundColor = 'white';
-    element.style.color = '#1e293b';
-    element.style.padding = '15mm';
-    element.style.zIndex = '99999';
-    element.style.opacity = '0.7';
-    element.style.fontFamily = 'Tajawal, sans-serif';
-    element.style.textAlign = 'right';
-    element.style.direction = 'rtl';
-    element.style.boxSizing = 'border-box';
-    element.innerHTML = `
-        <div style="border-bottom:3px solid #10b981;">
-            <h1>تقرير الصيانة الشامل</h1>
-        </div>
-        <div style="margin:20px 0;">
-            <p><strong>المركبة:</strong> ${vehicleName}</p>
-            <p><strong>العداد الحالي:</strong> ${formatNumber(AppState.vehicleKm)} km</p>
-            <p><strong>إجمالي الصيانات:</strong> ${AppState.maintenances.length}</p>
-            <p><strong>إجمالي المصروفات:</strong> ${totalCost.toFixed(2)} SAR</p>
-        </div>
-        <h3>تفاصيل الصيانات</h3>
-        <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
-            <tr style="background:#f1f5f9;">
-                <th style="padding:12px;">التاريخ</th>
-                <th style="padding:12px;">النوع</th>
-                <th style="padding:12px;">العداد</th>
-                <th style="padding:12px;">التكلفة</th>
-            </tr>
-            ${AppState.maintenances.map(m => `
+        const element = document.createElement('div');
+        element.style.position = 'fixed';
+        element.style.top = '0';
+        element.style.left = '0';
+        element.style.width = '210mm';
+        element.style.backgroundColor = 'white';
+        element.style.color = '#1e293b';
+        element.style.padding = '15mm';
+        element.style.zIndex = '99999';
+        element.style.opacity = '0.7';
+        element.style.fontFamily = 'Tajawal, sans-serif';
+        element.style.textAlign = 'right';
+        element.style.direction = 'rtl';
+        element.style.boxSizing = 'border-box';
+        element.innerHTML = `
+            <div style="border-bottom:3px solid #10b981;margin-bottom:20px;">
+                <h1 style="color:#1e293b;">ورشتي</h1>
+                <p style="color:#64748b;">فاتورة صيانة رسمية</p>
+            </div>
+            <div style="margin-bottom:20px;">
+                <p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p>
+                <p><strong>التاريخ:</strong> ${formatDate(new Date())}</p>
+                <p><strong>المركبة:</strong> ${vehicleName}</p>
+            </div>
+            <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
+                <tr style="background:#f1f5f9;">
+                    <th style="padding:12px;text-align:right;">نوع الصيانة</th>
+                    <th style="padding:12px;text-align:right;">العداد</th>
+                    <th style="padding:12px;text-align:right;">المبلغ</th>
+                </tr>
                 <tr>
-                    <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatDate(m.date)}</td>
                     <td style="padding:12px;border-top:1px solid #e2e8f0;">${m.type}</td>
                     <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
                     <td style="padding:12px;border-top:1px solid #e2e8f0;">${(m.cost || 0).toFixed(2)} SAR</td>
                 </tr>
-            `).join('')}
-        </table>
-        <div style="margin-top:30px;text-align:center;color:#64748b;">تم إنشاء التقرير في ${formatDate(new Date())}</div>
-    `;
+                <tr>
+                    <td colspan="2" style="padding:12px;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td>
+                </tr>
+            </table>
+            <div style="margin-top:30px;text-align:center;color:#64748b;">شكراً لثقتكم بنا</div>
+        `;
 
-    document.body.appendChild(element);
-    await new Promise(resolve => setTimeout(resolve, 200));
+        document.body.appendChild(element);
+        await new Promise(resolve => setTimeout(resolve, 200));
 
-    try {
-        const canvas = await html2canvas(element, { scale: 2, logging: false });
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgRatio = canvas.height / canvas.width;
-        let imgWidth = pdfWidth;
-        let imgHeight = pdfWidth * imgRatio;
+        try {
+            const canvas = await html2canvas(element, { scale: 2, logging: false });
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const imgRatio = canvas.height / canvas.width;
+            let imgWidth = pdfWidth;
+            let imgHeight = pdfWidth * imgRatio;
 
-        if (imgHeight > pdfHeight) {
-            imgHeight = pdfHeight;
-            imgWidth = imgHeight / imgRatio;
+            if (imgHeight > pdf.internal.pageSize.getHeight()) {
+                imgHeight = pdf.internal.pageSize.getHeight();
+                imgWidth = imgHeight / imgRatio;
+            }
+
+            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`invoice_${m.id}.pdf`);
+            showToast("تم إنشاء الفاتورة بنجاح");
+        } catch (error) {
+            console.error(error);
+            showToast("خطأ في إنشاء الفاتورة: " + error.message, "error");
+        } finally {
+            document.body.removeChild(element);
         }
-
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-        pdf.save(`report_${Date.now()}.pdf`);
-        showToast("تم إنشاء التقرير بنجاح");
-    } catch (error) {
-        console.error(error);
-        showToast("خطأ في إنشاء التقرير: " + error.message, "error");
-    } finally {
-        document.body.removeChild(element);
     }
-}
+
+    async function generateFullReport() {
+        const totalCost = AppState.maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
+        const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
+
+        const element = document.createElement('div');
+        element.style.position = 'fixed';
+        element.style.top = '0';
+        element.style.left = '0';
+        element.style.width = '210mm';
+        element.style.backgroundColor = 'white';
+        element.style.color = '#1e293b';
+        element.style.padding = '15mm';
+        element.style.zIndex = '99999';
+        element.style.opacity = '0.7';
+        element.style.fontFamily = 'Tajawal, sans-serif';
+        element.style.textAlign = 'right';
+        element.style.direction = 'rtl';
+        element.style.boxSizing = 'border-box';
+        element.innerHTML = `
+            <div style="border-bottom:3px solid #10b981;">
+                <h1>تقرير الصيانة الشامل</h1>
+            </div>
+            <div style="margin:20px 0;">
+                <p><strong>المركبة:</strong> ${vehicleName}</p>
+                <p><strong>العداد الحالي:</strong> ${formatNumber(AppState.vehicleKm)} km</p>
+                <p><strong>إجمالي الصيانات:</strong> ${AppState.maintenances.length}</p>
+                <p><strong>إجمالي المصروفات:</strong> ${totalCost.toFixed(2)} SAR</p>
+            </div>
+            <h3>تفاصيل الصيانات</h3>
+            <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
+                <tr style="background:#f1f5f9;">
+                    <th style="padding:12px;">التاريخ</th>
+                    <th style="padding:12px;">النوع</th>
+                    <th style="padding:12px;">العداد</th>
+                    <th style="padding:12px;">التكلفة</th>
+                </tr>
+                ${AppState.maintenances.map(m => `
+                    <tr>
+                        <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatDate(m.date)}</td>
+                        <td style="padding:12px;border-top:1px solid #e2e8f0;">${m.type}</td>
+                        <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
+                        <td style="padding:12px;border-top:1px solid #e2e8f0;">${(m.cost || 0).toFixed(2)} SAR</td>
+                    </tr>
+                `).join('')}
+            </table>
+            <div style="margin-top:30px;text-align:center;color:#64748b;">تم إنشاء التقرير في ${formatDate(new Date())}</div>
+        `;
+
+        document.body.appendChild(element);
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        try {
+            const canvas = await html2canvas(element, { scale: 2, logging: false });
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const imgRatio = canvas.height / canvas.width;
+            let imgWidth = pdfWidth;
+            let imgHeight = pdfWidth * imgRatio;
+
+            if (imgHeight > pdf.internal.pageSize.getHeight()) {
+                imgHeight = pdf.internal.pageSize.getHeight();
+                imgWidth = imgHeight / imgRatio;
+            }
+
+            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`report_${Date.now()}.pdf`);
+            showToast("تم إنشاء التقرير بنجاح");
+        } catch (error) {
+            console.error(error);
+            showToast("خطأ في إنشاء التقرير: " + error.message, "error");
+        } finally {
+            document.body.removeChild(element);
+        }
+    }
+
+    // ========== EXCEL ==========
     function exportToExcel() {
         try {
             const wsData = [["التاريخ", "نوع الصيانة", "العداد (كم)", "التكلفة (SAR)", "الملاحظات"]];
@@ -1164,7 +1165,6 @@ async function generateFullReport() {
     }
 
     async function logout() {
-        // Destruir el gráfico antes de limpiar el estado
         const canvas = document.getElementById('expensesChart');
         if (canvas) {
             const existingChart = Chart.getChart(canvas);
