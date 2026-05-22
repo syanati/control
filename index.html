@@ -51,7 +51,7 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 2rem; border-radius: 24px; width: 90%; max-width: 500px; }
-        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; } /* Altura fija para gráfico estático */
+        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; } /* Altura fija para evitar movimientos */
         .chart-container canvas { width: 100% !important; height: 100% !important; }
         .export-buttons { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
         .vehicle-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 16px; padding: 1rem; margin-bottom: 1rem; }
@@ -118,34 +118,34 @@
 <body>
 
 <div class="login-container" id="loginContainer">
-<div class="login-card">
-    <div class="login-logo">
-        <div class="login-logo-icon"><i class="fas fa-car"></i><i class="fas fa-wrench"></i></div>
-        <div class="login-logo-text"><span class="login-logo-name">ورشتي</span><span class="login-logo-tagline">صيانة سيارات</span></div>
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="login-logo-icon"><i class="fas fa-car"></i><i class="fas fa-wrench"></i></div>
+            <div class="login-logo-text"><span class="login-logo-name">ورشتي</span><span class="login-logo-tagline">صيانة سيارات</span></div>
+        </div>
+        <div style="margin:10px 0;font-size:0.75rem;color:#64748b;border-top:1px solid var(--gray);padding-top:12px;">
+            <p>Professional Car Maintenance System</p>
+        </div>
+        <div id="loginForm">
+            <input type="text" id="loginUsername" placeholder="اسم المستخدم / الإيميل / رقم الجوال">
+            <input type="password" id="loginPassword" placeholder="كلمة المرور">
+            <div class="loading-spinner" id="loginSpinner"></div>
+            <button id="loginBtn">دخول</button>
+            <div class="switch-form" id="showRegisterBtn">ليس لديك حساب؟ سجل الآن</div>
+            <div class="switch-form" id="forgotPasswordBtn" style="margin-top:5px; font-size:0.75rem;">نسيت كلمة المرور؟</div>
+        </div>
+        <div id="registerForm" style="display:none;">
+            <input type="text" id="regUsername" placeholder="اسم المستخدم">
+            <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
+            <input type="tel" id="regPhone" placeholder="رقم الهاتف">
+            <input type="password" id="regPassword" placeholder="كلمة المرور">
+            <input type="text" id="regVehicle" placeholder="اسم السيارة">
+            <div class="loading-spinner" id="registerSpinner"></div>
+            <button id="registerBtn">تسجيل حساب جديد</button>
+            <div class="switch-form" id="showLoginBtn">لديك حساب؟ سجل دخول</div>
+        </div>
+        <div style="margin-top:1rem;font-size:0.7rem;color:#94a3b8;">Developed by Hicham El Khamlichi © 2026</div>
     </div>
-    <div style="margin:10px 0;font-size:0.75rem;color:#64748b;border-top:1px solid var(--gray);padding-top:12px;">
-        <p>Professional Car Maintenance System</p>
-    </div>
-    <div id="loginForm">
-        <input type="text" id="loginUsername" placeholder="اسم المستخدم / الإيميل / رقم الجوال">
-        <input type="password" id="loginPassword" placeholder="كلمة المرور">
-        <div class="loading-spinner" id="loginSpinner"></div>
-        <button id="loginBtn">دخول</button>
-        <div class="switch-form" id="showRegisterBtn">ليس لديك حساب؟ سجل الآن</div>
-        <div class="switch-form" id="forgotPasswordBtn" style="margin-top:5px; font-size:0.75rem;">نسيت كلمة المرور؟</div>
-    </div>
-    <div id="registerForm" style="display:none;">
-        <input type="text" id="regUsername" placeholder="اسم المستخدم">
-        <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
-        <input type="tel" id="regPhone" placeholder="رقم الهاتف">
-        <input type="password" id="regPassword" placeholder="كلمة المرور">
-        <input type="text" id="regVehicle" placeholder="اسم السيارة">
-        <div class="loading-spinner" id="registerSpinner"></div>
-        <button id="registerBtn">تسجيل حساب جديد</button>
-        <div class="switch-form" id="showLoginBtn">لديك حساب؟ سجل دخول</div>
-    </div>
-    <div style="margin-top:1rem;font-size:0.7rem;color:#94a3b8;">Developed by Hicham El Khamlichi © 2026</div>
-</div>
 </div>
 
 <div class="app" id="app">
@@ -655,10 +655,8 @@
         document.getElementById('cost').value = '';
         document.getElementById('date').value = '';
         document.getElementById('description').value = '';
-        // Rellenar automáticamente el kilometraje actual del vehículo
         const kmInput = document.getElementById('kilometers');
         if (kmInput) kmInput.value = AppState.vehicleKm || '';
-        // Restablecer el select de tipo
         const typeSelect = document.getElementById('maintenanceTypeSelect');
         if (typeSelect) typeSelect.selectedIndex = 0;
     }
@@ -834,8 +832,16 @@
         applyFilters();
     }
 
-    // ========== CHART (estático) ==========
+    // ========== CHART (con destrucción segura) ==========
     function updateChart() {
+        const canvas = document.getElementById('expensesChart');
+        if (!canvas) return;
+
+        // Destruir cualquier gráfico existente en el lienzo, incluso si no está en AppState
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) existingChart.destroy();
+
+        // Preparar datos mensuales
         const monthlyData = {};
         AppState.maintenances.forEach(m => {
             const month = m.date.substring(0, 7);
@@ -843,17 +849,34 @@
         });
         const months = Object.keys(monthlyData).sort();
         const costs = months.map(m => monthlyData[m]);
-        const ctx = document.getElementById('expensesChart')?.getContext('2d');
+
+        const ctx = canvas.getContext('2d');
         if (!ctx) return;
-        if (AppState.expensesChart) AppState.expensesChart.destroy();
+
         AppState.expensesChart = new Chart(ctx, {
             type: 'bar',
-            data: { labels: months, datasets: [{ label: 'المصروفات (SAR)', data: costs, backgroundColor: 'var(--primary)', borderRadius: 5 }] },
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'المصروفات (SAR)',
+                    data: costs,
+                    backgroundColor: 'var(--primary)',
+                    borderRadius: 5
+                }]
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => ctx.parsed.y.toFixed(2) + ' SAR' } } },
-                scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + ' SAR' } } }
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: (ctx) => ctx.parsed.y.toFixed(2) + ' SAR' } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: (value) => value + ' SAR' }
+                    }
+                }
             }
         });
     }
@@ -962,7 +985,6 @@
         try {
             let email = loginValue;
             if (!loginValue.includes('@')) {
-                // Búsqueda case-insensitive con ilike
                 const { data: user, error } = await supabaseClient
                     .from('users')
                     .select('email')
@@ -1031,6 +1053,12 @@
     }
 
     async function logout() {
+        // Destruir el gráfico antes de limpiar el estado
+        const canvas = document.getElementById('expensesChart');
+        if (canvas) {
+            const existingChart = Chart.getChart(canvas);
+            if (existingChart) existingChart.destroy();
+        }
         try {
             await supabaseClient.auth.signOut();
         } catch (error) { console.error(error); }
