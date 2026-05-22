@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Test PDF Externo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; padding: 20px; text-align: center; }
+        button { padding: 10px 20px; font-size: 18px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Prueba de PDF con html2pdf</h1>
+    <button id="generateBtn">Generar PDF de prueba</button>
+    <div id="status"></div>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const status = document.getElementById('status');
+            status.textContent = 'Generando...';
+
+            // Crear elemento igual que en la app
+            const element = document.createElement('div');
+            element.style.position = 'fixed';
+            element.style.top = '0';
+            element.style.left = '0';
+            element.style.width = '210mm';
+            element.style.backgroundColor = 'white';
+            element.style.color = '#1e293b';
+            element.style.fontFamily = 'Tajawal, sans-serif';
+            element.style.padding = '15mm';
+            element.style.zIndex = '99999';
+            element.style.opacity = '0.9'; // visible para debug
+            element.innerHTML = '<h1>اختبار PDF</h1><p>Si ves este texto en el PDF, la librería funciona correctamente.</p>';
+
+            document.body.appendChild(element);
+
+            // Pequeña pausa
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            try {
+                await html2pdf()
+                    .set({
+                        margin: 0,
+                        filename: 'test.pdf',
+                        html2canvas: { scale: 2, logging: true },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    })
+                    .from(element)
+                    .save();
+                status.textContent = 'PDF generado. Revisa la descarga.';
+            } catch (error) {
+                console.error(error);
+                status.textContent = 'Error: ' + error.message;
+            } finally {
+                document.body.removeChild(element);
+            }
+        });
+    </script>
+</body>
+</html>
