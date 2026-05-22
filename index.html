@@ -114,6 +114,7 @@
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -882,28 +883,26 @@
     }
 
     // ========== PDF Y EXCEL ==========
- async function generateInvoicePDF(id) {
+async function generateInvoicePDF(id) {
     const m = AppState.maintenances.find(m => m.id === id);
     if (!m) return;
     const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
 
-    // Crear el elemento de forma visible pero casi invisible (para que html2canvas lo capture)
+    // Crear elemento visible con baja opacidad (como en la prueba)
     const element = document.createElement('div');
     element.style.position = 'fixed';
     element.style.top = '0';
     element.style.left = '0';
-    element.style.width = '210mm'; // ancho A4
+    element.style.width = '210mm';
     element.style.backgroundColor = 'white';
     element.style.color = '#1e293b';
+    element.style.padding = '15mm';
+    element.style.zIndex = '99999';
+    element.style.opacity = '0.7'; // semi-transparente
     element.style.fontFamily = 'Tajawal, sans-serif';
     element.style.textAlign = 'right';
     element.style.direction = 'rtl';
-    element.style.padding = '15mm';
     element.style.boxSizing = 'border-box';
-    element.style.zIndex = '-1';
-    element.style.opacity = '0.01';  // casi invisible, pero renderizado
-    element.style.pointerEvents = 'none';
-
     element.innerHTML = `
         <div style="border-bottom:3px solid #10b981;margin-bottom:20px;">
             <h1 style="color:#1e293b;">ورشتي</h1>
@@ -933,30 +932,35 @@
     `;
 
     document.body.appendChild(element);
-
-    // Pequeño retraso para que el navegador renderice el elemento
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     try {
-        await html2pdf()
-            .set({
-                margin: 0,
-                filename: `invoice_${m.id}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, logging: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            })
-            .from(element)
-            .save();
-        showToast("جاري إنشاء الفاتورة...");
+        const canvas = await html2canvas(element, { scale: 2, logging: false });
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgRatio = canvas.height / canvas.width;
+        let imgWidth = pdfWidth;
+        let imgHeight = pdfWidth * imgRatio;
+
+        // Si la imagen es más alta que la página, la ajustamos
+        if (imgHeight > pdfHeight) {
+            imgHeight = pdfHeight;
+            imgWidth = imgHeight / imgRatio;
+        }
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`invoice_${m.id}.pdf`);
+        showToast("تم إنشاء الفاتورة بنجاح");
     } catch (error) {
         console.error(error);
-        showToast("خطأ في إنشاء الفاتورة", "error");
+        showToast("خطأ في إنشاء الفاتورة: " + error.message, "error");
     } finally {
         document.body.removeChild(element);
     }
 }
-
 async function generateFullReport() {
     const totalCost = AppState.maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
     const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
@@ -968,15 +972,13 @@ async function generateFullReport() {
     element.style.width = '210mm';
     element.style.backgroundColor = 'white';
     element.style.color = '#1e293b';
+    element.style.padding = '15mm';
+    element.style.zIndex = '99999';
+    element.style.opacity = '0.7';
     element.style.fontFamily = 'Tajawal, sans-serif';
     element.style.textAlign = 'right';
     element.style.direction = 'rtl';
-    element.style.padding = '15mm';
     element.style.boxSizing = 'border-box';
-    element.style.zIndex = '-1';
-    element.style.opacity = '0.01';
-    element.style.pointerEvents = 'none';
-
     element.innerHTML = `
         <div style="border-bottom:3px solid #10b981;">
             <h1>تقرير الصيانة الشامل</h1>
@@ -1008,24 +1010,30 @@ async function generateFullReport() {
     `;
 
     document.body.appendChild(element);
-
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     try {
-        await html2pdf()
-            .set({
-                margin: 0,
-                filename: `report_${Date.now()}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, logging: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            })
-            .from(element)
-            .save();
-        showToast("جاري إنشاء التقرير...");
+        const canvas = await html2canvas(element, { scale: 2, logging: false });
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgRatio = canvas.height / canvas.width;
+        let imgWidth = pdfWidth;
+        let imgHeight = pdfWidth * imgRatio;
+
+        if (imgHeight > pdfHeight) {
+            imgHeight = pdfHeight;
+            imgWidth = imgHeight / imgRatio;
+        }
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`report_${Date.now()}.pdf`);
+        showToast("تم إنشاء التقرير بنجاح");
     } catch (error) {
         console.error(error);
-        showToast("خطأ في إنشاء التقرير", "error");
+        showToast("خطأ في إنشاء التقرير: " + error.message, "error");
     } finally {
         document.body.removeChild(element);
     }
