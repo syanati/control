@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ورشتي | Warchati</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z'/%3E%3Cpath d='M17.5 9.5L15 7l-2.5 2.5L10 7l-2.5 2.5L5 7v7h14V7l-2.5 2.5z' fill='%2310b981'/%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" sizes="180x180" href="/mi-icono.png">
+    <!-- Iconos personalizados -->
+    <link rel="icon" type="image/png" sizes="32x32" href="mi-icono.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="mi-icono.png">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Librerías para PDF (html2canvas + jsPDF directos) -->
+    <!-- Librerías PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -56,7 +57,7 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 2rem; border-radius: 24px; width: 90%; max-width: 500px; }
-        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; } /* Altura fija para gráfico estático */
+        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; }
         .chart-container canvas { width: 100% !important; height: 100% !important; }
         .export-buttons { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
         .vehicle-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 16px; padding: 1rem; margin-bottom: 1rem; }
@@ -66,18 +67,18 @@
         .collapsible-content { display: none; padding: 1rem; }
         .collapsible-content.show { display: block; }
         .logo-container { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #1e293b, #0f172a); padding: 8px 20px; border-radius: 60px; }
-        .logo-icon { background: var(--primary); width: 45px; height: 45px; border-radius: 50%; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px; }
-        .logo-icon i { color: white; }
+        .logo-icon { background: none; width: 45px; height: 45px; border-radius: 50%; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .logo-icon img { width: 100%; height: 100%; object-fit: cover; }
         .logo-name { font-size: 1.4rem; font-weight: 800; color: white; }
         .logo-tagline { font-size: 0.6rem; color: #94a3b8; }
         .login-logo { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; }
-        .login-logo-icon { background: var(--primary); width: 70px; height: 70px; border-radius: 50%; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin: 0 auto; }
-        .login-logo-icon i { color: white; }
+        .login-logo-icon { background: none; width: 70px; height: 70px; border-radius: 50%; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0 auto; }
+        .login-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
         .login-logo-name { font-size: 1.8rem; font-weight: 800; color: var(--dark); }
         .login-logo-tagline { font-size: 0.7rem; color: #64748b; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 
-        /* CAMPO DE FECHA CORREGIDO (móvil y escritorio) */
+        /* Campo de fecha corregido */
         input[type="date"] {
             width: 100%;
             box-sizing: border-box;
@@ -98,35 +99,27 @@
             cursor: pointer;
         }
         @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr !important;
-            }
-            .form-grid input,
-            .form-grid select,
-            .form-grid textarea {
-                width: 100% !important;
-                box-sizing: border-box;
-            }
-            input[type="date"] {
-                min-height: 46px;
-                padding: 12px 2.2rem 12px 10px;
-            }
-            input[type="date"]::-webkit-calendar-picker-indicator {
-                right: 0.4rem;
-            }
-            .section {
-                overflow-x: hidden;
-            }
+            .form-grid { grid-template-columns: 1fr !important; }
+            .form-grid input, .form-grid select, .form-grid textarea { width: 100% !important; box-sizing: border-box; }
+            input[type="date"] { min-height: 46px; padding: 12px 2.2rem 12px 10px; }
+            input[type="date"]::-webkit-calendar-picker-indicator { right: 0.4rem; }
+            .section { overflow-x: hidden; }
         }
     </style>
 </head>
 <body>
 
+<!-- LOGIN CONTAINER -->
 <div class="login-container" id="loginContainer">
 <div class="login-card">
     <div class="login-logo">
-        <div class="login-logo-icon"><i class="fas fa-car"></i><i class="fas fa-wrench"></i></div>
-        <div class="login-logo-text"><span class="login-logo-name">ورشتي</span><span class="login-logo-tagline">صيانة سيارات</span></div>
+        <div class="login-logo-icon">
+            <img src="mi-icono.png" alt="Logo Warchati">
+        </div>
+        <div class="login-logo-text">
+            <span class="login-logo-name">ورشتي</span>
+            <span class="login-logo-tagline">صيانة سيارات</span>
+        </div>
     </div>
     <div style="margin:10px 0;font-size:0.75rem;color:#64748b;border-top:1px solid var(--gray);padding-top:12px;">
         <p>Professional Car Maintenance System</p>
@@ -153,12 +146,18 @@
 </div>
 </div>
 
+<!-- APP PRINCIPAL -->
 <div class="app" id="app">
     <div class="header">
         <div class="logo">
             <div class="logo-container">
-                <div class="logo-icon"><i class="fas fa-car"></i><i class="fas fa-wrench"></i></div>
-                <div><span class="logo-name">ورشتي</span><span class="logo-tagline">صيانة سيارات</span></div>
+                <div class="logo-icon">
+                    <img src="mi-icono.png" alt="Logo">
+                </div>
+                <div>
+                    <span class="logo-name">ورشتي</span>
+                    <span class="logo-tagline">صيانة سيارات</span>
+                </div>
             </div>
             <p style="font-size:0.8rem;" id="vehicleNameDisplay">البيانات متزامنة مع السحاب ☁️</p>
         </div>
@@ -234,6 +233,7 @@
     </div>
 </div>
 
+<!-- Modal -->
 <div id="typeModal" class="modal">
     <div class="modal-content">
         <h3 id="modalTitle">إضافة نوع صيانة جديد</h3>
@@ -293,22 +293,23 @@
             const month = (d.getMonth() + 1).toString().padStart(2, '0');
             const year = d.getFullYear();
             return `${day}/${month}/${year}`;
-        } catch {
-            return '';
-        }
+        } catch { return ''; }
     }
 
     function formatNumber(num) {
-        try {
-            return num.toLocaleString('en-US');
-        } catch {
-            return num.toString();
-        }
+        try { return num.toLocaleString('en-US'); } catch { return num.toString(); }
     }
 
     function setLoading(spinnerId, loading) {
         const spinner = document.getElementById(spinnerId);
         if (spinner) spinner.style.display = loading ? 'block' : 'none';
+    }
+
+    function actualizarNombreVehiculoEnCabecera() {
+        const vehiculo = AppState.vehicles.find(v => v.id === AppState.currentVehicleId);
+        const nombre = vehiculo ? vehiculo.name : (AppState.currentUsername ? 'سيارة' : '');
+        const display = document.getElementById('vehicleNameDisplay');
+        if (display) display.innerHTML = `<i class="fas fa-car"></i> ${nombre} ☁️`;
     }
 
     // ========== GESTIÓN DE FRECUENCIAS ==========
@@ -504,6 +505,7 @@
         AppState.currentVehicleId = parseInt(vehicleId);
         await loadVehicleData();
         renderVehiclesList();
+        actualizarNombreVehiculoEnCabecera();
         showToast("تم التبديل إلى المركبة المحددة");
     }
 
@@ -529,6 +531,7 @@
                     AppState.frequencies[row.maintenance_type] = row.frequency_km;
                 }
             }
+            actualizarNombreVehiculoEnCabecera();
             updateDisplay();
             updateChart();
             await checkAndSendReminders();
@@ -558,7 +561,6 @@
             AppState.lastKmDate = new Date().toISOString().split('T')[0];
             document.getElementById('newKmInput').value = '';
             updateDisplay();
-            // Forzar actualización del campo de kilometraje en el formulario de mantenimiento
             const kmField = document.getElementById('kilometers');
             if (kmField) kmField.value = AppState.vehicleKm;
             showToast(`تم تحديث العداد إلى ${formatNumber(newKm)} km`);
@@ -587,22 +589,10 @@
         const date = dateEl.value || new Date().toISOString().split('T')[0];
         const description = descEl.value || '';
 
-        if (!type) {
-            showToast("اختر نوع الصيانة", "error");
-            return;
-        }
-        if (!kilometers || isNaN(kilometers) || kilometers < 0) {
-            showToast("الرجاء إدخال عداد صحيح", "error");
-            return;
-        }
-        if (kilometers < AppState.vehicleKm) {
-            showToast(`العداد يجب أن يكون ≥ ${formatNumber(AppState.vehicleKm)} km`, "error");
-            return;
-        }
-        if (cost < 0) {
-            showToast("التكلفة يجب أن تكون قيمة موجبة", "error");
-            return;
-        }
+        if (!type) { showToast("اختر نوع الصيانة", "error"); return; }
+        if (!kilometers || isNaN(kilometers) || kilometers < 0) { showToast("الرجاء إدخال عداد صحيح", "error"); return; }
+        if (kilometers < AppState.vehicleKm) { showToast(`العداد يجب أن يكون ≥ ${formatNumber(AppState.vehicleKm)} km`, "error"); return; }
+        if (cost < 0) { showToast("التكلفة يجب أن تكون قيمة موجبة", "error"); return; }
 
         try {
             const { data, error } = await supabaseClient.from('maintenances').insert({
@@ -617,9 +607,7 @@
 
             if (error) throw error;
 
-            if (data) {
-                AppState.maintenances.unshift(data);
-            }
+            if (data) AppState.maintenances.unshift(data);
 
             if (kilometers > AppState.vehicleKm) {
                 AppState.vehicleKm = kilometers;
@@ -698,29 +686,20 @@
                 `;
                 tbody.appendChild(tr);
             }
-            document.querySelectorAll('.edit-type-btn').forEach(btn => {
-                btn.onclick = () => editType(btn.getAttribute('data-type'));
-            });
-            document.querySelectorAll('.delete-type-btn').forEach(btn => {
-                btn.onclick = () => deleteType(btn.getAttribute('data-type'));
-            });
+            document.querySelectorAll('.edit-type-btn').forEach(btn => { btn.onclick = () => editType(btn.getAttribute('data-type')); });
+            document.querySelectorAll('.delete-type-btn').forEach(btn => { btn.onclick = () => deleteType(btn.getAttribute('data-type')); });
         }
 
-        // Actualizar selectores
         const select = document.getElementById('maintenanceTypeSelect');
         const filterSelect = document.getElementById('filterSelect');
         if (select) {
             select.innerHTML = '<option value="">اختر نوع الصيانة</option>';
-            for (const type of Object.keys(AppState.frequencies).sort()) {
-                select.innerHTML += `<option value="${type}">${type}</option>`;
-            }
+            for (const type of Object.keys(AppState.frequencies).sort()) select.innerHTML += `<option value="${type}">${type}</option>`;
         }
         if (filterSelect) {
             const currentValue = filterSelect.value;
             filterSelect.innerHTML = '<option value="">جميع الأنواع</option>';
-            for (const type of Object.keys(AppState.frequencies).sort()) {
-                filterSelect.innerHTML += `<option value="${type}">${type}</option>`;
-            }
+            for (const type of Object.keys(AppState.frequencies).sort()) filterSelect.innerHTML += `<option value="${type}">${type}</option>`;
             filterSelect.value = currentValue;
         }
 
@@ -731,11 +710,8 @@
         updateAlertsGrid();
         applyFilters();
 
-        // Actualizar campo de kilometraje en formulario de mantenimiento (si no tiene el foco)
         const kmInput = document.getElementById('kilometers');
-        if (kmInput && document.activeElement !== kmInput) {
-            kmInput.value = AppState.vehicleKm || '';
-        }
+        if (kmInput && document.activeElement !== kmInput) kmInput.value = AppState.vehicleKm || '';
     }
 
     function updateAlertsGrid() {
@@ -753,8 +729,7 @@
         }
         grid.innerHTML = alerts.map(a => `
             <div class="stat-card" style="${a.remaining <= 1000 ? 'background:#fee2e2' : 'background:#fef3c7'}">
-                <i class="fas fa-bell"></i>
-                <h3>🔔 ${a.type}</h3>
+                <i class="fas fa-bell"></i><h3>🔔 ${a.type}</h3>
                 <div class="value">${a.remaining <= 0 ? 'منتهي!' : formatNumber(a.remaining) + ' km'}</div>
                 <p>${a.remaining <= 0 ? 'مطلوب الآن' : (a.remaining <= 1000 ? 'أقل من 1000 km - عاجل' : 'يحتاج صيانة قريباً')}</p>
                 <button class="reminder-btn" data-type="${a.type}" data-remaining="${a.remaining}" style="margin-top:8px; background:var(--warning); padding:6px 12px;">📧 تذكير</button>
@@ -766,10 +741,7 @@
     }
 
     function sendEmailReminder(type, remaining) {
-        if (!AppState.currentUserEmail) {
-            showToast("⚠️ لا يوجد بريد إلكتروني مسجل لهذا المستخدم", "error");
-            return;
-        }
+        if (!AppState.currentUserEmail) { showToast("⚠️ لا يوجد بريد إلكتروني", "error"); return; }
         const subject = encodeURIComponent(`تذكير صيانة: ${type}`);
         const body = encodeURIComponent(`مرحباً ${AppState.currentUsername},\n\nموعد صيانة ${type} قد اقترب. المتبقي ${remaining} كم.\n\nمع تحيات ورشتي`);
         window.location.href = `mailto:${AppState.currentUserEmail}?subject=${subject}&body=${body}`;
@@ -823,12 +795,8 @@
                 </div>
             `;
         }).join('');
-        document.querySelectorAll('.invoice-btn').forEach(btn => {
-            btn.onclick = () => generateInvoicePDF(parseInt(btn.getAttribute('data-id')));
-        });
-        document.querySelectorAll('.delete-maint-btn').forEach(btn => {
-            btn.onclick = () => deleteMaintenance(parseInt(btn.getAttribute('data-id')));
-        });
+        document.querySelectorAll('.invoice-btn').forEach(btn => { btn.onclick = () => generateInvoicePDF(parseInt(btn.getAttribute('data-id'))); });
+        document.querySelectorAll('.delete-maint-btn').forEach(btn => { btn.onclick = () => deleteMaintenance(parseInt(btn.getAttribute('data-id'))); });
     }
 
     function resetFilters() {
@@ -837,11 +805,10 @@
         applyFilters();
     }
 
-    // ========== CHART (estático) ==========
+    // ========== CHART ==========
     function updateChart() {
         const canvas = document.getElementById('expensesChart');
         if (!canvas) return;
-
         const existingChart = Chart.getChart(canvas);
         if (existingChart) existingChart.destroy();
 
@@ -855,36 +822,22 @@
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
-
         AppState.expensesChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: months,
-                datasets: [{
-                    label: 'المصروفات (SAR)',
-                    data: costs,
-                    backgroundColor: '#10b981',
-                    borderRadius: 5
-                }]
+                datasets: [{ label: 'المصروفات (SAR)', data: costs, backgroundColor: '#10b981', borderRadius: 5 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top' },
-                    tooltip: { callbacks: { label: (ctx) => ctx.parsed.y.toFixed(2) + ' SAR' } }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { callback: (value) => value + ' SAR' }
-                    }
-                }
+                plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => ctx.parsed.y.toFixed(2) + ' SAR' } } },
+                scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + ' SAR' } } }
             }
         });
     }
 
-    // ========== PDF (html2canvas + jsPDF directos) ==========
+    // ========== PDF (con logo) ==========
     async function generateInvoicePDF(id) {
         const m = AppState.maintenances.find(m => m.id === id);
         if (!m) return;
@@ -905,9 +858,12 @@
         element.style.direction = 'rtl';
         element.style.boxSizing = 'border-box';
         element.innerHTML = `
-            <div style="border-bottom:3px solid #10b981;margin-bottom:20px;">
-                <h1 style="color:#1e293b;">ورشتي</h1>
-                <p style="color:#64748b;">فاتورة صيانة رسمية</p>
+            <div style="border-bottom:3px solid #10b981;margin-bottom:20px;display:flex;align-items:center;gap:15px;">
+                <img src="mi-icono.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;" alt="Logo">
+                <div>
+                    <h1 style="color:#1e293b;margin:0;">ورشتي</h1>
+                    <p style="color:#64748b;margin:0;">فاتورة صيانة رسمية</p>
+                </div>
             </div>
             <div style="margin-bottom:20px;">
                 <p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p>
@@ -933,10 +889,10 @@
         `;
 
         document.body.appendChild(element);
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         try {
-            const canvas = await html2canvas(element, { scale: 2, logging: false });
+            const canvas = await html2canvas(element, { scale: 2, logging: false, useCORS: true });
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
@@ -944,12 +900,10 @@
             const imgRatio = canvas.height / canvas.width;
             let imgWidth = pdfWidth;
             let imgHeight = pdfWidth * imgRatio;
-
             if (imgHeight > pdf.internal.pageSize.getHeight()) {
                 imgHeight = pdf.internal.pageSize.getHeight();
                 imgWidth = imgHeight / imgRatio;
             }
-
             pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
             pdf.save(`invoice_${m.id}.pdf`);
             showToast("تم إنشاء الفاتورة بنجاح");
@@ -980,8 +934,9 @@
         element.style.direction = 'rtl';
         element.style.boxSizing = 'border-box';
         element.innerHTML = `
-            <div style="border-bottom:3px solid #10b981;">
-                <h1>تقرير الصيانة الشامل</h1>
+            <div style="border-bottom:3px solid #10b981;margin-bottom:20px;display:flex;align-items:center;gap:15px;">
+                <img src="mi-icono.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;" alt="Logo">
+                <h1 style="color:#1e293b;margin:0;">تقرير الصيانة الشامل</h1>
             </div>
             <div style="margin:20px 0;">
                 <p><strong>المركبة:</strong> ${vehicleName}</p>
@@ -1010,10 +965,10 @@
         `;
 
         document.body.appendChild(element);
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         try {
-            const canvas = await html2canvas(element, { scale: 2, logging: false });
+            const canvas = await html2canvas(element, { scale: 2, logging: false, useCORS: true });
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
@@ -1021,12 +976,10 @@
             const imgRatio = canvas.height / canvas.width;
             let imgWidth = pdfWidth;
             let imgHeight = pdfWidth * imgRatio;
-
             if (imgHeight > pdf.internal.pageSize.getHeight()) {
                 imgHeight = pdf.internal.pageSize.getHeight();
                 imgWidth = imgHeight / imgRatio;
             }
-
             pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
             pdf.save(`report_${Date.now()}.pdf`);
             showToast("تم إنشاء التقرير بنجاح");
@@ -1058,10 +1011,7 @@
         const phone = document.getElementById('regPhone').value.trim();
         const password = document.getElementById('regPassword').value;
         const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
-        if (!username || !email || !password) {
-            alert("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور");
-            return;
-        }
+        if (!username || !email || !password) { alert("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور"); return; }
         setLoading('registerSpinner', true);
         try {
             const { data: authData, error: authError } = await supabaseClient.auth.signUp({
@@ -1075,24 +1025,17 @@
                 if (insertError) throw insertError;
                 showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
                 showLogin();
-            } else {
-                alert("خطأ: لم يتم إنشاء المستخدم");
-            }
+            } else { alert("خطأ: لم يتم إنشاء المستخدم"); }
         } catch (error) {
             console.error(error);
             alert("خطأ في التسجيل: " + error.message);
-        } finally {
-            setLoading('registerSpinner', false);
-        }
+        } finally { setLoading('registerSpinner', false); }
     }
 
     async function login() {
         const loginValue = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value;
-        if (!loginValue || !password) {
-            alert("الرجاء إدخال اسم المستخدم / البريد الإلكتروني / رقم الهاتف وكلمة المرور");
-            return;
-        }
+        if (!loginValue || !password) { alert("الرجاء إدخال اسم المستخدم / البريد الإلكتروني / رقم الهاتف وكلمة المرور"); return; }
         setLoading('loginSpinner', true);
         try {
             let email = loginValue;
@@ -1113,29 +1056,21 @@
                 AppState.currentUserId = data.user.id;
                 AppState.currentUsername = profile.username;
                 AppState.currentUserEmail = data.user.email;
-                document.getElementById('currentUser').innerText = AppState.currentUsername;
-                document.getElementById('vehicleNameDisplay').innerHTML = `<i class="fas fa-car"></i> ${profile.vehicle_name || 'سيارة'} ☁️`;
                 await loadVehicles();
+                actualizarNombreVehiculoEnCabecera();
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('app').style.display = 'block';
                 showToast("مرحباً " + AppState.currentUsername);
-            } else {
-                alert("بيانات الدخول غير صحيحة");
-            }
+            } else { alert("بيانات الدخول غير صحيحة"); }
         } catch (error) {
             console.error(error);
             alert("خطأ في الدخول: " + error.message);
-        } finally {
-            setLoading('loginSpinner', false);
-        }
+        } finally { setLoading('loginSpinner', false); }
     }
 
     async function resetPassword() {
         const loginValue = document.getElementById('loginUsername')?.value.trim();
-        if (!loginValue) {
-            showToast("الرجاء إدخال بريدك الإلكتروني أو اسم المستخدم أو رقم الهاتف", "error");
-            return;
-        }
+        if (!loginValue) { showToast("الرجاء إدخال بريدك الإلكتروني أو اسم المستخدم أو رقم الهاتف", "error"); return; }
         let email = loginValue;
         if (!loginValue.includes('@')) {
             try {
@@ -1146,10 +1081,7 @@
                     .maybeSingle();
                 if (error || !user?.email) throw new Error("لم نتمكن من إيجاد حسابك");
                 email = user.email;
-            } catch (error) {
-                showToast(error.message, "error");
-                return;
-            }
+            } catch (error) { showToast(error.message, "error"); return; }
         }
         setLoading('loginSpinner', true);
         try {
@@ -1159,31 +1091,16 @@
         } catch (error) {
             console.error(error);
             showToast("خطأ في إرسال رابط استعادة كلمة المرور: " + error.message, "error");
-        } finally {
-            setLoading('loginSpinner', false);
-        }
+        } finally { setLoading('loginSpinner', false); }
     }
 
     async function logout() {
         const canvas = document.getElementById('expensesChart');
-        if (canvas) {
-            const existingChart = Chart.getChart(canvas);
-            if (existingChart) existingChart.destroy();
-        }
-        try {
-            await supabaseClient.auth.signOut();
-        } catch (error) { console.error(error); }
+        if (canvas) { const existingChart = Chart.getChart(canvas); if (existingChart) existingChart.destroy(); }
+        try { await supabaseClient.auth.signOut(); } catch (error) { console.error(error); }
         Object.assign(AppState, {
-            currentUserId: null,
-            currentUsername: null,
-            currentUserEmail: null,
-            currentVehicleId: null,
-            vehicles: [],
-            maintenances: [],
-            frequencies: {},
-            vehicleKm: 0,
-            lastKmDate: "",
-            currentFilter: "",
+            currentUserId: null, currentUsername: null, currentUserEmail: null, currentVehicleId: null,
+            vehicles: [], maintenances: [], frequencies: {}, vehicleKm: 0, lastKmDate: "", currentFilter: "",
             expensesChart: null
         });
         document.getElementById('loginContainer').style.display = 'flex';
