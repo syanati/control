@@ -740,7 +740,13 @@ const DEFAULT_FREQUENCIES = {
   'بواجي': 40000,
   'فلتر هواء': 20000,
   'مياه ردياتير': 80000,
-  'فحص عام': 10000
+  'فحص عام': 10000,
+  'زيت الفرامل': 40000,
+  'تغير فلتر مكيف': 20000,
+  'فلتر بنزين': 40000,
+  'تغير البطارية': 80000,
+  'تغير زيت جير بوكس': 60000,
+  'تغير موقع العجلات': 20000
 };
 
 const TYPE_LABELS = {
@@ -751,7 +757,13 @@ const TYPE_LABELS = {
   'بواجي': 'Spark plugs',
   'فلتر هواء': 'Air filter',
   'مياه ردياتير': 'Coolant',
-  'فحص عام': 'General inspection'
+  'فحص عام': 'General inspection',
+  'زيت الفرامل': 'Brake oil',
+  'تغير فلتر مكيف': 'AC filter change',
+  'فلتر بنزين': 'Fuel filter',
+  'تغير البطارية': 'Battery change',
+  'تغير زيت جير بوكس': 'Gearbox oil change',
+  'تغير موقع العجلات': 'Wheel rotation'
 };
 
 const PAGE_TITLES = {
@@ -1739,24 +1751,16 @@ async function loadVehicleData() {
     AppState.maintenances = maintenancesResult.data || [];
     const rows = frequenciesResult.data || [];
 
-    if (rows.length === 0) {
-      AppState.frequencies = { ...DEFAULT_FREQUENCIES };
-      try {
-        const seed = Object.entries(DEFAULT_FREQUENCIES).map(([type, frequency]) => ({
-          user_id: AppState.currentUserId,
-          maintenance_type: type,
-          frequency_km: frequency
-        }));
-        await supabaseClient.from('frequencies').upsert(seed, { onConflict: 'user_id, maintenance_type' });
-      } catch (seedError) {
-        console.error('Seed frequencies error:', seedError);
+    AppState.frequencies = { ...DEFAULT_FREQUENCIES };
+    rows.forEach((row) => {
+      AppState.frequencies[row.maintenance_type] = Number(row.frequency_km) || 10000;
+    });
+
+    AppState.maintenances.forEach((record) => {
+      if (record.type && AppState.frequencies[record.type] === undefined) {
+        AppState.frequencies[record.type] = 10000;
       }
-    } else {
-      AppState.frequencies = {};
-      rows.forEach((row) => {
-        AppState.frequencies[row.maintenance_type] = Number(row.frequency_km) || 10000;
-      });
-    }
+    });
 
     updateDisplay();
     updateChart();
