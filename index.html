@@ -1,1161 +1,2566 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ورشتي | Warchati</title>
-    <!-- Icono personalizado -->
-    <link rel="icon" type="image/png" sizes="32x32" href="mi-icono.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="mi-icono.png">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Librerías PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <!-- Otras librerías -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f9d76">
+<title>ورشتي | Warchati</title>
+<link rel="icon" type="image/png" sizes="32x32" href="mi-icono.png">
+<link rel="apple-touch-icon" href="mi-icono.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --brand:#0f9d76; --brand-2:#34d399; --brand-700:#047857; --brand-50:#ecfdf5;
+  --ink:#0f172a; --ink-2:#334155; --muted:#64748b; --muted-2:#94a3b8;
+  --surface:#ffffff; --bg:#f5f8f7; --line:#e2e8f0;
+  --danger:#e11d48; --danger-50:#fff1f2; --warning:#d97706; --warning-50:#fffbeb;
+  --info:#2563eb; --info-50:#eff6ff;
+  --radius:20px; --radius-sm:14px;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.05),0 10px 30px -18px rgba(15,23,42,.18);
+  --shadow-lg:0 24px 70px -28px rgba(15,23,42,.35);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+html[lang="ar"] body{font-family:'Tajawal',sans-serif}
+html[lang="en"] body{font-family:'Inter','Tajawal',sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+img{max-width:100%}
+h1,h2,h3,h4,p{margin-top:0}
+::selection{background:rgba(16,185,129,.22)}
+:focus-visible{outline:3px solid rgba(16,185,129,.35);outline-offset:2px}
+.muted{color:var(--muted)}
+.small{font-size:.78rem}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        :root { --primary: #10b981; --primary-dark: #059669; --danger: #ef4444; --warning: #f59e0b; --gray: #e2e8f0; --dark: #1e293b; --light-bg: #f8fafc; }
-        body { background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%); min-height: 100vh; }
-        .login-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e293b, #0f172a); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-card { background: white; padding: 2rem; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 90%; max-width: 420px; text-align: center; }
-        .login-card input { width: 100%; padding: 14px; margin: 12px 0; border: 2px solid var(--gray); border-radius: 16px; font-size: 1rem; }
-        .login-card button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 16px; font-weight: 600; cursor: pointer; }
-        .login-card button:hover { background: var(--primary-dark); }
-        .switch-form { margin-top: 1rem; color: var(--primary); cursor: pointer; }
-        .app { display: none; max-width: 1400px; margin: 0 auto; padding: 1rem; }
-        .header { background: white; border-radius: 24px; padding: 1rem 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 24px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .stat-card .value { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
-        .section { background: white; border-radius: 24px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
-        input, select, textarea { width: 100%; padding: 12px; border: 2px solid var(--gray); border-radius: 12px; font-size: 0.9rem; }
-        button { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        button:hover { background: var(--primary-dark); transform: translateY(-2px); }
-        .frequency-table { overflow-x: auto; margin-top: 1rem; }
-        .frequency-table table { width: 100%; border-collapse: collapse; }
-        .frequency-table th, .frequency-table td { padding: 12px; text-align: right; border-bottom: 1px solid var(--gray); }
-        .maintenance-item { background: var(--light-bg); border-radius: 16px; padding: 1rem; margin-bottom: 1rem; border-right: 4px solid var(--primary); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-        .progress-bar { width: 100%; height: 8px; background: var(--gray); border-radius: 4px; overflow: hidden; margin-top: 8px; }
-        .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
-        .progress-fill.warning { background: var(--warning); }
-        .progress-fill.danger { background: var(--danger); }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 12px 24px; border-radius: 12px; z-index: 3000; animation: fadeInOut 3s ease-in-out; }
-        @keyframes fadeInOut { 0% { opacity: 0; transform: translateY(20px); } 15% { opacity: 1; transform: translateY(0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(20px); } }
-        @media (max-width: 768px) { .maintenance-item { flex-direction: column; align-items: stretch; } .header { flex-direction: column; text-align: center; } }
-        .badge { display: inline-block; padding: 4px 12px; background: var(--gray); border-radius: 12px; font-size: 0.75rem; margin-left: 8px; }
-        .btn-icon { padding: 6px 12px; margin: 0 4px; border-radius: 8px; cursor: pointer; }
-        .loading-spinner { display: none; margin: 10px auto; width: 30px; height: 30px; border: 3px solid var(--gray); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 2rem; border-radius: 24px; width: 90%; max-width: 500px; }
-        .chart-container { max-width: 400px; margin: 0 auto; height: 300px; }
-        .chart-container canvas { width: 100% !important; height: 100% !important; }
-        .export-buttons { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
-        .vehicle-card { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 16px; padding: 1rem; margin-bottom: 1rem; }
-        .vehicle-card select, .vehicle-card button { background: white; color: var(--dark); margin-top: 0.5rem; }
-        .collapsible { background: #f1f5f9; border-radius: 12px; margin-bottom: 1rem; }
-        .collapsible-header { background: var(--primary); color: white; padding: 12px 20px; cursor: pointer; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .collapsible-content { display: none; padding: 1rem; }
-        .collapsible-content.show { display: block; }
-        .logo-container { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #1e293b, #0f172a); padding: 8px 20px; border-radius: 60px; }
-        .logo-icon { background: none; width: 45px; height: 45px; border-radius: 50%; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        .logo-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .logo-name { font-size: 1.4rem; font-weight: 800; color: white; }
-        .logo-tagline { font-size: 0.6rem; color: #94a3b8; }
-        .login-logo { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; }
-        /* Logo cuadrado en login con fondo blanco para eliminar bordes oscuros */
-        .login-logo-icon {
-            background-color: white;   /* Fondo blanco para tapar bordes negros de la imagen */
-            width: 100px;
-            height: 100px;
-            border-radius: 0;          /* Cuadrado, cámbialo a 50% si quieres circular */
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto;
-        }
-        .login-logo-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .login-logo-name { font-size: 1.8rem; font-weight: 800; color: var(--dark); }
-        .login-logo-tagline { font-size: 0.7rem; color: #64748b; }
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid transparent;border-radius:12px;font-weight:700;font-size:.86rem;transition:transform .16s ease,box-shadow .16s ease,background .16s ease;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand-700));color:#fff;box-shadow:0 10px 24px -12px rgba(4,120,87,.65)}
+.btn-primary:hover{box-shadow:0 14px 28px -12px rgba(4,120,87,.75)}
+.btn-soft{background:var(--brand-50);color:var(--brand-700);border-color:#a7f3d0}
+.btn-soft:hover{background:#d1fae5}
+.btn-ghost{background:#fff;color:var(--ink-2);border-color:var(--line)}
+.btn-ghost:hover{border-color:#cbd5e1;background:#f8fafc}
+.btn-light{background:#fff;color:var(--brand-700)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-warning{background:var(--warning-50);color:#b45309;border-color:#fde68a}
+.btn-block{width:100%}
+.btn-sm{min-height:36px;padding:0 12px;font-size:.76rem;border-radius:10px}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:#fff;color:var(--muted);display:inline-grid;place-items:center;transition:.16s}
+.icon-btn:hover{color:var(--brand);border-color:var(--brand);background:var(--brand-50)}
+.icon-btn.danger:hover{color:var(--danger);border-color:#fecdd3;background:var(--danger-50)}
+.link-btn{display:inline;border:0;background:none;color:var(--brand-700);font-weight:700;padding:0}
+.link-btn:hover{text-decoration:underline}
 
-        /* Campo de fecha corregido */
-        input[type="date"] {
-            width: 100%;
-            box-sizing: border-box;
-            -webkit-appearance: none;
-            min-height: 44px;
-            padding: 10px 2.2rem 10px 12px;
-            position: relative;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            position: absolute;
-            right: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            margin: 0;
-            padding: 0;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-        @media (max-width: 768px) {
-            .form-grid { grid-template-columns: 1fr !important; }
-            .form-grid input, .form-grid select, .form-grid textarea { width: 100% !important; box-sizing: border-box; }
-            input[type="date"] { min-height: 46px; padding: 12px 2.2rem 12px 10px; }
-            input[type="date"]::-webkit-calendar-picker-indicator { right: 0.4rem; }
-            .section { overflow-x: hidden; }
-        }
-    </style>
+/* ---------- Login ---------- */
+.login-shell{display:grid;grid-template-columns:1.05fr .95fr;min-height:100vh}
+.login-visual{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:44px;color:#fff;background:radial-gradient(900px 500px at 80% 0%,rgba(52,211,153,.28),transparent 60%),linear-gradient(150deg,#071b16 0%,#0a2b23 55%,#064e3b 100%)}
+.login-visual::before,.login-visual::after{content:"";position:absolute;border-radius:50%;filter:blur(2px);pointer-events:none}
+.login-visual::before{width:420px;height:420px;inset-inline-end:-140px;top:-140px;background:radial-gradient(circle,rgba(52,211,153,.22),transparent 65%)}
+.login-visual::after{width:320px;height:320px;inset-inline-start:-120px;bottom:-120px;background:radial-gradient(circle,rgba(16,185,129,.16),transparent 65%)}
+.login-visual-brand,.login-visual-copy,.login-visual-foot{position:relative;z-index:1}
+.login-visual-brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:52px;height:52px;border-radius:16px;background:#fff;overflow:hidden;display:grid;place-items:center;box-shadow:0 12px 30px rgba(0,0,0,.25);flex:0 0 auto}
+.brand-mark img{width:100%;height:100%;object-fit:cover}
+.brand-name{font-size:1.25rem;font-weight:800;color:#fff;line-height:1.1}
+.brand-tagline{font-size:.72rem;color:#6ee7b7;font-weight:600;letter-spacing:.02em}
+.login-visual-copy{max-width:520px;margin:10vh 0}
+.login-visual-copy h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.08;letter-spacing:-.03em;margin:0 0 16px;font-weight:800}
+.login-visual-copy p{font-size:1rem;line-height:1.8;color:#a7f3d0;margin:0 0 28px;max-width:44ch}
+.feature-list{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.feature-list li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);font-size:.84rem;color:#d1fae5;backdrop-filter:blur(8px)}
+.feature-list i{color:#34d399;width:20px;text-align:center}
+.login-visual-foot{font-size:.72rem;color:#6ee7b7;opacity:.8}
+.login-panel{background:#fff;padding:40px;display:flex;flex-direction:column;justify-content:center;overflow-y:auto}
+.login-panel-top{display:flex;justify-content:flex-end;margin-bottom:22px}
+.login-card{width:min(420px,100%);margin:0 auto}
+.mobile-brand{display:none;align-items:center;gap:12px;margin-bottom:24px}
+.mobile-brand .brand-mark{width:46px;height:46px;background:#f1f5f9;box-shadow:none;border:1px solid var(--line)}
+.mobile-brand .brand-name{color:var(--ink)}
+.mobile-brand .brand-tagline{color:var(--brand-700)}
+.login-heading{margin-bottom:22px}
+.login-heading h2{font-size:1.65rem;font-weight:800;letter-spacing:-.03em;margin:0 0 6px}
+.login-heading p{color:var(--muted);font-size:.86rem;line-height:1.7;margin:0}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field-label{font-size:.76rem;font-weight:700;color:var(--ink-2)}
+.input-wrap{position:relative;display:flex;align-items:center}
+.input-wrap>i{position:absolute;inset-inline-start:14px;color:var(--muted-2);font-size:.9rem;pointer-events:none}
+.input-wrap input{width:100%;height:48px;padding:0 14px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);outline:none;transition:.16s}
+.input-wrap.has-icon input{padding-inline-start:42px}
+.input-wrap.has-toggle input{padding-inline-end:46px}
+.input-wrap input:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(16,185,129,.12)}
+.input-wrap input::placeholder{color:var(--muted-2)}
+.password-toggle{position:absolute;inset-inline-end:8px;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:var(--muted);display:grid;place-items:center}
+.password-toggle:hover{background:#f1f5f9;color:var(--brand-700)}
+.loading-spinner{display:none;margin:10px auto;width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.auth-links{display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:16px;text-align:center;font-size:.8rem;color:var(--muted)}
+.auth-links .subtle{font-size:.74rem;font-weight:600;color:var(--muted)}
+.auth-links .subtle:hover{color:var(--brand-700)}
+.login-legal{text-align:center;font-size:.68rem;color:var(--muted-2);margin:22px 0 0}
+.lang-switch{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:#f1f5f9;border:1px solid var(--line)}
+.lang-btn{min-height:30px;padding:0 11px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:.72rem;font-weight:700;transition:.16s}
+.lang-btn:hover{color:var(--brand-700)}
+.lang-btn.active{background:#fff;color:var(--brand-700);box-shadow:0 1px 4px rgba(15,23,42,.1)}
+.lang-btn[data-lang="ar"]{font-family:'Tajawal',sans-serif}
+
+/* ---------- App shell ---------- */
+.app{display:none}
+.app.is-visible{display:grid;grid-template-columns:264px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:24px;padding:22px 16px;background:linear-gradient(180deg,#0b1f1a,#08110f);color:#d1fae5;border-inline-end:1px solid rgba(255,255,255,.06)}
+.sidebar-brand{display:flex;align-items:center;gap:12px;padding:4px 8px}
+.sidebar-brand .brand-mark{width:46px;height:46px;border-radius:14px}
+.side-nav{display:flex;flex-direction:column;gap:6px}
+.nav-item{display:flex;align-items:center;gap:12px;width:100%;min-height:46px;padding:0 14px;border:0;border-radius:12px;background:transparent;color:#a7f3d0;font-weight:700;font-size:.86rem;text-align:start;transition:.16s}
+.nav-item i{width:20px;text-align:center;color:#6ee7b7;font-size:.95rem;flex:0 0 auto}
+.nav-item:hover{background:rgba(16,185,129,.12);color:#fff}
+.nav-item.active{background:linear-gradient(135deg,rgba(16,185,129,.3),rgba(5,150,105,.16));color:#fff;box-shadow:inset 0 0 0 1px rgba(110,231,183,.2)}
+.nav-item.active i{color:#34d399}
+.sidebar-footer{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:15px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.avatar{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;background:linear-gradient(135deg,#34d399,#059669);color:#052e24;font-weight:800;font-size:.9rem}
+.sidebar-user-text{min-width:0}
+.sidebar-user-text strong{display:block;color:#fff;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user-text small{display:block;color:#6ee7b7;font-size:.68rem;margin-top:1px}
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 26px;background:rgba(245,248,247,.86);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.topbar-left{min-width:0}
+.topbar h1{font-size:1.05rem;font-weight:800;letter-spacing:-.02em;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-sub{display:flex;align-items:center;gap:6px;margin:0;color:var(--muted);font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-sub i{color:var(--brand)}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.sync-pill{display:inline-flex;align-items:center;gap:7px;min-height:30px;padding:0 11px;border-radius:999px;background:var(--brand-50);color:var(--brand-700);font-size:.7rem;font-weight:700;border:1px solid #a7f3d0;white-space:nowrap}
+.sync-pill .dot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.18)}
+.sync-pill.offline{background:var(--warning-50);color:#9a3412;border-color:#fed7aa}
+.sync-pill.offline .dot{background:#f97316;box-shadow:none}
+.topbar-user{display:flex;align-items:center;gap:8px;padding-inline-start:4px}
+.topbar-user .avatar{width:34px;height:34px;border-radius:10px;font-size:.8rem}
+.topbar-user span{font-size:.8rem;font-weight:700;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar .icon-btn{width:36px;height:36px}
+.content{width:100%;max-width:1320px;margin:0 auto;padding:26px}
+
+/* ---------- Pages & cards ---------- */
+.page{display:none;animation:fadeUp .32s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.page-head h2{font-size:1.4rem;font-weight:800;letter-spacing:-.03em;margin:0 0 4px}
+.page-head p{font-size:.84rem;color:var(--muted);margin:0}
+.page-actions{display:flex;gap:8px;flex-wrap:wrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.card-head h3{display:flex;align-items:center;gap:9px;font-size:.95rem;font-weight:800;margin:0}
+.card-head h3 i{color:var(--brand)}
+.count-badge{min-width:28px;height:28px;padding:0 8px;border-radius:999px;display:inline-grid;place-items:center;background:var(--brand-50);color:var(--brand-700);font-size:.74rem;font-weight:800}
+.dashboard-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:18px;margin-bottom:18px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.stat-card{display:flex;align-items:center;gap:13px;padding:17px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-sm)}
+.stat-icon{width:45px;height:45px;border-radius:14px;display:grid;place-items:center;background:var(--brand-50);color:var(--brand-700);font-size:1rem;flex:0 0 auto}
+.stat-icon.warning{background:var(--warning-50);color:var(--warning)}
+.stat-icon.info{background:var(--info-50);color:var(--info)}
+.stat-card span{display:block;color:var(--muted);font-size:.7rem;font-weight:700;margin-bottom:2px}
+.stat-card strong{display:block;font-size:1.3rem;font-weight:800;letter-spacing:-.02em}
+.chart-container{position:relative;height:310px}
+.chart-card{margin-bottom:18px}
+
+/* Hero */
+.hero-card{position:relative;overflow:hidden;border:0;color:#fff;background:radial-gradient(700px 380px at 85% 0%,rgba(52,211,153,.35),transparent 60%),linear-gradient(135deg,#0a2b23,#064e3b 58%,#065f46);box-shadow:0 24px 60px -30px rgba(4,120,87,.7)}
+.hero-card::after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;inset-inline-end:-80px;bottom:-100px;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 65%);pointer-events:none}
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;position:relative;z-index:1}
+.hero-label{display:inline-flex;align-items:center;gap:8px;color:#a7f3d0;font-size:.72rem;font-weight:800;letter-spacing:.02em}
+.hero-label i{color:#34d399}
+.hero-vehicle{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+.hero-vehicle .vehicle-icon{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);font-size:1.3rem;color:#a7f3d0;flex:0 0 auto}
+.hero-vehicle strong{display:block;font-size:1.35rem;font-weight:800;letter-spacing:-.02em;line-height:1.25}
+.hero-vehicle small{display:block;color:#a7f3d0;font-size:.74rem;margin-top:3px}
+.hero-vehicle .btn{margin-inline-start:auto}
+.odometer-block{position:relative;z-index:1;margin-top:22px;padding-top:20px;border-top:1px solid rgba(255,255,255,.12)}
+.odometer-value{display:flex;align-items:baseline;gap:8px;font-size:2.6rem;font-weight:800;letter-spacing:-.04em;line-height:1}
+.odometer-value small{font-size:.85rem;font-weight:700;color:#a7f3d0}
+.odometer-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.odometer-form input{flex:1;min-width:160px;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.1);color:#fff;outline:none}
+.odometer-form input::placeholder{color:#a7f3d0}
+.odometer-form input:focus{border-color:#6ee7b7;box-shadow:0 0 0 4px rgba(110,231,183,.14)}
+.odometer-note{display:flex;align-items:center;gap:6px;color:#a7f3d0;font-size:.72rem;margin:12px 0 0}
+.odometer-note i{color:#34d399}
+
+/* Alerts */
+.alerts-grid{display:flex;flex-direction:column;gap:9px;max-height:330px;overflow-y:auto;padding-inline-end:2px}
+.alert-item{display:flex;align-items:flex-start;gap:11px;padding:12px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)}
+.alert-item.urgent{background:var(--danger-50);border-color:#fecdd3}
+.alert-item.soon{background:var(--warning-50);border-color:#fde68a}
+.alert-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;background:#fff;color:var(--warning);border:1px solid rgba(15,23,42,.06)}
+.alert-item.urgent .alert-icon{color:var(--danger)}
+.alert-body{min-width:0;flex:1}
+.alert-body h4{font-size:.82rem;font-weight:800;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alert-body p{font-size:.72rem;color:var(--muted);margin:0}
+.alert-item .btn{min-height:32px;padding:0 10px;font-size:.7rem;margin-inline-start:auto;flex:0 0 auto}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:32px 16px;text-align:center;color:var(--muted)}
+.empty-state i{font-size:1.8rem;color:var(--brand);opacity:.55;margin-bottom:4px}
+.empty-state strong{color:var(--ink);font-size:.9rem}
+.empty-state p{font-size:.76rem;margin:0}
+
+/* Vehicles */
+.vehicle-picker{display:flex;flex-direction:column;gap:10px}
+.select-row{display:flex;gap:10px;flex-wrap:wrap}
+.select-wrap{position:relative;flex:1;min-width:210px}
+.select-wrap>i{position:absolute;inset-inline-start:14px;top:50%;transform:translateY(-50%);color:var(--brand);font-size:.9rem;pointer-events:none}
+select{width:100%;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);outline:none;transition:.16s}
+select:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(16,185,129,.12)}
+.select-wrap select{padding-inline-start:42px}
+.vehicle-note{display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--muted);margin:12px 0 0}
+.vehicle-note i{color:var(--brand)}
+
+/* Forms */
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.form-grid .full{grid-column:1/-1}
+input[type="text"],input[type="email"],input[type="tel"],input[type="password"],input[type="number"],input[type="date"],textarea{width:100%;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);outline:none;transition:.16s}
+textarea{min-height:86px;padding:12px 14px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(16,185,129,.12)}
+input::placeholder,textarea::placeholder{color:var(--muted-2)}
+input[type="date"]{-webkit-appearance:none;min-height:46px;padding:0 14px}
+input[type="date"]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.6}
+.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.form-actions .btn{flex:1;min-width:140px}
+
+/* Frequency table */
+.frequency-card{margin-top:18px}
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:48px;padding:0 4px;border:0;background:transparent;color:var(--ink);font-weight:800;font-size:.95rem;text-align:start}
+.collapsible-header span{display:flex;align-items:center;gap:9px}
+.collapsible-header i{color:var(--brand)}
+.collapsible-content{display:none;padding-top:14px}
+.collapsible-content.show{display:block}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+.frequency-table{width:100%;border-collapse:collapse;min-width:700px}
+.frequency-table th{padding:11px 12px;background:#f8fafc;border-bottom:1px solid var(--line);color:var(--muted);font-size:.68rem;font-weight:800;letter-spacing:.03em;text-align:start;white-space:nowrap}
+.frequency-table td{padding:11px 12px;border-bottom:1px solid var(--line);font-size:.82rem}
+.frequency-table tr:last-child td{border-bottom:0}
+.frequency-table input{width:112px;min-height:38px;padding:0 10px;border:1px solid var(--line);border-radius:9px}
+.status-text{font-size:.74rem;font-weight:700;white-space:nowrap}
+.status-text.ok{color:var(--brand-700)}
+.status-text.soon{color:var(--warning)}
+.status-text.urgent{color:var(--danger)}
+.row-actions{display:flex;gap:6px}
+.row-actions .icon-btn{width:32px;height:32px;border-radius:9px}
+
+/* History */
+.filter-row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:15px}
+.filter-row select{max-width:260px}
+.maintenance-list{display:flex;flex-direction:column;gap:11px}
+.maintenance-item{display:flex;gap:16px;justify-content:space-between;padding:15px;border:1px solid var(--line);border-radius:15px;background:#fff;border-inline-start:4px solid var(--brand);transition:.16s}
+.maintenance-item:hover{box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.maintenance-main{flex:1;min-width:0}
+.maintenance-item h4{display:flex;align-items:center;gap:8px;font-size:.92rem;font-weight:800;margin:0 0 8px}
+.maintenance-item h4 i{color:var(--brand)}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:#f1f5f9;color:#475569;font-size:.68rem;font-weight:700}
+.badge.cost{background:var(--brand-50);color:var(--brand-700)}
+.maintenance-desc{font-size:.78rem;color:var(--muted);margin:0 0 8px;line-height:1.6;word-break:break-word}
+.progress-bar{height:7px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:8px 0 6px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#34d399,#059669);border-radius:999px;transition:width .3s}
+.progress-fill.warning{background:linear-gradient(90deg,#fbbf24,#d97706)}
+.progress-fill.danger{background:linear-gradient(90deg,#fb7185,#e11d48)}
+.maintenance-actions{display:flex;align-items:flex-start;gap:7px;flex-wrap:wrap}
+.maintenance-actions .btn{min-height:36px;padding:0 11px;font-size:.72rem}
+
+/* Modal */
+.modal{position:fixed;inset:0;z-index:4000;display:none;place-items:center;padding:20px;background:rgba(15,23,42,.55);backdrop-filter:blur(6px)}
+.modal.active{display:grid}
+.modal-card{width:min(480px,100%);padding:24px;border-radius:22px;background:#fff;box-shadow:var(--shadow-lg);animation:modalIn .22s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.modal-card h3{font-size:1.1rem;font-weight:800;margin:0 0 6px}
+.modal-card p{font-size:.82rem;color:var(--muted);line-height:1.7;margin:0 0 16px}
+.modal-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px}
+
+/* Toast */
+.toast-host{position:fixed;top:18px;inset-inline-end:18px;z-index:5000;display:flex;flex-direction:column;gap:9px;width:min(370px,calc(100% - 36px));pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 13px;border-radius:13px;background:#0f172a;color:#fff;box-shadow:var(--shadow-lg);font-size:.8rem;line-height:1.45;pointer-events:auto;animation:toastIn .22s ease}
+.toast.success{background:#065f46}
+.toast.error{background:#9f1239}
+.toast.warning{background:#92400e}
+.toast.info{background:#1e3a8a}
+.toast i{flex:0 0 auto;font-size:.95rem}
+.toast span{flex:1;min-width:0}
+.toast button{border:0;background:none;color:inherit;opacity:.75;padding:2px}
+.toast button:hover{opacity:1}
+@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+/* Mobile nav */
+.mobile-nav{display:none}
+
+@media(max-width:1024px){
+  .app.is-visible{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .content{padding:20px 18px 98px}
+  .topbar{padding:11px 16px}
+  .dashboard-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:820px){
+  .login-shell{grid-template-columns:1fr}
+  .login-visual{display:none}
+  .login-panel{min-height:100vh;padding:28px 20px}
+  .mobile-brand{display:flex}
+  .login-panel-top{justify-content:center;margin-bottom:26px}
+  .login-heading{text-align:center}
+}
+@media(max-width:760px){
+  .stats-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .maintenance-item{flex-direction:column}
+  .maintenance-actions{width:100%;justify-content:flex-end}
+  .mobile-nav{position:fixed;inset-inline:12px;bottom:12px;z-index:50;display:flex;justify-content:space-around;gap:4px;padding:6px;border-radius:18px;background:rgba(255,255,255,.93);border:1px solid var(--line);box-shadow:var(--shadow-lg);backdrop-filter:blur(16px)}
+  .mobile-nav .nav-item{flex:1;flex-direction:column;gap:4px;min-height:52px;padding:6px 4px;border-radius:13px;font-size:.6rem;color:var(--muted);text-align:center;justify-content:center}
+  .mobile-nav .nav-item i{font-size:1rem;color:var(--muted)}
+  .mobile-nav .nav-item.active{background:var(--brand-50);color:var(--brand-700)}
+  .mobile-nav .nav-item.active i{color:var(--brand-700)}
+  .topbar-right .sync-pill{display:none}
+  .topbar-user span{display:none}
+  .topbar .lang-switch{padding:2px}
+  .topbar .lang-btn{min-height:27px;padding:0 8px;font-size:.66rem}
+  .logout-label{display:none}
+  .page-head h2{font-size:1.2rem}
+  .odometer-value{font-size:2rem}
+  .hero-vehicle .btn span{display:none}
+  .hero-vehicle .btn{width:42px;min-height:42px;padding:0}
+  .filter-row select{max-width:none}
+  .filter-row .btn{flex:1;min-width:100px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
 </head>
 <body>
+<div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="false"></div>
 
-<!-- LOGIN CONTAINER -->
-<div class="login-container" id="loginContainer">
-<div class="login-card">
-    <div class="login-logo">
-        <div class="login-logo-icon">
-            <img src="mi-icono.png" alt="Logo Warchati">
-        </div>
-        <div class="login-logo-text">
-            <span class="login-logo-name">ورشتي</span>
-            <span class="login-logo-tagline">صيانة سيارات</span>
-        </div>
+<!-- ================= LOGIN ================= -->
+<div class="login-shell" id="loginContainer">
+  <aside class="login-visual">
+    <div class="login-visual-brand">
+      <div class="brand-mark"><img src="mi-icono.png" alt="Warchati"></div>
+      <div>
+        <div class="brand-name">ورشتي</div>
+        <div class="brand-tagline" data-tr="صيانة سيارات">صيانة سيارات</div>
+      </div>
     </div>
-    <div style="margin:10px 0;font-size:0.75rem;color:#64748b;border-top:1px solid var(--gray);padding-top:12px;">
-        <p>Professional Car Maintenance System</p>
+    <div class="login-visual-copy">
+      <h1 data-tr="صيانة سيارتك، بذكاء">صيانة سيارتك، بذكاء</h1>
+      <p data-tr="تابع الصيانات، المصروفات والتنبيهات من مكان واحد.">تابع الصيانات، المصروفات والتنبيهات من مكان واحد.</p>
+      <ul class="feature-list">
+        <li><i class="fa-solid fa-cloud-arrow-up"></i><span data-tr="مزامنة سحابية آمنة">مزامنة سحابية آمنة</span></li>
+        <li><i class="fa-solid fa-bell"></i><span data-tr="تنبيهات ذكية للصيانة">تنبيهات ذكية للصيانة</span></li>
+        <li><i class="fa-solid fa-file-invoice"></i><span data-tr="فواتير وتقارير PDF">فواتير وتقارير PDF</span></li>
+      </ul>
     </div>
-    <div id="loginForm">
-        <input type="text" id="loginUsername" placeholder="اسم المستخدم / الإيميل / رقم الجوال">
-        <input type="password" id="loginPassword" placeholder="كلمة المرور">
+    <div class="login-visual-foot">Developed by Hicham El Khamlichi © 2026</div>
+  </aside>
+
+  <main class="login-panel">
+    <div class="login-panel-top">
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" class="lang-btn" data-lang="ar">العربية</button>
+        <button type="button" class="lang-btn" data-lang="en">English</button>
+      </div>
+    </div>
+
+    <div class="login-card">
+      <div class="mobile-brand">
+        <div class="brand-mark"><img src="mi-icono.png" alt="Warchati"></div>
+        <div>
+          <div class="brand-name">ورشتي</div>
+          <div class="brand-tagline" data-tr="صيانة سيارات">صيانة سيارات</div>
+        </div>
+      </div>
+
+      <div class="login-heading">
+        <h2 id="authTitle">تسجيل الدخول</h2>
+        <p id="authSubtitle">مرحباً بعودتك، أدخل بياناتك للمتابعة</p>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <label class="field">
+          <span class="field-label" data-tr="اسم المستخدم / الإيميل / رقم الجوال">اسم المستخدم / الإيميل / رقم الجوال</span>
+          <span class="input-wrap has-icon">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="loginUsername" autocomplete="username" placeholder="اسم المستخدم / الإيميل / رقم الجوال" data-tr-placeholder="اسم المستخدم / الإيميل / رقم الجوال">
+          </span>
+        </label>
+        <label class="field">
+          <span class="field-label" data-tr="كلمة المرور">كلمة المرور</span>
+          <span class="input-wrap has-icon has-toggle">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="loginPassword" autocomplete="current-password" placeholder="كلمة المرور" data-tr-placeholder="كلمة المرور">
+            <button type="button" class="password-toggle" data-target="loginPassword" aria-label="إظهار كلمة المرور" data-tr-title="إظهار كلمة المرور"><i class="fa-regular fa-eye"></i></button>
+          </span>
+        </label>
         <div class="loading-spinner" id="loginSpinner"></div>
-        <button id="loginBtn">دخول</button>
-        <div class="switch-form" id="showRegisterBtn">ليس لديك حساب؟ سجل الآن</div>
-        <div class="switch-form" id="forgotPasswordBtn" style="margin-top:5px; font-size:0.75rem;">نسيت كلمة المرور؟</div>
-    </div>
-    <div id="registerForm" style="display:none;">
-        <input type="text" id="regUsername" placeholder="اسم المستخدم">
-        <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
-        <input type="tel" id="regPhone" placeholder="رقم الهاتف">
-        <input type="password" id="regPassword" placeholder="كلمة المرور">
-        <input type="text" id="regVehicle" placeholder="اسم السيارة">
+        <button class="btn btn-primary btn-block" id="loginBtn" type="submit" data-tr="دخول">دخول</button>
+        <div class="auth-links">
+          <button type="button" class="link-btn" id="showRegisterBtn"><span data-tr="ليس لديك حساب؟">ليس لديك حساب؟</span> <span data-tr="سجل الآن">سجل الآن</span></button>
+          <button type="button" class="link-btn subtle" id="forgotPasswordBtn" data-tr="نسيت كلمة المرور؟">نسيت كلمة المرور؟</button>
+        </div>
+      </form>
+
+      <form id="registerForm" style="display:none" novalidate>
+        <label class="field">
+          <span class="field-label" data-tr="اسم المستخدم">اسم المستخدم</span>
+          <span class="input-wrap has-icon">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="regUsername" autocomplete="username" placeholder="اسم المستخدم" data-tr-placeholder="اسم المستخدم">
+          </span>
+        </label>
+        <label class="field">
+          <span class="field-label" data-tr="البريد الإلكتروني">البريد الإلكتروني</span>
+          <span class="input-wrap has-icon">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="regEmail" autocomplete="email" placeholder="البريد الإلكتروني" data-tr-placeholder="البريد الإلكتروني">
+          </span>
+        </label>
+        <label class="field">
+          <span class="field-label" data-tr="رقم الهاتف">رقم الهاتف</span>
+          <span class="input-wrap has-icon">
+            <i class="fa-solid fa-phone"></i>
+            <input type="tel" id="regPhone" autocomplete="tel" inputmode="tel" placeholder="رقم الهاتف" data-tr-placeholder="رقم الهاتف">
+          </span>
+        </label>
+        <label class="field">
+          <span class="field-label" data-tr="كلمة المرور">كلمة المرور</span>
+          <span class="input-wrap has-icon has-toggle">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="regPassword" autocomplete="new-password" placeholder="كلمة المرور" data-tr-placeholder="كلمة المرور">
+            <button type="button" class="password-toggle" data-target="regPassword" aria-label="إظهار كلمة المرور" data-tr-title="إظهار كلمة المرور"><i class="fa-regular fa-eye"></i></button>
+          </span>
+        </label>
+        <label class="field">
+          <span class="field-label" data-tr="اسم السيارة">اسم السيارة</span>
+          <span class="input-wrap has-icon">
+            <i class="fa-solid fa-car"></i>
+            <input type="text" id="regVehicle" placeholder="اسم السيارة" data-tr-placeholder="اسم السيارة">
+          </span>
+        </label>
         <div class="loading-spinner" id="registerSpinner"></div>
-        <button id="registerBtn">تسجيل حساب جديد</button>
-        <div class="switch-form" id="showLoginBtn">لديك حساب؟ سجل دخول</div>
+        <button class="btn btn-primary btn-block" id="registerBtn" type="submit" data-tr="تسجيل حساب جديد">تسجيل حساب جديد</button>
+        <div class="auth-links">
+          <button type="button" class="link-btn" id="showLoginBtn"><span data-tr="لديك حساب؟">لديك حساب؟</span> <span data-tr="سجل دخول">سجل دخول</span></button>
+        </div>
+      </form>
+
+      <p class="login-legal">Developed by Hicham El Khamlichi © 2026</p>
     </div>
-    <div style="margin-top:1rem;font-size:0.7rem;color:#94a3b8;">Developed by Hicham El Khamlichi © 2026</div>
-</div>
+  </main>
 </div>
 
-<!-- APP PRINCIPAL -->
+<!-- ================= APP ================= -->
 <div class="app" id="app">
-    <div class="header">
-        <div class="logo">
-            <div class="logo-container">
-                <div class="logo-icon">
-                    <img src="mi-icono.png" alt="Logo">
-                </div>
-                <div>
-                    <span class="logo-name">ورشتي</span>
-                    <span class="logo-tagline">صيانة سيارات</span>
-                </div>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark"><img src="mi-icono.png" alt="Warchati"></div>
+      <div>
+        <div class="brand-name">ورشتي</div>
+        <div class="brand-tagline" data-tr="صيانة سيارات">صيانة سيارات</div>
+      </div>
+    </div>
+
+    <nav class="side-nav" aria-label="Main navigation">
+      <button type="button" class="nav-item active" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i><span data-tr="الرئيسية">الرئيسية</span></button>
+      <button type="button" class="nav-item" data-page="vehicles"><i class="fa-solid fa-car"></i><span data-tr="مركباتي">مركباتي</span></button>
+      <button type="button" class="nav-item" data-page="maintenance"><i class="fa-solid fa-screwdriver-wrench"></i><span data-tr="الصيانة">الصيانة</span></button>
+      <button type="button" class="nav-item" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i><span data-tr="السجل">السجل</span></button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-text">
+        <strong id="currentUser">-</strong>
+        <small data-tr="مسجل الدخول">مسجل الدخول</small>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="pageTitle">الرئيسية</h1>
+        <p class="topbar-sub"><i class="fa-solid fa-car"></i><span id="vehicleNameDisplay">البيانات متزامنة مع السحاب</span></p>
+      </div>
+      <div class="topbar-right">
+        <div class="sync-pill" id="syncPill"><span class="dot"></span><span id="syncPillText" data-tr="متزامن">متزامن</span></div>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" class="lang-btn" data-lang="ar">ع</button>
+          <button type="button" class="lang-btn" data-lang="en">EN</button>
+        </div>
+        <div class="topbar-user">
+          <div class="avatar" id="topbarAvatar">?</div>
+          <span id="currentUserTop">-</span>
+        </div>
+        <button type="button" class="icon-btn" id="logoutBtn" aria-label="تسجيل خروج" data-tr-title="تسجيل خروج"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="logout-label sr-only" data-tr="تسجيل خروج">تسجيل خروج</span></button>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- DASHBOARD -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-head">
+          <div>
+            <h2 data-tr="نظرة عامة">نظرة عامة</h2>
+            <p data-tr="كل ما تحتاجه لصيانة سيارتك في لوحة واحدة">كل ما تحتاجه لصيانة سيارتك في لوحة واحدة</p>
+          </div>
+          <div class="page-actions">
+            <button type="button" class="btn btn-primary" data-page="maintenance"><i class="fa-solid fa-plus"></i><span data-tr="تسجيل صيانة">تسجيل صيانة</span></button>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card hero-card">
+            <div class="hero-top">
+              <span class="hero-label"><i class="fa-solid fa-car-side"></i><span data-tr="المركبة الحالية">المركبة الحالية</span></span>
+              <span class="sync-pill"><span class="dot"></span><span data-tr="متزامن">متزامن</span></span>
             </div>
-            <p style="font-size:0.8rem;" id="vehicleNameDisplay">البيانات متزامنة مع السحاب ☁️</p>
-        </div>
-        <div class="user-info">
-            <i class="fas fa-user-circle"></i>
-            <span id="currentUser">-</span>
-            <button id="logoutBtn" style="background:var(--danger)">تسجيل خروج</button>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3><i class="fas fa-car"></i> مركباتي</h3>
-        <div id="vehiclesList" class="vehicle-card"></div>
-        <div class="form-grid"><input type="text" id="newVehicleName" placeholder="اسم المركبة الجديدة"><button id="addVehicleBtn">إضافة مركبة</button></div>
-    </div>
-
-    <div class="section">
-        <h3><i class="fas fa-tachometer-alt"></i> عداد المسافات</h3>
-        <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:1rem;">
-            <div style="font-size:2rem;font-weight:700;" id="totalKmDisplay">0 km</div>
-            <div><input type="number" id="newKmInput" placeholder="تحديث العداد"><button id="updateKmBtn">تحديث</button></div>
-        </div>
-        <p style="font-size:0.8rem;color:#64748b;">آخر تحديث: <span id="lastKmUpdate">-</span></p>
-    </div>
-
-    <div class="stats-grid" id="alertsGrid"></div>
-
-    <div class="stats-grid">
-        <div class="stat-card"><i class="fas fa-tools"></i><h3>إجمالي الصيانات</h3><div class="value" id="totalCount">0</div></div>
-        <div class="stat-card"><i class="fas fa-coins"></i><h3>إجمالي المصروفات</h3><div class="value" id="totalCost">0 SAR</div></div>
-        <div class="stat-card"><i class="fas fa-bell"></i><h3>التنبيهات</h3><div class="value" id="alertCount">0</div></div>
-    </div>
-
-    <div class="section"><h3><i class="fas fa-chart-line"></i> تحليل المصروفات</h3><div class="chart-container"><canvas id="expensesChart"></canvas></div></div>
-
-    <div class="collapsible">
-        <div class="collapsible-header" id="toggleFreqHeader">
-            <span><i class="fas fa-cog"></i> إدارة أنواع الصيانة</span>
-            <span><i class="fas fa-chevron-down" id="toggleIcon"></i></span>
-        </div>
-        <div class="collapsible-content" id="frequencyContent">
-            <button id="addTypeBtn">إضافة نوع جديد</button>
-            <div class="frequency-table">
-                <table>
-                    <thead><tr><th>نوع الصيانة</th><th>المسافة (km)</th><th>آخر صيانة</th><th>الصيانة القادمة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
-                    <tbody id="freqBody"></tbody>
-                </table>
+            <div class="hero-vehicle">
+              <div class="vehicle-icon"><i class="fa-solid fa-car"></i></div>
+              <div>
+                <strong id="heroVehicleName">-</strong>
+                <small id="heroVehicleMeta">-</small>
+              </div>
+              <button type="button" class="btn btn-light" data-page="vehicles"><i class="fa-solid fa-arrow-left-right"></i><span data-tr="تغيير المركبة">تغيير المركبة</span></button>
             </div>
-            <button id="saveFreqBtn">حفظ الترددات</button>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3><i class="fas fa-plus-circle"></i> تسجيل صيانة جديدة</h3>
-        <div class="form-grid">
-            <select id="maintenanceTypeSelect"><option value="">اختر نوع الصيانة</option></select>
-            <input type="number" id="kilometers" placeholder="العداد الحالي">
-            <input type="number" id="cost" placeholder="التكلفة (SAR)" step="0.01">
-            <div class="date-field">
-                <input type="date" id="date">
-                <i class="fas fa-calendar-alt"></i>
+            <div class="odometer-block">
+              <div class="odometer-value"><span id="totalKmDisplay">0</span><small data-tr="كم">كم</small></div>
+              <div class="odometer-form">
+                <input type="number" id="newKmInput" min="0" step="1" inputmode="numeric" placeholder="تحديث العداد" data-tr-placeholder="تحديث العداد">
+                <button type="button" class="btn btn-light" id="updateKmBtn"><i class="fa-solid fa-rotate"></i><span data-tr="تحديث">تحديث</span></button>
+              </div>
+              <p class="odometer-note"><i class="fa-solid fa-clock"></i><span data-tr="آخر تحديث">آخر تحديث</span>: <span id="lastKmUpdate">-</span></p>
             </div>
-            <textarea id="description" placeholder="ملاحظات" rows="2"></textarea>
-        </div>
-        <button id="addMaintBtn">تسجيل الصيانة</button>
-    </div>
+          </div>
 
-    <div class="section">
-        <h3><i class="fas fa-history"></i> سجل الصيانة</h3>
-        <div class="export-buttons"><button id="exportExcelBtn" style="background:var(--warning)">Excel</button><button id="fullReportBtn">تقرير PDF</button></div>
-        <div class="form-grid"><select id="filterSelect"><option value="">جميع الأنواع</option></select><button id="applyFilterBtn">تصفية</button><button id="resetFilterBtn">إلغاء</button></div>
-        <div id="maintList"></div>
-    </div>
+          <div class="card">
+            <div class="card-head">
+              <h3><i class="fa-solid fa-bell"></i><span data-tr="التنبيهات">التنبيهات</span></h3>
+              <span class="count-badge" id="alertBadge">0</span>
+            </div>
+            <div id="alertsGrid" class="alerts-grid"></div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+            <div><span data-tr="إجمالي الصيانات">إجمالي الصيانات</span><strong id="totalCount">0</strong></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon warning"><i class="fa-solid fa-coins"></i></div>
+            <div><span data-tr="إجمالي المصروفات">إجمالي المصروفات</span><strong id="totalCost">0</strong></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon info"><i class="fa-solid fa-bell"></i></div>
+            <div><span data-tr="التنبيهات">التنبيهات</span><strong id="alertCount">0</strong></div>
+          </div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="card-head"><h3><i class="fa-solid fa-chart-line"></i><span data-tr="تحليل المصروفات">تحليل المصروفات</span></h3></div>
+          <div class="chart-container"><canvas id="expensesChart"></canvas></div>
+        </div>
+      </section>
+
+      <!-- VEHICLES -->
+      <section class="page" id="page-vehicles">
+        <div class="page-head">
+          <div>
+            <h2 data-tr="مركباتي">مركباتي</h2>
+            <p data-tr="أضف وبدّل بين سياراتك بسهولة">أضف وبدّل بين سياراتك بسهولة</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3><i class="fa-solid fa-car"></i><span data-tr="المركبة الحالية">المركبة الحالية</span></h3></div>
+          <div id="vehiclesList" class="vehicle-picker"></div>
+          <p class="vehicle-note"><i class="fa-solid fa-cloud"></i><span data-tr="بياناتك محفوظة ومزامنة مع السحاب">بياناتك محفوظة ومزامنة مع السحاب</span></p>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-head"><h3><i class="fa-solid fa-plus"></i><span data-tr="إضافة مركبة">إضافة مركبة</span></h3></div>
+          <div class="form-grid">
+            <div class="field full">
+              <label class="field-label" for="newVehicleName" data-tr="اسم المركبة الجديدة">اسم المركبة الجديدة</label>
+              <input type="text" id="newVehicleName" placeholder="اسم المركبة الجديدة" data-tr-placeholder="اسم المركبة الجديدة">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="addVehicleBtn"><i class="fa-solid fa-plus"></i><span data-tr="إضافة مركبة">إضافة مركبة</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- MAINTENANCE -->
+      <section class="page" id="page-maintenance">
+        <div class="page-head">
+          <div>
+            <h2 data-tr="الصيانة">الصيانة</h2>
+            <p data-tr="سجل عملية جديدة واضبط فترات الصيانة">سجل عملية جديدة واضبط فترات الصيانة</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3><i class="fa-solid fa-plus-circle"></i><span data-tr="تسجيل صيانة جديدة">تسجيل صيانة جديدة</span></h3></div>
+          <div class="form-grid">
+            <div class="field full">
+              <label class="field-label" for="maintenanceTypeSelect" data-tr="نوع الصيانة">نوع الصيانة</label>
+              <select id="maintenanceTypeSelect"><option value="">اختر نوع الصيانة</option></select>
+            </div>
+            <div class="field">
+              <label class="field-label" for="kilometers" data-tr="العداد الحالي">العداد الحالي</label>
+              <input type="number" id="kilometers" min="0" step="1" inputmode="numeric" placeholder="العداد الحالي" data-tr-placeholder="العداد الحالي">
+            </div>
+            <div class="field">
+              <label class="field-label" for="cost" data-tr="التكلفة (ر.س)">التكلفة (ر.س)</label>
+              <input type="number" id="cost" min="0" step="0.01" inputmode="decimal" placeholder="التكلفة (ر.س)" data-tr-placeholder="التكلفة (ر.س)">
+            </div>
+            <div class="field">
+              <label class="field-label" for="date" data-tr="التاريخ">التاريخ</label>
+              <input type="date" id="date">
+            </div>
+            <div class="field full">
+              <label class="field-label" for="description" data-tr="ملاحظات">ملاحظات</label>
+              <textarea id="description" rows="2" placeholder="ملاحظات" data-tr-placeholder="ملاحظات"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="addMaintBtn"><i class="fa-solid fa-check"></i><span data-tr="تسجيل الصيانة">تسجيل الصيانة</span></button>
+          </div>
+        </div>
+
+        <div class="card frequency-card">
+          <button type="button" class="collapsible-header" id="toggleFreqHeader">
+            <span><i class="fa-solid fa-sliders"></i><span data-tr="إدارة أنواع الصيانة">إدارة أنواع الصيانة</span></span>
+            <i class="fa-solid fa-chevron-down" id="toggleIcon"></i>
+          </button>
+          <div class="collapsible-content" id="frequencyContent">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+              <button type="button" class="btn btn-soft btn-sm" id="addTypeBtn"><i class="fa-solid fa-plus"></i><span data-tr="إضافة نوع جديد">إضافة نوع جديد</span></button>
+            </div>
+            <div class="table-wrap">
+              <table class="frequency-table">
+                <thead><tr>
+                  <th data-tr="نوع الصيانة">نوع الصيانة</th>
+                  <th data-tr="المسافة (كم)">المسافة (كم)</th>
+                  <th data-tr="آخر صيانة">آخر صيانة</th>
+                  <th data-tr="الصيانة القادمة">الصيانة القادمة</th>
+                  <th data-tr="الحالة">الحالة</th>
+                  <th data-tr="إجراءات">إجراءات</th>
+                </tr></thead>
+                <tbody id="freqBody"></tbody>
+              </table>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" id="saveFreqBtn"><i class="fa-solid fa-floppy-disk"></i><span data-tr="حفظ الترددات">حفظ الترددات</span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORY -->
+      <section class="page" id="page-history">
+        <div class="page-head">
+          <div>
+            <h2 data-tr="سجل الصيانة">سجل الصيانة</h2>
+            <p data-tr="كل عمليات الصيانة السابقة">كل عمليات الصيانة السابقة</p>
+          </div>
+          <div class="page-actions">
+            <button type="button" class="btn btn-warning" id="exportExcelBtn"><i class="fa-solid fa-file-excel"></i><span data-tr="Excel">Excel</span></button>
+            <button type="button" class="btn btn-ghost" id="fullReportBtn"><i class="fa-solid fa-file-pdf"></i><span data-tr="تقرير PDF">تقرير PDF</span></button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="filter-row">
+            <select id="filterSelect"><option value="">جميع الأنواع</option></select>
+            <button type="button" class="btn btn-soft" id="applyFilterBtn"><i class="fa-solid fa-filter"></i><span data-tr="تصفية">تصفية</span></button>
+            <button type="button" class="btn btn-ghost" id="resetFilterBtn"><i class="fa-solid fa-rotate-left"></i><span data-tr="إعادة تعيين">إعادة تعيين</span></button>
+          </div>
+          <div id="maintList" class="maintenance-list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <button type="button" class="nav-item active" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i><span data-tr="الرئيسية">الرئيسية</span></button>
+    <button type="button" class="nav-item" data-page="vehicles"><i class="fa-solid fa-car"></i><span data-tr="مركباتي">مركباتي</span></button>
+    <button type="button" class="nav-item" data-page="maintenance"><i class="fa-solid fa-screwdriver-wrench"></i><span data-tr="الصيانة">الصيانة</span></button>
+    <button type="button" class="nav-item" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i><span data-tr="السجل">السجل</span></button>
+  </nav>
 </div>
 
-<!-- Modal -->
+<!-- TYPE MODAL -->
 <div id="typeModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle">إضافة نوع صيانة جديد</h3>
-        <input type="text" id="typeName" placeholder="نوع الصيانة">
-        <input type="number" id="typeFreq" placeholder="المسافة (كم)" value="10000">
-        <input type="hidden" id="editTypeOld">
-        <button id="saveTypeBtn">حفظ</button>
-        <button id="closeTypeModalBtn">إلغاء</button>
+  <div class="modal-card">
+    <h3 id="modalTitle">إضافة نوع صيانة جديد</h3>
+    <p data-tr="اختر اسماً واضحاً ومسافة دورية بين 1000 و 1,000,000 كم.">اختر اسماً واضحاً ومسافة دورية بين 1000 و 1,000,000 كم.</p>
+    <div class="field">
+      <label class="field-label" for="typeName" data-tr="نوع الصيانة">نوع الصيانة</label>
+      <input type="text" id="typeName" placeholder="نوع الصيانة" data-tr-placeholder="نوع الصيانة">
     </div>
+    <div class="field">
+      <label class="field-label" for="typeFreq" data-tr="المسافة (كم)">المسافة (كم)</label>
+      <input type="number" id="typeFreq" value="10000" min="1000" max="1000000" step="1000">
+    </div>
+    <input type="hidden" id="editTypeOld">
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="closeTypeModalBtn" data-tr="إلغاء">إلغاء</button>
+      <button type="button" class="btn btn-primary" id="saveTypeBtn"><i class="fa-solid fa-check"></i><span data-tr="حفظ">حفظ</span></button>
+    </div>
+  </div>
 </div>
 
 <script>
-    // ========== CONFIGURACIÓN ==========
-    const SUPABASE_URL = 'https://gaqecppjjdcuzdsxgqqg.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_TsAOyGFDraRXOpIKegrhbA_IzPgVCh6';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* =========================================================
+   Warchati — App script
+   ========================================================= */
+const SUPABASE_URL = 'https://gaqecppjjdcuzdsxgqqg.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_TsAOyGFDraRXOpIKegrhbA_IzPgVCh6';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ========== ESTADO GLOBAL ==========
-    const AppState = {
-        currentUserId: null,
-        currentUsername: null,
-        currentUserEmail: null,
-        currentVehicleId: null,
-        vehicles: [],
-        maintenances: [],
-        frequencies: {},
-        vehicleKm: 0,
-        lastKmDate: "",
-        currentFilter: "",
-        expensesChart: null
-    };
+/* ---------- Constants ---------- */
+const DEFAULT_FREQUENCIES = {
+  'تغيير زيت': 10000,
+  'فرامل': 200000,
+  'إطارات': 60000,
+  'سير المكينة': 100000,
+  'بواجي': 40000,
+  'فلتر هواء': 20000,
+  'مياه ردياتير': 80000,
+  'فحص عام': 10000
+};
 
-    const DEFAULT_TYPES = ["تغيير زيت", "فرامل", "إطارات", "سير المكينة", "بواجي", "فلتر هواء", "مياه ردياتير", "فحص عام"];
-    const DEFAULT_FREQUENCIES = {
-        "تغيير زيت": 10000, "فرامل": 200000, "إطارات": 60000,
-        "سير المكينة": 100000, "بواجي": 40000, "فلتر هواء": 20000,
-        "مياه ردياتير": 80000, "فحص عام": 10000
-    };
+const TYPE_LABELS = {
+  'تغيير زيت': 'Oil change',
+  'فرامل': 'Brakes',
+  'إطارات': 'Tires',
+  'سير المكينة': 'Engine belt',
+  'بواجي': 'Spark plugs',
+  'فلتر هواء': 'Air filter',
+  'مياه ردياتير': 'Coolant',
+  'فحص عام': 'General inspection'
+};
 
-    // ========== FUNCIONES AUXILIARES ==========
-    function showToast(msg, type = 'success') {
-        const existingToast = document.querySelector('.toast');
-        if (existingToast) existingToast.remove();
-        const t = document.createElement('div');
-        t.className = `toast ${type === 'error' ? 'error' : ''}`;
-        t.innerHTML = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 3000);
+const PAGE_TITLES = {
+  dashboard: 'الرئيسية',
+  vehicles: 'مركباتي',
+  maintenance: 'الصيانة',
+  history: 'السجل'
+};
+
+/* ---------- Language ---------- */
+let currentLang = 'ar';
+let currentPage = 'dashboard';
+
+const I18N = {
+  en: {
+    'ورشتي': 'Warchati',
+    'صيانة سيارات': 'Car maintenance',
+    'صيانة سيارتك، بذكاء': 'Smart care for your car',
+    'تابع الصيانات، المصروفات والتنبيهات من مكان واحد.': 'Track maintenance, expenses and alerts in one place.',
+    'مزامنة سحابية آمنة': 'Secure cloud sync',
+    'تنبيهات ذكية للصيانة': 'Smart maintenance alerts',
+    'فواتير وتقارير PDF': 'Invoices & PDF reports',
+    'تسجيل الدخول': 'Sign in',
+    'مرحباً بعودتك، أدخل بياناتك للمتابعة': 'Welcome back. Enter your details to continue.',
+    'إنشاء حساب جديد': 'Create account',
+    'أدخل بياناتك لإنشاء حسابك': 'Enter your details to create your account.',
+    'اسم المستخدم / الإيميل / رقم الجوال': 'Username / Email / Phone',
+    'كلمة المرور': 'Password',
+    'إظهار كلمة المرور': 'Show password',
+    'دخول': 'Sign in',
+    'ليس لديك حساب؟': "Don't have an account?",
+    'سجل الآن': 'Sign up',
+    'نسيت كلمة المرور؟': 'Forgot password?',
+    'اسم المستخدم': 'Username',
+    'البريد الإلكتروني': 'Email',
+    'رقم الهاتف': 'Phone number',
+    'اسم السيارة': 'Vehicle name',
+    'تسجيل حساب جديد': 'Create account',
+    'لديك حساب؟': 'Already have an account?',
+    'سجل دخول': 'Sign in',
+    'الرئيسية': 'Dashboard',
+    'مركباتي': 'My vehicles',
+    'الصيانة': 'Maintenance',
+    'السجل': 'History',
+    'مسجل الدخول': 'Signed in',
+    'متزامن': 'Synced',
+    'غير متصل': 'Offline',
+    'تسجيل خروج': 'Log out',
+    'نظرة عامة': 'Overview',
+    'كل ما تحتاجه لصيانة سيارتك في لوحة واحدة': 'Everything you need to care for your car, in one dashboard.',
+    'تسجيل صيانة': 'Log maintenance',
+    'المركبة الحالية': 'Current vehicle',
+    'تغيير المركبة': 'Switch vehicle',
+    'كم': 'km',
+    'تحديث العداد': 'Update odometer',
+    'تحديث': 'Update',
+    'آخر تحديث': 'Last update',
+    'التنبيهات': 'Alerts',
+    'إجمالي الصيانات': 'Total services',
+    'إجمالي المصروفات': 'Total expenses',
+    'تحليل المصروفات': 'Expense analysis',
+    'أضف وبدّل بين سياراتك بسهولة': 'Add and switch between your cars easily.',
+    'بياناتك محفوظة ومزامنة مع السحاب': 'Your data is saved and synced to the cloud.',
+    'إضافة مركبة': 'Add vehicle',
+    'اسم المركبة الجديدة': 'New vehicle name',
+    'سجل عملية جديدة واضبط فترات الصيانة': 'Log a new service and set maintenance intervals.',
+    'تسجيل صيانة جديدة': 'Log new maintenance',
+    'نوع الصيانة': 'Maintenance type',
+    'العداد الحالي': 'Current odometer',
+    'التكلفة (ر.س)': 'Cost (SAR)',
+    'التاريخ': 'Date',
+    'ملاحظات': 'Notes',
+    'تسجيل الصيانة': 'Save maintenance',
+    'إدارة أنواع الصيانة': 'Manage maintenance types',
+    'إضافة نوع جديد': 'Add new type',
+    'المسافة (كم)': 'Interval (km)',
+    'آخر صيانة': 'Last service',
+    'الصيانة القادمة': 'Next service',
+    'الحالة': 'Status',
+    'إجراءات': 'Actions',
+    'حفظ الترددات': 'Save intervals',
+    'سجل الصيانة': 'Maintenance history',
+    'كل عمليات الصيانة السابقة': 'All previous maintenance records.',
+    'تقرير PDF': 'PDF report',
+    'جميع الأنواع': 'All types',
+    'تصفية': 'Filter',
+    'إعادة تعيين': 'Reset',
+    'اختر اسماً واضحاً ومسافة دورية بين 1000 و 1,000,000 كم.': 'Choose a clear name and an interval between 1,000 and 1,000,000 km.',
+    'إلغاء': 'Cancel',
+    'حفظ': 'Save',
+    'Excel': 'Excel',
+    'سيارتي': 'My car',
+    'سيارة': 'Vehicle',
+    'عملية صيانة': 'service records',
+    'تعديل': 'Edit',
+    'حذف': 'Delete',
+    'فاتورة': 'Invoice',
+    'منتهي': 'Due now',
+    'منتهي!': 'Overdue!',
+    'متبقي': 'remaining',
+    'عاجل': 'Urgent',
+    'قريب': 'Soon',
+    'الصيانة القادمة عند': 'Next service at',
+    'بدون ملاحظات': 'No notes',
+    'لا توجد سجلات': 'No records yet',
+    'لا توجد مركبات مضافة': 'No vehicles added yet',
+    'كل شيء على ما يرام': 'All good',
+    'لا توجد تنبيهات': 'No alerts right now',
+    'مطلوب الآن': 'Required now',
+    'أقل من 1000 km - عاجل': 'Less than 1,000 km — urgent',
+    'يحتاج صيانة قريباً': 'Needs service soon',
+    'تذكير': 'Remind',
+    'الرجاء إدخال اسم نوع الصيانة': 'Please enter a maintenance type name.',
+    'الرجاء إدخال مسافة صحيحة (بين 1000 و 1000000 كم)': 'Please enter a valid interval (1,000 – 1,000,000 km).',
+    'هذا النوع موجود بالفعل': 'This type already exists.',
+    'تم حفظ نوع الصيانة في السحاب': 'Maintenance type saved to the cloud.',
+    'خطأ في حفظ نوع الصيانة: ': 'Error saving maintenance type: ',
+    'هل أنت متأكد من حذف نوع "{type}"؟ سيتم حذف جميع سجلات الصيانة المرتبطة به.': 'Delete the type "{type}"? All related maintenance records will be removed.',
+    'تم حذف نوع "{type}"': 'Type "{type}" deleted.',
+    'خطأ في حذف النوع: ': 'Error deleting type: ',
+    'خطأ في تحميل المركبات: ': 'Error loading vehicles: ',
+    'الرجاء إدخال اسم المركبة': 'Please enter a vehicle name.',
+    'تم إضافة المركبة بنجاح': 'Vehicle added successfully.',
+    'خطأ في إضافة المركبة: ': 'Error adding vehicle: ',
+    'تم التبديل إلى المركبة المحددة': 'Switched to the selected vehicle.',
+    'خطأ في تحميل بيانات المركبة: ': 'Error loading vehicle data: ',
+    'الرجاء إدخال قيمة صحيحة': 'Please enter a valid value.',
+    'الرجاء إدخال قيمة أكبر من {value}': 'Please enter a value greater than {value}.',
+    'تم تحديث العداد إلى {value} km': 'Odometer updated to {value} km.',
+    'خطأ في تحديث العداد: ': 'Error updating odometer: ',
+    'خطأ: عنصر النموذج مفقود': 'Error: form element is missing.',
+    'اختر نوع الصيانة': 'Select a maintenance type.',
+    'الرجاء إدخال عداد صحيح': 'Please enter a valid odometer reading.',
+    'العداد يجب أن يكون ≥ {value} km': 'Odometer must be ≥ {value} km.',
+    'التكلفة يجب أن تكون قيمة موجبة': 'Cost must be a positive value.',
+    'تم تسجيل الصيانة ومزامنتها مع السحاب': 'Maintenance logged and synced to the cloud.',
+    'خطأ في تسجيل الصيانة: ': 'Error logging maintenance: ',
+    'هل أنت متأكد من حذف هذا السجل؟': 'Delete this record?',
+    'تم حذف السجل': 'Record deleted.',
+    'خطأ في حذف السجل: ': 'Error deleting record: ',
+    'خطأ: usuario no identificado': 'Error: user not identified.',
+    'تم حفظ الترددات': 'Intervals saved.',
+    'تعذر حفظ بعض الترددات': 'Some intervals could not be saved.',
+    'لا يوجد بريد إلكتروني مسجل لهذا المستخدم': 'No email is registered for this user.',
+    'تذكير صيانة: {type}': 'Maintenance reminder: {type}',
+    'مرحباً {name}،\n\nموعد صيانة {type} قد اقترب. المتبقي {remaining} كم.\n\nمع تحيات ورشتي': 'Hello {name},\n\nYour {type} service is due soon. {remaining} km remaining.\n\n— Warchati',
+    'تم فتح بريدك الإلكتروني لإرسال التذكير': 'Your email app is open to send the reminder.',
+    'تم إنشاء الفاتورة بنجاح': 'Invoice created successfully.',
+    'خطأ في إنشاء الفاتورة: ': 'Error creating invoice: ',
+    'تم إنشاء التقرير بنجاح': 'Report created successfully.',
+    'خطأ في إنشاء التقرير: ': 'Error creating report: ',
+    'تم تصدير البيانات إلى Excel': 'Data exported to Excel.',
+    'خطأ في تصدير البيانات': 'Error exporting data.',
+    'الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور': 'Please enter a username, email and password.',
+    'خطأ في التسجيل: ': 'Registration error: ',
+    'خطأ: لم يتم إنشاء المستخدم': 'Error: user was not created.',
+    'تم إنشاء الحساب بنجاح': 'Account created successfully.',
+    'تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول': 'Account created! You can now sign in.',
+    'الرجاء إدخال اسم المستخدم / البريد الإلكتروني / رقم الهاتف وكلمة المرور': 'Please enter your username / email / phone and password.',
+    'اسم المستخدم أو رقم الهاتف غير صحيح': 'Incorrect username or phone number.',
+    'بيانات الدخول غير صحيحة': 'Incorrect sign-in details.',
+    'خطأ في الدخول: ': 'Sign-in error: ',
+    'الرجاء إدخال بريدك الإلكتروني أو اسم المستخدم أو رقم الهاتف': 'Please enter your email, username or phone number.',
+    'لم نتمكن من إيجاد حسابك': 'We could not find your account.',
+    'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني': 'A password reset link has been sent to your email.',
+    'خطأ في إرسال رابط استعادة كلمة المرور: ': 'Error sending the reset link: ',
+    'مرحباً {name}': 'Welcome, {name}',
+    'إضافة نوع صيانة جديد': 'Add a new maintenance type',
+    'تعديل نوع الصيانة': 'Edit maintenance type',
+    'تم تسجيل الخروج': 'Signed out.',
+    'فاتورة صيانة رسمية': 'Official maintenance invoice',
+    'رقم الفاتورة': 'Invoice number',
+    'المركبة': 'Vehicle',
+    'العداد': 'Odometer',
+    'المبلغ': 'Amount',
+    'لا توجد': 'None',
+    'شكراً لثقتكم بنا': 'Thank you for your trust',
+    'تقرير الصيانة الشامل': 'Full maintenance report',
+    'تفاصيل الصيانات': 'Maintenance details',
+    'التكلفة': 'Cost',
+    'تم إنشاء التقرير في': 'Report generated on',
+    'الصيانات': 'Maintenance',
+    'العداد (كم)': 'Odometer (km)',
+    'التكلفة (SAR)': 'Cost (SAR)',
+    'المصروفات (SAR)': 'Expenses (SAR)'
+  }
+};
+
+function tf(key, vars) {
+  let value = currentLang === 'en'
+    ? (Object.prototype.hasOwnProperty.call(I18N.en, key) ? I18N.en[key] : key)
+    : key;
+  if (vars) {
+    value = String(value).replace(/\{(\w+)\}/g, (match, name) => (
+      Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match
+    ));
+  }
+  return value;
+}
+
+function typeLabel(type) {
+  if (currentLang === 'en' && TYPE_LABELS[type]) return TYPE_LABELS[type];
+  return type;
+}
+
+/* ---------- State ---------- */
+const AppState = {
+  currentUserId: null,
+  currentUsername: null,
+  currentUserEmail: null,
+  profileVehicleName: '',
+  currentVehicleId: null,
+  vehicles: [],
+  maintenances: [],
+  frequencies: {},
+  vehicleKm: 0,
+  lastKmDate: '',
+  currentFilter: '',
+  expensesChart: null
+};
+
+/* ---------- Helpers ---------- */
+const ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ESCAPE_MAP[char]);
+}
+
+function formatNumber(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '0';
+  return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+}
+
+function formatDate(value) {
+  if (!value) return '';
+  const raw = String(value);
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+  if (match) return `${match[3]}/${match[2]}/${match[1]}`;
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return '';
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${day}/${month}/${date.getFullYear()}`;
+}
+
+function todayISO() {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function initials(name) {
+  const text = String(name || '?').trim();
+  return text ? text.charAt(0).toUpperCase() : '?';
+}
+
+function setLoading(spinnerId, loading) {
+  const spinner = document.getElementById(spinnerId);
+  if (spinner) spinner.style.display = loading ? 'block' : 'none';
+  const button = document.getElementById(spinnerId.replace('Spinner', 'Btn'));
+  if (button) button.disabled = loading;
+}
+
+function getCurrentVehicle() {
+  return AppState.vehicles.find((vehicle) => String(vehicle.id) === String(AppState.currentVehicleId)) || null;
+}
+
+function showToast(message, type = 'success') {
+  const host = document.getElementById('toastHost');
+  if (!host) return;
+  while (host.children.length >= 4) host.firstElementChild.remove();
+
+  const icons = {
+    success: 'fa-circle-check',
+    error: 'fa-circle-exclamation',
+    warning: 'fa-triangle-exclamation',
+    info: 'fa-circle-info'
+  };
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+
+  const icon = document.createElement('i');
+  icon.className = `fa-solid ${icons[type] || icons.info}`;
+
+  const text = document.createElement('span');
+  text.textContent = String(message ?? '');
+
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.setAttribute('aria-label', 'close');
+  close.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+  close.addEventListener('click', () => toast.remove());
+
+  toast.append(icon, text, close);
+  host.appendChild(toast);
+
+  window.setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-8px)';
+    window.setTimeout(() => toast.remove(), 200);
+  }, 4200);
+}
+
+/* ---------- Language ---------- */
+function applyLanguage(lang) {
+  currentLang = lang === 'en' ? 'en' : 'ar';
+  localStorage.setItem('warchati_lang', currentLang);
+
+  const html = document.documentElement;
+  html.lang = currentLang;
+  html.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+  document.querySelectorAll('.lang-btn').forEach((button) => {
+    button.classList.toggle('active', button.dataset.lang === currentLang);
+  });
+
+  document.querySelectorAll('[data-tr]').forEach((element) => {
+    element.textContent = tf(element.dataset.tr);
+  });
+
+  document.querySelectorAll('[data-tr-placeholder]').forEach((element) => {
+    element.setAttribute('placeholder', tf(element.dataset.trPlaceholder));
+  });
+
+  document.querySelectorAll('[data-tr-title]').forEach((element) => {
+    const value = tf(element.dataset.trTitle);
+    element.setAttribute('title', value);
+    element.setAttribute('aria-label', value);
+  });
+
+  document.querySelectorAll('.brand-name').forEach((element) => {
+    element.textContent = currentLang === 'en' ? 'Warchati' : 'ورشتي';
+  });
+
+  document.title = currentLang === 'en' ? 'Warchati | Car maintenance' : 'ورشتي | صيانة سيارات';
+
+  updateAuthHeading();
+  updateSyncPill();
+  setPageTitle(currentPage);
+
+  const modal = document.getElementById('typeModal');
+  if (modal && modal.classList.contains('active')) updateModalTitle();
+
+  if (AppState.currentUserId) {
+    updateDisplay();
+    updateChart();
+  }
+}
+
+function updateAuthHeading() {
+  const registerForm = document.getElementById('registerForm');
+  const title = document.getElementById('authTitle');
+  const subtitle = document.getElementById('authSubtitle');
+  if (!registerForm || !title || !subtitle) return;
+  const registering = registerForm.style.display !== 'none';
+  title.textContent = tf(registering ? 'إنشاء حساب جديد' : 'تسجيل الدخول');
+  subtitle.textContent = tf(registering ? 'أدخل بياناتك لإنشاء حسابك' : 'مرحباً بعودتك، أدخل بياناتك للمتابعة');
+}
+
+function updateSyncPill() {
+  const pill = document.getElementById('syncPill');
+  const text = document.getElementById('syncPillText');
+  if (!pill || !text) return;
+  const offline = !navigator.onLine;
+  pill.classList.toggle('offline', offline);
+  text.textContent = tf(offline ? 'غير متصل' : 'متزامن');
+}
+
+/* ---------- Navigation ---------- */
+function setPageTitle(page) {
+  const title = document.getElementById('pageTitle');
+  if (title) title.textContent = tf(PAGE_TITLES[page] || PAGE_TITLES.dashboard);
+}
+
+function navigate(page) {
+  const valid = ['dashboard', 'vehicles', 'maintenance', 'history'];
+  if (!valid.includes(page)) page = 'dashboard';
+  currentPage = page;
+
+  document.querySelectorAll('.page').forEach((section) => {
+    section.classList.toggle('active', section.id === `page-${page}`);
+  });
+
+  document.querySelectorAll('.nav-item[data-page]').forEach((button) => {
+    button.classList.toggle('active', button.dataset.page === page);
+  });
+
+  setPageTitle(page);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (page === 'maintenance') {
+    const kmInput = document.getElementById('kilometers');
+    if (kmInput && !kmInput.value) kmInput.value = AppState.vehicleKm || '';
+  }
+
+  if (page === 'dashboard') updateChart();
+}
+
+/* ---------- Auth UI ---------- */
+function showRegisterForm() {
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  if (!loginForm || !registerForm) return;
+  loginForm.style.display = 'none';
+  registerForm.style.display = 'block';
+  updateAuthHeading();
+}
+
+function showLoginForm() {
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  if (!loginForm || !registerForm) return;
+  loginForm.style.display = 'block';
+  registerForm.style.display = 'none';
+
+  ['loginUsername', 'loginPassword', 'regUsername', 'regEmail', 'regPhone', 'regPassword', 'regVehicle'].forEach((id) => {
+    const element = document.getElementById(id);
+    if (element) element.value = '';
+  });
+
+  updateAuthHeading();
+}
+
+function updateUserUI() {
+  const name = AppState.currentUsername || '-';
+  const mark = initials(name);
+  ['currentUser', 'currentUserTop'].forEach((id) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = name;
+  });
+  ['sidebarAvatar', 'topbarAvatar'].forEach((id) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = mark;
+  });
+}
+
+async function enterApp(user, greet = false) {
+  let profile = null;
+  try {
+    const { data, error } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (error) throw error;
+    profile = data;
+  } catch (error) {
+    console.error('Profile load error:', error);
+  }
+
+  AppState.currentUserId = user.id;
+  AppState.currentUsername = profile?.username
+    || user.user_metadata?.username
+    || (user.email || 'user').split('@')[0];
+  AppState.currentUserEmail = user.email || profile?.email || '';
+  AppState.profileVehicleName = profile?.vehicle_name || user.user_metadata?.vehicle_name || '';
+
+  updateUserUI();
+  await loadVehicles();
+
+  const loginContainer = document.getElementById('loginContainer');
+  const app = document.getElementById('app');
+  if (loginContainer) loginContainer.style.display = 'none';
+  if (app) app.classList.add('is-visible');
+
+  navigate('dashboard');
+
+  if (greet) showToast(tf('مرحباً {name}', { name: AppState.currentUsername }));
+}
+
+async function restoreSession() {
+  try {
+    const { data } = await supabaseClient.auth.getSession();
+    const session = data?.session;
+    if (!session?.user || AppState.currentUserId) return;
+    await enterApp(session.user, false);
+  } catch (error) {
+    console.error('Session restore error:', error);
+  }
+}
+
+async function login() {
+  const loginValue = document.getElementById('loginUsername')?.value.trim();
+  const password = document.getElementById('loginPassword')?.value;
+  if (!loginValue || !password) {
+    showToast(tf('الرجاء إدخال اسم المستخدم / البريد الإلكتروني / رقم الهاتف وكلمة المرور'), 'error');
+    return;
+  }
+
+  setLoading('loginSpinner', true);
+  try {
+    let email = loginValue;
+    if (!loginValue.includes('@')) {
+      const { data: user, error } = await supabaseClient
+        .from('users')
+        .select('email')
+        .or(`username.ilike.${loginValue},phone.ilike.${loginValue}`)
+        .maybeSingle();
+      if (error || !user?.email) throw new Error(tf('اسم المستخدم أو رقم الهاتف غير صحيح'));
+      email = user.email;
     }
 
-    function formatDate(date) {
-        if (!date) return '';
-        try {
-            const d = new Date(date);
-            if (isNaN(d.getTime())) return '';
-            const day = d.getDate().toString().padStart(2, '0');
-            const month = (d.getMonth() + 1).toString().padStart(2, '0');
-            const year = d.getFullYear();
-            return `${day}/${month}/${year}`;
-        } catch { return ''; }
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    if (!data.user) throw new Error(tf('بيانات الدخول غير صحيحة'));
+
+    await enterApp(data.user, true);
+    const passwordInput = document.getElementById('loginPassword');
+    if (passwordInput) passwordInput.value = '';
+  } catch (error) {
+    console.error('Login error:', error);
+    showToast(tf('خطأ في الدخول: ') + (error.message || ''), 'error');
+  } finally {
+    setLoading('loginSpinner', false);
+  }
+}
+
+async function register() {
+  const username = document.getElementById('regUsername')?.value.trim();
+  const email = document.getElementById('regEmail')?.value.trim();
+  const phone = document.getElementById('regPhone')?.value.trim();
+  const password = document.getElementById('regPassword')?.value;
+  const vehicleName = document.getElementById('regVehicle')?.value.trim() || tf('سيارة');
+
+  if (!username || !email || !password) {
+    showToast(tf('الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور'), 'error');
+    return;
+  }
+
+  setLoading('registerSpinner', true);
+  try {
+    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: { data: { username, phone, vehicle_name: vehicleName } }
+    });
+    if (authError) throw authError;
+    if (!authData.user) throw new Error(tf('خطأ: لم يتم إنشاء المستخدم'));
+
+    const { error: insertError } = await supabaseClient.from('users').insert({
+      id: authData.user.id,
+      username,
+      email,
+      phone: phone || null,
+      vehicle_name: vehicleName
+    });
+    if (insertError) throw insertError;
+
+    if (authData.session) {
+      await enterApp(authData.user, false);
+      showToast(tf('تم إنشاء الحساب بنجاح'));
+    } else {
+      showToast(tf('تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول'));
+      showLoginForm();
+    }
+  } catch (error) {
+    console.error('Register error:', error);
+    showToast(tf('خطأ في التسجيل: ') + (error.message || ''), 'error');
+  } finally {
+    setLoading('registerSpinner', false);
+  }
+}
+
+async function resetPassword() {
+  const loginValue = document.getElementById('loginUsername')?.value.trim();
+  if (!loginValue) {
+    showToast(tf('الرجاء إدخال بريدك الإلكتروني أو اسم المستخدم أو رقم الهاتف'), 'error');
+    return;
+  }
+
+  let email = loginValue;
+  if (!loginValue.includes('@')) {
+    try {
+      const { data: user, error } = await supabaseClient
+        .from('users')
+        .select('email')
+        .or(`username.ilike.${loginValue},phone.ilike.${loginValue}`)
+        .maybeSingle();
+      if (error || !user?.email) throw new Error(tf('لم نتمكن من إيجاد حسابك'));
+      email = user.email;
+    } catch (error) {
+      showToast(error.message, 'error');
+      return;
+    }
+  }
+
+  setLoading('loginSpinner', true);
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/update-password.html'
+    });
+    if (error) throw error;
+    showToast(tf('تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني'));
+  } catch (error) {
+    console.error('Reset password error:', error);
+    showToast(tf('خطأ في إرسال رابط استعادة كلمة المرور: ') + (error.message || ''), 'error');
+  } finally {
+    setLoading('loginSpinner', false);
+  }
+}
+
+function destroyChart() {
+  const canvas = document.getElementById('expensesChart');
+  if (canvas && window.Chart) {
+    const chart = Chart.getChart(canvas);
+    if (chart) chart.destroy();
+  }
+  AppState.expensesChart = null;
+}
+
+async function logout() {
+  try {
+    await supabaseClient.auth.signOut();
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+
+  destroyChart();
+
+  Object.assign(AppState, {
+    currentUserId: null,
+    currentUsername: null,
+    currentUserEmail: null,
+    profileVehicleName: '',
+    currentVehicleId: null,
+    vehicles: [],
+    maintenances: [],
+    frequencies: {},
+    vehicleKm: 0,
+    lastKmDate: '',
+    currentFilter: '',
+    expensesChart: null
+  });
+
+  const loginContainer = document.getElementById('loginContainer');
+  const app = document.getElementById('app');
+  if (loginContainer) loginContainer.style.display = 'grid';
+  if (app) app.classList.remove('is-visible');
+
+  navigate('dashboard');
+  showLoginForm();
+  showToast(tf('تم تسجيل الخروج'), 'info');
+}
+
+/* ---------- Frequencies ---------- */
+function getLastKmForType(type) {
+  const records = AppState.maintenances.filter((record) => record.type === type);
+  if (!records.length) return 0;
+  return Math.max(...records.map((record) => Number(record.kilometers) || 0));
+}
+
+function getNextKmForType(type) {
+  const frequency = Number(AppState.frequencies[type]) || 10000;
+  return getLastKmForType(type) + frequency;
+}
+
+function getKmRemaining(type) {
+  return Math.max(0, getNextKmForType(type) - AppState.vehicleKm);
+}
+
+function toggleFrequencyTable() {
+  const content = document.getElementById('frequencyContent');
+  const icon = document.getElementById('toggleIcon');
+  if (!content || !icon) return;
+  content.classList.toggle('show');
+  icon.classList.toggle('fa-chevron-down');
+  icon.classList.toggle('fa-chevron-up');
+}
+
+function updateModalTitle() {
+  const title = document.getElementById('modalTitle');
+  const editing = document.getElementById('editTypeOld')?.value;
+  if (title) title.textContent = tf(editing ? 'تعديل نوع الصيانة' : 'إضافة نوع صيانة جديد');
+}
+
+function openAddTypeModal() {
+  const nameInput = document.getElementById('typeName');
+  const frequencyInput = document.getElementById('typeFreq');
+  const editInput = document.getElementById('editTypeOld');
+  if (nameInput) nameInput.value = '';
+  if (frequencyInput) frequencyInput.value = '10000';
+  if (editInput) editInput.value = '';
+  updateModalTitle();
+  document.getElementById('typeModal')?.classList.add('active');
+  window.setTimeout(() => nameInput?.focus(), 80);
+}
+
+function editType(type) {
+  const nameInput = document.getElementById('typeName');
+  const frequencyInput = document.getElementById('typeFreq');
+  const editInput = document.getElementById('editTypeOld');
+  if (nameInput) nameInput.value = type;
+  if (frequencyInput) frequencyInput.value = AppState.frequencies[type] || 10000;
+  if (editInput) editInput.value = type;
+  updateModalTitle();
+  document.getElementById('typeModal')?.classList.add('active');
+  window.setTimeout(() => nameInput?.focus(), 80);
+}
+
+function closeModal() {
+  document.getElementById('typeModal')?.classList.remove('active');
+}
+
+async function saveType() {
+  const newName = document.getElementById('typeName')?.value.trim() || '';
+  const frequency = parseInt(document.getElementById('typeFreq')?.value, 10);
+  const editingOld = document.getElementById('editTypeOld')?.value || '';
+
+  if (!newName) {
+    showToast(tf('الرجاء إدخال اسم نوع الصيانة'), 'error');
+    return;
+  }
+  if (Number.isNaN(frequency) || frequency < 1000 || frequency > 1000000) {
+    showToast(tf('الرجاء إدخال مسافة صحيحة (بين 1000 و 1000000 كم)'), 'error');
+    return;
+  }
+  if (editingOld !== newName && AppState.frequencies[newName] !== undefined) {
+    showToast(tf('هذا النوع موجود بالفعل'), 'error');
+    return;
+  }
+
+  try {
+    if (editingOld && editingOld !== newName) {
+      const { error: renameError } = await supabaseClient
+        .from('maintenances')
+        .update({ type: newName })
+        .eq('user_id', AppState.currentUserId)
+        .eq('vehicle_id', AppState.currentVehicleId)
+        .eq('type', editingOld);
+      if (renameError) throw renameError;
+
+      const { error: deleteOldError } = await supabaseClient
+        .from('frequencies')
+        .delete()
+        .eq('user_id', AppState.currentUserId)
+        .eq('maintenance_type', editingOld);
+      if (deleteOldError) throw deleteOldError;
     }
 
-    function formatNumber(num) {
-        try { return num.toLocaleString('en-US'); } catch { return num.toString(); }
+    const { error } = await supabaseClient.from('frequencies').upsert({
+      user_id: AppState.currentUserId,
+      maintenance_type: newName,
+      frequency_km: frequency
+    }, { onConflict: 'user_id, maintenance_type' });
+    if (error) throw error;
+
+    if (editingOld && editingOld !== newName) {
+      delete AppState.frequencies[editingOld];
+      AppState.maintenances.forEach((record) => {
+        if (record.type === editingOld) record.type = newName;
+      });
+    }
+    AppState.frequencies[newName] = frequency;
+
+    closeModal();
+    updateDisplay();
+    updateChart();
+    showToast(tf('تم حفظ نوع الصيانة في السحاب'));
+  } catch (error) {
+    console.error('Save type error:', error);
+    showToast(tf('خطأ في حفظ نوع الصيانة: ') + (error.message || ''), 'error');
+  }
+}
+
+async function deleteType(type) {
+  const confirmed = window.confirm(tf('هل أنت متأكد من حذف نوع "{type}"؟ سيتم حذف جميع سجلات الصيانة المرتبطة به.', { type: typeLabel(type) }));
+  if (!confirmed) return;
+
+  try {
+    delete AppState.frequencies[type];
+
+    await supabaseClient
+      .from('frequencies')
+      .delete()
+      .eq('user_id', AppState.currentUserId)
+      .eq('maintenance_type', type);
+
+    await supabaseClient
+      .from('maintenances')
+      .delete()
+      .eq('user_id', AppState.currentUserId)
+      .eq('type', type)
+      .eq('vehicle_id', AppState.currentVehicleId);
+
+    AppState.maintenances = AppState.maintenances.filter((record) => record.type !== type);
+    updateDisplay();
+    updateChart();
+    showToast(tf('تم حذف نوع "{type}"', { type: typeLabel(type) }));
+  } catch (error) {
+    console.error('Delete type error:', error);
+    showToast(tf('خطأ في حذف النوع: ') + (error.message || ''), 'error');
+  }
+}
+
+async function saveFrequencies() {
+  if (!AppState.currentUserId) {
+    showToast(tf('خطأ: usuario no identificado'), 'error');
+    return;
+  }
+
+  const inputs = Array.from(document.querySelectorAll('#freqBody input[data-freq-type]'));
+  if (!inputs.length) {
+    showToast(tf('تم حفظ الترددات'));
+    return;
+  }
+
+  const updates = [];
+  for (const input of inputs) {
+    const type = input.getAttribute('data-freq-type');
+    const frequency = parseInt(input.value, 10);
+    if (Number.isNaN(frequency) || frequency < 1000 || frequency > 1000000) {
+      showToast(tf('الرجاء إدخال مسافة صحيحة (بين 1000 و 1000000 كم)'), 'error');
+      input.focus();
+      return;
+    }
+    updates.push({ type, frequency });
+  }
+
+  let failed = 0;
+  for (const update of updates) {
+    const { error } = await supabaseClient.from('frequencies').upsert({
+      user_id: AppState.currentUserId,
+      maintenance_type: update.type,
+      frequency_km: update.frequency
+    }, { onConflict: 'user_id, maintenance_type' });
+    if (error) {
+      failed += 1;
+      console.error('Save frequency error:', error);
+    } else {
+      AppState.frequencies[update.type] = update.frequency;
+    }
+  }
+
+  updateDisplay();
+  showToast(
+    failed ? tf('تعذر حفظ بعض الترددات') : tf('تم حفظ الترددات'),
+    failed ? 'error' : 'success'
+  );
+}
+
+/* ---------- Vehicles ---------- */
+async function createVehicleRow(name) {
+  const { data, error } = await supabaseClient.from('vehicles').insert({
+    user_id: AppState.currentUserId,
+    name,
+    current_km: 0,
+    last_update: todayISO()
+  }).select().single();
+  if (error) throw error;
+  return data;
+}
+
+async function loadVehicles() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('vehicles')
+      .select('*')
+      .eq('user_id', AppState.currentUserId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+
+    AppState.vehicles = data || [];
+
+    if (AppState.vehicles.length === 0) {
+      const defaultName = AppState.profileVehicleName || tf('سيارتي');
+      const created = await createVehicleRow(defaultName);
+      if (created) AppState.vehicles.push(created);
     }
 
-    function setLoading(spinnerId, loading) {
-        const spinner = document.getElementById(spinnerId);
-        if (spinner) spinner.style.display = loading ? 'block' : 'none';
+    if (!AppState.currentVehicleId || !AppState.vehicles.some((vehicle) => String(vehicle.id) === String(AppState.currentVehicleId))) {
+      AppState.currentVehicleId = AppState.vehicles[0]?.id || null;
     }
 
-    function actualizarNombreVehiculoEnCabecera() {
-        const vehiculo = AppState.vehicles.find(v => v.id === AppState.currentVehicleId);
-        const nombre = vehiculo ? vehiculo.name : (AppState.currentUsername ? 'سيارة' : '');
-        const display = document.getElementById('vehicleNameDisplay');
-        if (display) display.innerHTML = `<i class="fas fa-car"></i> ${nombre} ☁️`;
+    renderVehiclesList();
+    if (AppState.currentVehicleId) await loadVehicleData();
+  } catch (error) {
+    console.error('Load vehicles error:', error);
+    showToast(tf('خطأ في تحميل المركبات: ') + (error.message || ''), 'error');
+  }
+}
+
+function renderVehiclesList() {
+  const container = document.getElementById('vehiclesList');
+  if (!container) return;
+
+  if (!AppState.vehicles.length) {
+    container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-car"></i><strong>${escapeHtml(tf('لا توجد مركبات مضافة'))}</strong></div>`;
+    return;
+  }
+
+  const options = AppState.vehicles.map((vehicle) => {
+    const isCurrent = String(vehicle.id) === String(AppState.currentVehicleId);
+    const km = isCurrent ? AppState.vehicleKm : (Number(vehicle.current_km) || 0);
+    return `<option value="${escapeHtml(vehicle.id)}" ${isCurrent ? 'selected' : ''}>${escapeHtml(vehicle.name)} · ${formatNumber(km)} ${escapeHtml(tf('كم'))}</option>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="select-row">
+      <div class="select-wrap">
+        <i class="fa-solid fa-car"></i>
+        <select id="vehicleSelect">${options}</select>
+      </div>
+      <button type="button" class="btn btn-primary" id="changeVehicleBtn">
+        <i class="fa-solid fa-arrow-left-right"></i><span>${escapeHtml(tf('تغيير المركبة'))}</span>
+      </button>
+    </div>
+  `;
+
+  const select = document.getElementById('vehicleSelect');
+  const button = document.getElementById('changeVehicleBtn');
+  const handler = () => {
+    const value = select ? select.value : null;
+    if (value) changeVehicle(value);
+  };
+  select?.addEventListener('change', handler);
+  button?.addEventListener('click', handler);
+}
+
+async function addVehicle(name = null) {
+  const input = document.getElementById('newVehicleName');
+  const vehicleName = String(name ?? input?.value ?? '').trim();
+
+  if (!vehicleName) {
+    showToast(tf('الرجاء إدخال اسم المركبة'), 'error');
+    return null;
+  }
+
+  try {
+    const created = await createVehicleRow(vehicleName);
+    if (input) input.value = '';
+    if (created) AppState.currentVehicleId = created.id;
+    await loadVehicles();
+    showToast(tf('تم إضافة المركبة بنجاح'));
+    return created;
+  } catch (error) {
+    console.error('Add vehicle error:', error);
+    showToast(tf('خطأ في إضافة المركبة: ') + (error.message || ''), 'error');
+    return null;
+  }
+}
+
+async function changeVehicle(vehicleId) {
+  if (!vehicleId) return;
+  if (String(vehicleId) === String(AppState.currentVehicleId)) {
+    renderVehiclesList();
+    return;
+  }
+  AppState.currentVehicleId = vehicleId;
+  await loadVehicleData();
+  renderVehiclesList();
+  showToast(tf('تم التبديل إلى المركبة المحددة'));
+}
+
+async function loadVehicleData() {
+  if (!AppState.currentVehicleId) return;
+
+  try {
+    const { data: vehicleData, error: vehicleError } = await supabaseClient
+      .from('vehicles')
+      .select('*')
+      .eq('id', AppState.currentVehicleId)
+      .single();
+    if (vehicleError) throw vehicleError;
+
+    AppState.vehicleKm = Number(vehicleData.current_km) || 0;
+    AppState.lastKmDate = vehicleData.last_update || '';
+
+    const [maintenancesResult, frequenciesResult] = await Promise.all([
+      supabaseClient
+        .from('maintenances')
+        .select('*')
+        .eq('vehicle_id', AppState.currentVehicleId)
+        .order('date', { ascending: false }),
+      supabaseClient
+        .from('frequencies')
+        .select('*')
+        .eq('user_id', AppState.currentUserId)
+    ]);
+
+    if (maintenancesResult.error) throw maintenancesResult.error;
+    if (frequenciesResult.error) throw frequenciesResult.error;
+
+    AppState.maintenances = maintenancesResult.data || [];
+    const rows = frequenciesResult.data || [];
+
+    if (rows.length === 0) {
+      AppState.frequencies = { ...DEFAULT_FREQUENCIES };
+      try {
+        const seed = Object.entries(DEFAULT_FREQUENCIES).map(([type, frequency]) => ({
+          user_id: AppState.currentUserId,
+          maintenance_type: type,
+          frequency_km: frequency
+        }));
+        await supabaseClient.from('frequencies').upsert(seed, { onConflict: 'user_id, maintenance_type' });
+      } catch (seedError) {
+        console.error('Seed frequencies error:', seedError);
+      }
+    } else {
+      AppState.frequencies = {};
+      rows.forEach((row) => {
+        AppState.frequencies[row.maintenance_type] = Number(row.frequency_km) || 10000;
+      });
     }
 
-    // ========== GESTIÓN DE FRECUENCIAS ==========
-    function getLastKmForType(type) {
-        const lastMaint = AppState.maintenances.find(m => m.type === type);
-        return lastMaint ? lastMaint.kilometers : 0;
+    updateDisplay();
+    updateChart();
+    await checkAndSendReminders();
+  } catch (error) {
+    console.error('Load vehicle data error:', error);
+    showToast(tf('خطأ في تحميل بيانات المركبة: ') + (error.message || ''), 'error');
+  }
+}
+
+async function updateTotalKilometers() {
+  const input = document.getElementById('newKmInput');
+  const newKm = parseInt(input?.value, 10);
+
+  if (Number.isNaN(newKm) || newKm < 0) {
+    showToast(tf('الرجاء إدخال قيمة صحيحة'), 'error');
+    return;
+  }
+  if (newKm <= AppState.vehicleKm) {
+    showToast(tf('الرجاء إدخال قيمة أكبر من {value}', { value: formatNumber(AppState.vehicleKm) }), 'error');
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('vehicles')
+      .update({ current_km: newKm, last_update: todayISO() })
+      .eq('id', AppState.currentVehicleId);
+    if (error) throw error;
+
+    AppState.vehicleKm = newKm;
+    AppState.lastKmDate = todayISO();
+
+    const vehicle = getCurrentVehicle();
+    if (vehicle) {
+      vehicle.current_km = newKm;
+      vehicle.last_update = AppState.lastKmDate;
     }
 
-    function getNextKmForType(type) {
-        return getLastKmForType(type) + (AppState.frequencies[type] || 10000);
+    if (input) input.value = '';
+    updateDisplay();
+    showToast(tf('تم تحديث العداد إلى {value} km', { value: formatNumber(newKm) }));
+  } catch (error) {
+    console.error('Update odometer error:', error);
+    showToast(tf('خطأ في تحديث العداد: ') + (error.message || ''), 'error');
+  }
+}
+
+/* ---------- Maintenance ---------- */
+async function addMaintenance() {
+  const typeEl = document.getElementById('maintenanceTypeSelect');
+  const kmEl = document.getElementById('kilometers');
+  const costEl = document.getElementById('cost');
+  const dateEl = document.getElementById('date');
+  const descEl = document.getElementById('description');
+
+  if (!typeEl || !kmEl || !costEl || !dateEl || !descEl) {
+    showToast(tf('خطأ: عنصر النموذج مفقود'), 'error');
+    return;
+  }
+
+  const type = typeEl.value;
+  const kilometers = parseInt(kmEl.value, 10);
+  const cost = parseFloat(costEl.value) || 0;
+  const date = dateEl.value || todayISO();
+  const description = descEl.value.trim();
+
+  if (!type) {
+    showToast(tf('اختر نوع الصيانة'), 'error');
+    return;
+  }
+  if (Number.isNaN(kilometers) || kilometers < 0) {
+    showToast(tf('الرجاء إدخال عداد صحيح'), 'error');
+    return;
+  }
+  if (kilometers < AppState.vehicleKm) {
+    showToast(tf('العداد يجب أن يكون ≥ {value} km', { value: formatNumber(AppState.vehicleKm) }), 'error');
+    return;
+  }
+  if (cost < 0) {
+    showToast(tf('التكلفة يجب أن تكون قيمة موجبة'), 'error');
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient.from('maintenances').insert({
+      user_id: AppState.currentUserId,
+      vehicle_id: AppState.currentVehicleId,
+      type,
+      kilometers,
+      cost,
+      date,
+      description
+    }).select().single();
+    if (error) throw error;
+
+    if (data) AppState.maintenances.unshift(data);
+
+    if (kilometers > AppState.vehicleKm) {
+      AppState.vehicleKm = kilometers;
+      AppState.lastKmDate = todayISO();
+      await supabaseClient.from('vehicles').update({
+        current_km: AppState.vehicleKm,
+        last_update: AppState.lastKmDate
+      }).eq('id', AppState.currentVehicleId);
+
+      const vehicle = getCurrentVehicle();
+      if (vehicle) {
+        vehicle.current_km = AppState.vehicleKm;
+        vehicle.last_update = AppState.lastKmDate;
+      }
     }
 
-    function getKmRemaining(type) {
-        return Math.max(0, getNextKmForType(type) - AppState.vehicleKm);
+    clearForm();
+    updateDisplay();
+    updateChart();
+    showToast(tf('تم تسجيل الصيانة ومزامنتها مع السحاب'));
+    await checkAndSendReminders();
+  } catch (error) {
+    console.error('Add maintenance error:', error);
+    showToast(tf('خطأ في تسجيل الصيانة: ') + (error.message || ''), 'error');
+  }
+}
+
+async function deleteMaintenance(id) {
+  const confirmed = window.confirm(tf('هل أنت متأكد من حذف هذا السجل؟'));
+  if (!confirmed) return;
+
+  try {
+    const { error } = await supabaseClient.from('maintenances').delete().eq('id', id);
+    if (error) throw error;
+
+    AppState.maintenances = AppState.maintenances.filter((record) => String(record.id) !== String(id));
+    updateDisplay();
+    updateChart();
+    showToast(tf('تم حذف السجل'));
+  } catch (error) {
+    console.error('Delete maintenance error:', error);
+    showToast(tf('خطأ في حذف السجل: ') + (error.message || ''), 'error');
+  }
+}
+
+function clearForm() {
+  const cost = document.getElementById('cost');
+  const date = document.getElementById('date');
+  const description = document.getElementById('description');
+  const kmInput = document.getElementById('kilometers');
+  const typeSelect = document.getElementById('maintenanceTypeSelect');
+
+  if (cost) cost.value = '';
+  if (date) date.value = todayISO();
+  if (description) description.value = '';
+  if (kmInput) kmInput.value = AppState.vehicleKm || '';
+  if (typeSelect) typeSelect.selectedIndex = 0;
+}
+
+/* ---------- Rendering ---------- */
+function fillTypeSelect(select, placeholderKey) {
+  if (!select) return;
+  const previous = select.value;
+  select.innerHTML = '';
+
+  const placeholder = new Option(tf(placeholderKey), '');
+  select.add(placeholder);
+
+  const locale = currentLang === 'ar' ? 'ar' : 'en';
+  Object.keys(AppState.frequencies)
+    .sort((a, b) => typeLabel(a).localeCompare(typeLabel(b), locale))
+    .forEach((type) => {
+      select.add(new Option(typeLabel(type), type));
+    });
+
+  if (Array.from(select.options).some((option) => option.value === previous)) {
+    select.value = previous;
+  } else {
+    select.value = '';
+  }
+}
+
+function updateDisplay() {
+  if (!AppState.currentUserId) return;
+
+  const kmDisplay = document.getElementById('totalKmDisplay');
+  if (kmDisplay) kmDisplay.textContent = formatNumber(AppState.vehicleKm);
+
+  const lastUpdate = document.getElementById('lastKmUpdate');
+  if (lastUpdate) lastUpdate.textContent = formatDate(AppState.lastKmDate) || formatDate(todayISO());
+
+  syncVehicleHeader();
+  renderVehiclesList();
+  renderFrequencyTable();
+
+  fillTypeSelect(document.getElementById('maintenanceTypeSelect'), 'اختر نوع الصيانة');
+  fillTypeSelect(document.getElementById('filterSelect'), 'جميع الأنواع');
+
+  const totalCost = AppState.maintenances.reduce((sum, record) => sum + (Number(record.cost) || 0), 0);
+  const totalCount = document.getElementById('totalCount');
+  const totalCostEl = document.getElementById('totalCost');
+  if (totalCount) totalCount.textContent = String(AppState.maintenances.length);
+  if (totalCostEl) totalCostEl.textContent = `${totalCost.toFixed(2)} SAR`;
+
+  updateAlertsGrid();
+  applyFilters();
+
+  const kmInput = document.getElementById('kilometers');
+  if (kmInput && document.activeElement !== kmInput) {
+    kmInput.value = AppState.vehicleKm || '';
+  }
+}
+
+function syncVehicleHeader() {
+  const vehicle = getCurrentVehicle();
+  const name = vehicle?.name || '—';
+
+  const heroName = document.getElementById('heroVehicleName');
+  if (heroName) heroName.textContent = name;
+
+  const heroMeta = document.getElementById('heroVehicleMeta');
+  if (heroMeta) heroMeta.textContent = `${AppState.maintenances.length} ${tf('عملية صيانة')}`;
+
+  const topbarVehicle = document.getElementById('vehicleNameDisplay');
+  if (topbarVehicle) topbarVehicle.textContent = name;
+}
+
+function renderFrequencyTable() {
+  const tbody = document.getElementById('freqBody');
+  if (!tbody) return;
+
+  const types = Object.keys(AppState.frequencies);
+  if (!types.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-sliders"></i><strong>${escapeHtml(tf('لا توجد سجلات'))}</strong></div></td></tr>`;
+    return;
+  }
+
+  const rows = types.map((type) => {
+    const frequency = Number(AppState.frequencies[type]) || 10000;
+    const lastKm = getLastKmForType(type);
+    const nextKm = getNextKmForType(type);
+    const remaining = getKmRemaining(type);
+
+    let status = '';
+    let statusClass = 'ok';
+    let rowStyle = '';
+
+    if (remaining <= 0) {
+      status = tf('منتهي!');
+      statusClass = 'urgent';
+      rowStyle = 'background:#fff1f2;';
+    } else if (remaining <= 1000) {
+      status = `${formatNumber(remaining)} ${tf('كم')} · ${tf('عاجل')}`;
+      statusClass = 'urgent';
+      rowStyle = 'background:#fff1f2;';
+    } else if (remaining <= 3000) {
+      status = `${formatNumber(remaining)} ${tf('كم')} · ${tf('قريب')}`;
+      statusClass = 'soon';
+      rowStyle = 'background:#fffbeb;';
+    } else {
+      status = `${formatNumber(remaining)} ${tf('كم')} · ${tf('متبقي')}`;
+      statusClass = 'ok';
     }
 
-    function toggleFrequencyTable() {
-        const content = document.getElementById('frequencyContent');
-        const icon = document.getElementById('toggleIcon');
-        if (!content || !icon) return;
-        content.classList.toggle('show');
-        icon.classList.toggle('fa-chevron-down');
-        icon.classList.toggle('fa-chevron-up');
-    }
+    return `
+      <tr style="${rowStyle}">
+        <td><strong>${escapeHtml(typeLabel(type))}</strong></td>
+        <td><input type="number" data-freq-type="${escapeHtml(type)}" value="${frequency}" min="1000" max="1000000" step="1000"></td>
+        <td>${lastKm > 0 ? `${formatNumber(lastKm)} ${escapeHtml(tf('كم'))}` : '—'}</td>
+        <td><strong>${formatNumber(nextKm)} ${escapeHtml(tf('كم'))}</strong></td>
+        <td><span class="status-text ${statusClass}">${escapeHtml(status)}</span></td>
+        <td>
+          <div class="row-actions">
+            <button type="button" class="icon-btn" data-edit-type="${escapeHtml(type)}" title="${escapeHtml(tf('تعديل'))}" aria-label="${escapeHtml(tf('تعديل'))}"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" class="icon-btn danger" data-delete-type="${escapeHtml(type)}" title="${escapeHtml(tf('حذف'))}" aria-label="${escapeHtml(tf('حذف'))}"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
 
-    async function saveFrequencies() {
-        if (!AppState.currentUserId) {
-            showToast("⚠️ Error: usuario no identificado", "error");
-            return;
+  tbody.innerHTML = rows;
+
+  tbody.querySelectorAll('[data-edit-type]').forEach((button) => {
+    button.addEventListener('click', () => editType(button.getAttribute('data-edit-type')));
+  });
+  tbody.querySelectorAll('[data-delete-type]').forEach((button) => {
+    button.addEventListener('click', () => deleteType(button.getAttribute('data-delete-type')));
+  });
+}
+
+function updateAlertsGrid() {
+  const grid = document.getElementById('alertsGrid');
+  const badge = document.getElementById('alertBadge');
+  const count = document.getElementById('alertCount');
+  if (!grid) return;
+
+  const alerts = Object.keys(AppState.frequencies)
+    .map((type) => ({ type, remaining: getKmRemaining(type) }))
+    .filter((alert) => alert.remaining <= 3000)
+    .sort((a, b) => a.remaining - b.remaining);
+
+  if (badge) badge.textContent = String(alerts.length);
+  if (count) count.textContent = String(alerts.length);
+
+  if (!alerts.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <i class="fa-solid fa-circle-check"></i>
+        <strong>${escapeHtml(tf('كل شيء على ما يرام'))}</strong>
+        <p>${escapeHtml(tf('لا توجد تنبيهات'))}</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = alerts.map((alert) => {
+    const urgent = alert.remaining <= 1000;
+    const detail = alert.remaining <= 0
+      ? tf('مطلوب الآن')
+      : alert.remaining <= 1000
+        ? tf('أقل من 1000 km - عاجل')
+        : tf('يحتاج صيانة قريباً');
+
+    return `
+      <div class="alert-item ${urgent ? 'urgent' : 'soon'}">
+        <div class="alert-icon"><i class="fa-solid fa-bell"></i></div>
+        <div class="alert-body">
+          <h4>${escapeHtml(typeLabel(alert.type))}</h4>
+          <p>${escapeHtml(detail)}${alert.remaining > 0 ? ` · ${formatNumber(alert.remaining)} ${escapeHtml(tf('كم'))}` : ''}</p>
+        </div>
+        <button type="button" class="btn btn-warning" data-reminder-type="${escapeHtml(alert.type)}" data-remaining="${alert.remaining}">
+          <i class="fa-solid fa-envelope"></i><span>${escapeHtml(tf('تذكير'))}</span>
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('[data-reminder-type]').forEach((button) => {
+    button.addEventListener('click', () => {
+      sendEmailReminder(button.getAttribute('data-reminder-type'), parseInt(button.getAttribute('data-remaining'), 10));
+    });
+  });
+}
+
+function applyFilters() {
+  const filterSelect = document.getElementById('filterSelect');
+  if (filterSelect) AppState.currentFilter = filterSelect.value || '';
+
+  const container = document.getElementById('maintList');
+  if (!container) return;
+
+  const filtered = (AppState.currentFilter
+    ? AppState.maintenances.filter((record) => record.type === AppState.currentFilter)
+    : AppState.maintenances.slice()
+  ).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+  if (!filtered.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fa-solid fa-inbox"></i>
+        <strong>${escapeHtml(tf('لا توجد سجلات'))}</strong>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map((record) => {
+    const frequency = Number(AppState.frequencies[record.type]) || 10000;
+    const lastServiceKm = Number(record.kilometers) || 0;
+    const nextKm = getNextKmForType(record.type);
+    const remaining = getKmRemaining(record.type);
+    const traveled = Math.max(0, AppState.vehicleKm - lastServiceKm);
+    const progress = Math.min(100, (traveled / frequency) * 100);
+    const progressClass = remaining <= 1000 ? 'danger' : remaining <= 3000 ? 'warning' : '';
+    const remainingText = remaining <= 0
+      ? tf('منتهي')
+      : `${formatNumber(remaining)} ${tf('كم')} ${tf('متبقي')}`;
+
+    return `
+      <div class="maintenance-item">
+        <div class="maintenance-main">
+          <h4><i class="fa-solid fa-screwdriver-wrench"></i>${escapeHtml(typeLabel(record.type))}</h4>
+          <div class="badges">
+            <span class="badge"><i class="fa-regular fa-calendar"></i>${escapeHtml(formatDate(record.date))}</span>
+            <span class="badge"><i class="fa-solid fa-gauge-high"></i>${formatNumber(record.kilometers)} ${escapeHtml(tf('كم'))}</span>
+            <span class="badge cost"><i class="fa-solid fa-coins"></i>${(Number(record.cost) || 0).toFixed(2)} SAR</span>
+          </div>
+          <p class="maintenance-desc">${escapeHtml(record.description || tf('بدون ملاحظات'))}</p>
+          <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width:${progress.toFixed(1)}%"></div></div>
+          <small class="muted small">${escapeHtml(tf('الصيانة القادمة عند'))} ${formatNumber(nextKm)} ${escapeHtml(tf('كم'))} (${escapeHtml(remainingText)})</small>
+        </div>
+        <div class="maintenance-actions">
+          <button type="button" class="btn btn-soft" data-invoice-id="${escapeHtml(record.id)}">
+            <i class="fa-solid fa-file-invoice"></i><span>${escapeHtml(tf('فاتورة'))}</span>
+          </button>
+          <button type="button" class="icon-btn danger" data-delete-id="${escapeHtml(record.id)}" title="${escapeHtml(tf('حذف'))}" aria-label="${escapeHtml(tf('حذف'))}">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('[data-invoice-id]').forEach((button) => {
+    button.addEventListener('click', () => generateInvoicePDF(button.getAttribute('data-invoice-id')));
+  });
+  container.querySelectorAll('[data-delete-id]').forEach((button) => {
+    button.addEventListener('click', () => deleteMaintenance(button.getAttribute('data-delete-id')));
+  });
+}
+
+function resetFilters() {
+  const filterSelect = document.getElementById('filterSelect');
+  if (filterSelect) filterSelect.value = '';
+  applyFilters();
+}
+
+/* ---------- Chart ---------- */
+function updateChart() {
+  const canvas = document.getElementById('expensesChart');
+  if (!canvas || !window.Chart) return;
+
+  const existing = Chart.getChart(canvas);
+  if (existing) existing.destroy();
+
+  const monthly = {};
+  AppState.maintenances.forEach((record) => {
+    const month = String(record.date || '').slice(0, 7);
+    if (!/^\d{4}-\d{2}$/.test(month)) return;
+    monthly[month] = (monthly[month] || 0) + (Number(record.cost) || 0);
+  });
+
+  const months = Object.keys(monthly).sort();
+  const locale = currentLang === 'en' ? 'en-US' : 'ar-EG';
+  const labels = months.map((month) => {
+    const [year, monthNumber] = month.split('-').map(Number);
+    const date = new Date(year, (monthNumber || 1) - 1, 1);
+    return date.toLocaleDateString(locale, { month: 'short', year: 'numeric' });
+  });
+  const values = months.map((month) => monthly[month]);
+
+  AppState.expensesChart = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: tf('المصروفات (SAR)'),
+        data: values,
+        backgroundColor: '#10b981',
+        hoverBackgroundColor: '#059669',
+        borderRadius: 7,
+        maxBarThickness: 46
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      font: {
+        family: currentLang === 'en' ? "'Inter', sans-serif" : "'Tajawal', sans-serif"
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => `${formatNumber(context.parsed.y)} SAR`
+          }
         }
-        for (const [type, freq] of Object.entries(AppState.frequencies)) {
-            const { error } = await supabaseClient.from('frequencies').upsert({
-                user_id: AppState.currentUserId,
-                maintenance_type: type,
-                frequency_km: freq
-            }, { onConflict: 'user_id, maintenance_type' });
-            if (error) console.error(error);
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: '#eef2f1' },
+          ticks: {
+            callback: (value) => `${formatNumber(value)} SAR`
+          }
+        },
+        x: {
+          grid: { display: false }
         }
-        showToast("تم حفظ الترددات");
+      }
+    }
+  });
+}
+
+/* ---------- Reminders ---------- */
+function sendEmailReminder(type, remaining) {
+  if (!AppState.currentUserEmail) {
+    showToast(tf('لا يوجد بريد إلكتروني مسجل لهذا المستخدم'), 'error');
+    return;
+  }
+
+  const subject = encodeURIComponent(tf('تذكير صيانة: {type}', { type: typeLabel(type) }));
+  const body = encodeURIComponent(tf(
+    'مرحباً {name}،\n\nموعد صيانة {type} قد اقترب. المتبقي {remaining} كم.\n\nمع تحيات ورشتي',
+    {
+      name: AppState.currentUsername || '',
+      type: typeLabel(type),
+      remaining: formatNumber(Math.max(0, remaining))
+    }
+  ));
+
+  window.location.href = `mailto:${AppState.currentUserEmail}?subject=${subject}&body=${body}`;
+  showToast(tf('تم فتح بريدك الإلكتروني لإرسال التذكير'), 'info');
+}
+
+async function checkAndSendReminders() {
+  const cooldown = 24 * 60 * 60 * 1000;
+
+  for (const type of Object.keys(AppState.frequencies)) {
+    const remaining = getKmRemaining(type);
+    if (remaining <= 0 || remaining > 1000) continue;
+
+    const key = `reminder_${type}_${AppState.currentVehicleId}`;
+    const lastSent = localStorage.getItem(key);
+    const now = Date.now();
+
+    if (!lastSent || (now - Number(lastSent)) > cooldown) {
+      localStorage.setItem(key, String(now));
+      sendEmailReminder(type, remaining);
+      break;
+    }
+  }
+}
+
+/* ---------- PDF ---------- */
+function buildPdfElement(content) {
+  const element = document.createElement('div');
+  element.style.cssText = [
+    'position:fixed',
+    'top:0',
+    'left:-10000px',
+    'width:210mm',
+    'background:#ffffff',
+    'color:#1e293b',
+    'padding:15mm',
+    'z-index:99999',
+    `font-family:${currentLang === 'ar' ? "'Tajawal',sans-serif" : "'Inter',sans-serif"}`,
+    `text-align:${currentLang === 'ar' ? 'right' : 'left'}`,
+    `direction:${currentLang === 'ar' ? 'rtl' : 'ltr'}`,
+    'box-sizing:border-box'
+  ].join(';');
+  element.innerHTML = content;
+  return element;
+}
+
+async function downloadElementAsPdf(element, filename, successMessage, errorPrefix) {
+  document.body.appendChild(element);
+  await new Promise((resolve) => window.setTimeout(resolve, 250));
+
+  try {
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      logging: false,
+      backgroundColor: '#ffffff',
+      useCORS: true
+    });
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imageData = canvas.toDataURL('image/jpeg', 0.95);
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const ratio = canvas.height / canvas.width;
+
+    let imageWidth = pageWidth;
+    let imageHeight = pageWidth * ratio;
+    if (imageHeight > pageHeight) {
+      imageHeight = pageHeight;
+      imageWidth = imageHeight / ratio;
     }
 
-    function openAddTypeModal() {
-        document.getElementById('modalTitle').innerText = 'إضافة نوع صيانة جديد';
-        document.getElementById('typeName').value = '';
-        document.getElementById('typeFreq').value = '10000';
-        document.getElementById('editTypeOld').value = '';
-        document.getElementById('typeModal').classList.add('active');
+    pdf.addImage(imageData, 'JPEG', 0, 0, imageWidth, imageHeight);
+    pdf.save(filename);
+    showToast(successMessage);
+  } catch (error) {
+    console.error('PDF error:', error);
+    showToast(errorPrefix + (error.message || ''), 'error');
+  } finally {
+    element.remove();
+  }
+}
+
+async function generateInvoicePDF(id) {
+  const record = AppState.maintenances.find((item) => String(item.id) === String(id));
+  if (!record) return;
+
+  const vehicle = getCurrentVehicle();
+  const vehicleName = vehicle?.name || tf('سيارة');
+  const brand = currentLang === 'en' ? 'Warchati' : 'ورشتي';
+  const align = currentLang === 'ar' ? 'right' : 'left';
+
+  const content = `
+    <div style="border-bottom:3px solid #0f9d76;margin-bottom:20px;padding-bottom:12px;">
+      <h1 style="margin:0;color:#0f172a;">${brand}</h1>
+      <p style="margin:4px 0 0;color:#64748b;">${escapeHtml(tf('فاتورة صيانة رسمية'))}</p>
+    </div>
+    <div style="margin-bottom:20px;line-height:1.9;">
+      <p><strong>${escapeHtml(tf('رقم الفاتورة'))}:</strong> INV-${escapeHtml(record.id)}-${Date.now()}</p>
+      <p><strong>${escapeHtml(tf('التاريخ'))}:</strong> ${formatDate(todayISO())}</p>
+      <p><strong>${escapeHtml(tf('المركبة'))}:</strong> ${escapeHtml(vehicleName)}</p>
+    </div>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
+      <tr style="background:#f1f5f9;">
+        <th style="padding:12px;text-align:${align};">${escapeHtml(tf('نوع الصيانة'))}</th>
+        <th style="padding:12px;text-align:${align};">${escapeHtml(tf('العداد'))}</th>
+        <th style="padding:12px;text-align:${align};">${escapeHtml(tf('المبلغ'))}</th>
+      </tr>
+      <tr>
+        <td style="padding:12px;border-top:1px solid #e2e8f0;">${escapeHtml(typeLabel(record.type))}</td>
+        <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatNumber(record.kilometers)} km</td>
+        <td style="padding:12px;border-top:1px solid #e2e8f0;">${(Number(record.cost) || 0).toFixed(2)} SAR</td>
+      </tr>
+      <tr>
+        <td colspan="3" style="padding:12px;border-top:1px solid #e2e8f0;"><strong>${escapeHtml(tf('الملاحظات'))}:</strong> ${escapeHtml(record.description || tf('لا توجد'))}</td>
+      </tr>
+    </table>
+    <div style="margin-top:30px;text-align:center;color:#64748b;">${escapeHtml(tf('شكراً لثقتكم بنا'))}</div>
+  `;
+
+  await downloadElementAsPdf(
+    buildPdfElement(content),
+    `invoice_${record.id}.pdf`,
+    tf('تم إنشاء الفاتورة بنجاح'),
+    tf('خطأ في إنشاء الفاتورة: ')
+  );
+}
+
+async function generateFullReport() {
+  const totalCost = AppState.maintenances.reduce((sum, record) => sum + (Number(record.cost) || 0), 0);
+  const vehicle = getCurrentVehicle();
+  const vehicleName = vehicle?.name || tf('سيارة');
+  const brand = currentLang === 'en' ? 'Warchati' : 'ورشتي';
+  const align = currentLang === 'ar' ? 'right' : 'left';
+
+  const rows = AppState.maintenances
+    .slice()
+    .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+    .map((record) => `
+      <tr>
+        <td style="padding:10px;border-top:1px solid #e2e8f0;">${escapeHtml(formatDate(record.date))}</td>
+        <td style="padding:10px;border-top:1px solid #e2e8f0;">${escapeHtml(typeLabel(record.type))}</td>
+        <td style="padding:10px;border-top:1px solid #e2e8f0;">${formatNumber(record.kilometers)} km</td>
+        <td style="padding:10px;border-top:1px solid #e2e8f0;">${(Number(record.cost) || 0).toFixed(2)} SAR</td>
+        <td style="padding:10px;border-top:1px solid #e2e8f0;">${escapeHtml(record.description || '—')}</td>
+      </tr>
+    `).join('');
+
+  const content = `
+    <div style="border-bottom:3px solid #0f9d76;padding-bottom:12px;">
+      <h1 style="margin:0;color:#0f172a;">${brand}</h1>
+      <p style="margin:4px 0 0;color:#64748b;">${escapeHtml(tf('تقرير الصيانة الشامل'))}</p>
+    </div>
+    <div style="margin:20px 0;line-height:1.9;">
+      <p><strong>${escapeHtml(tf('المركبة'))}:</strong> ${escapeHtml(vehicleName)}</p>
+      <p><strong>${escapeHtml(tf('العداد الحالي'))}:</strong> ${formatNumber(AppState.vehicleKm)} km</p>
+      <p><strong>${escapeHtml(tf('إجمالي الصيانات'))}:</strong> ${AppState.maintenances.length}</p>
+      <p><strong>${escapeHtml(tf('إجمالي المصروفات'))}:</strong> ${totalCost.toFixed(2)} SAR</p>
+    </div>
+    <h3>${escapeHtml(tf('تفاصيل الصيانات'))}</h3>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
+      <tr style="background:#f1f5f9;">
+        <th style="padding:10px;text-align:${align};">${escapeHtml(tf('التاريخ'))}</th>
+        <th style="padding:10px;text-align:${align};">${escapeHtml(tf('نوع الصيانة'))}</th>
+        <th style="padding:10px;text-align:${align};">${escapeHtml(tf('العداد'))}</th>
+        <th style="padding:10px;text-align:${align};">${escapeHtml(tf('التكلفة'))}</th>
+        <th style="padding:10px;text-align:${align};">${escapeHtml(tf('ملاحظات'))}</th>
+      </tr>
+      ${rows || `<tr><td colspan="5" style="padding:14px;border-top:1px solid #e2e8f0;text-align:center;">${escapeHtml(tf('لا توجد سجلات'))}</td></tr>`}
+    </table>
+    <div style="margin-top:30px;text-align:center;color:#64748b;">${escapeHtml(tf('تم إنشاء التقرير في'))} ${formatDate(todayISO())}</div>
+  `;
+
+  await downloadElementAsPdf(
+    buildPdfElement(content),
+    `report_${Date.now()}.pdf`,
+    tf('تم إنشاء التقرير بنجاح'),
+    tf('خطأ في إنشاء التقرير: ')
+  );
+}
+
+/* ---------- Excel ---------- */
+function exportToExcel() {
+  try {
+    const data = [[
+      tf('التاريخ'),
+      tf('نوع الصيانة'),
+      tf('العداد (كم)'),
+      tf('التكلفة (SAR)'),
+      tf('الملاحظات')
+    ]];
+
+    AppState.maintenances.forEach((record) => {
+      data.push([
+        formatDate(record.date),
+        typeLabel(record.type),
+        Number(record.kilometers) || 0,
+        (Number(record.cost) || 0).toFixed(2),
+        record.description || ''
+      ]);
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, tf('الصيانات'));
+    XLSX.writeFile(workbook, `warchati_maintenance_${Date.now()}.xlsx`);
+    showToast(tf('تم تصدير البيانات إلى Excel'));
+  } catch (error) {
+    console.error('Excel export error:', error);
+    showToast(tf('خطأ في تصدير البيانات'), 'error');
+  }
+}
+
+/* ---------- Events ---------- */
+function initPasswordToggles() {
+  document.querySelectorAll('.password-toggle').forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = document.getElementById(button.dataset.target);
+      if (!target) return;
+      const show = target.type === 'password';
+      target.type = show ? 'text' : 'password';
+      button.innerHTML = `<i class="fa-regular ${show ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+    });
+  });
+}
+
+function setTodayDate() {
+  const dateInput = document.getElementById('date');
+  if (dateInput && !dateInput.value) dateInput.value = todayISO();
+}
+
+function initEventListeners() {
+  document.getElementById('loginForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    login();
+  });
+
+  document.getElementById('registerForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    register();
+  });
+
+  document.querySelectorAll('.lang-btn').forEach((button) => {
+    button.addEventListener('click', () => applyLanguage(button.dataset.lang));
+  });
+
+  document.addEventListener('click', (event) => {
+    const pageButton = event.target.closest('[data-page]');
+    if (pageButton) navigate(pageButton.getAttribute('data-page'));
+  });
+
+  document.getElementById('showRegisterBtn')?.addEventListener('click', showRegisterForm);
+  document.getElementById('showLoginBtn')?.addEventListener('click', showLoginForm);
+  document.getElementById('forgotPasswordBtn')?.addEventListener('click', resetPassword);
+  document.getElementById('logoutBtn')?.addEventListener('click', logout);
+
+  document.getElementById('addVehicleBtn')?.addEventListener('click', () => addVehicle());
+  document.getElementById('newVehicleName')?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addVehicle();
     }
+  });
 
-    function editType(type) {
-        document.getElementById('modalTitle').innerText = 'تعديل نوع الصيانة';
-        document.getElementById('typeName').value = type;
-        document.getElementById('typeFreq').value = AppState.frequencies[type] || 10000;
-        document.getElementById('editTypeOld').value = type;
-        document.getElementById('typeModal').classList.add('active');
+  document.getElementById('updateKmBtn')?.addEventListener('click', updateTotalKilometers);
+  document.getElementById('newKmInput')?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      updateTotalKilometers();
     }
+  });
 
-    function closeModal() {
-        document.getElementById('typeModal').classList.remove('active');
-    }
+  document.getElementById('addMaintBtn')?.addEventListener('click', addMaintenance);
+  document.getElementById('saveFreqBtn')?.addEventListener('click', saveFrequencies);
+  document.getElementById('addTypeBtn')?.addEventListener('click', openAddTypeModal);
+  document.getElementById('saveTypeBtn')?.addEventListener('click', saveType);
+  document.getElementById('closeTypeModalBtn')?.addEventListener('click', closeModal);
+  document.getElementById('toggleFreqHeader')?.addEventListener('click', toggleFrequencyTable);
 
-    async function saveType() {
-        const newName = document.getElementById('typeName').value.trim();
-        const frequency = parseInt(document.getElementById('typeFreq').value);
-        const editingOld = document.getElementById('editTypeOld').value;
+  document.getElementById('exportExcelBtn')?.addEventListener('click', exportToExcel);
+  document.getElementById('fullReportBtn')?.addEventListener('click', generateFullReport);
+  document.getElementById('applyFilterBtn')?.addEventListener('click', applyFilters);
+  document.getElementById('resetFilterBtn')?.addEventListener('click', resetFilters);
 
-        if (!newName) {
-            showToast("الرجاء إدخال اسم نوع الصيانة", "error");
-            return;
-        }
-        if (isNaN(frequency) || frequency < 1000 || frequency > 1000000) {
-            showToast("الرجاء إدخال مسافة صحيحة (بين 1000 و 1000000 كم)", "error");
-            return;
-        }
+  const modal = document.getElementById('typeModal');
+  modal?.addEventListener('click', (event) => {
+    if (event.target === modal) closeModal();
+  });
 
-        if (editingOld && editingOld !== newName) {
-            delete AppState.frequencies[editingOld];
-            AppState.frequencies[newName] = frequency;
-        } else if (!editingOld) {
-            if (AppState.frequencies[newName] !== undefined) {
-                showToast("هذا النوع موجود بالفعل", "error");
-                return;
-            }
-            AppState.frequencies[newName] = frequency;
-        } else {
-            AppState.frequencies[editingOld] = frequency;
-        }
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeModal();
+  });
 
-        try {
-            const { error } = await supabaseClient.from('frequencies').upsert({
-                user_id: AppState.currentUserId,
-                maintenance_type: newName,
-                frequency_km: frequency
-            }, { onConflict: 'user_id, maintenance_type' });
-            if (error) throw error;
-            closeModal();
-            updateDisplay();
-            showToast("تم حفظ نوع الصيانة في السحاب");
-        } catch (error) {
-            console.error('Error saving type:', error);
-            showToast("خطأ في حفظ نوع الصيانة: " + error.message, "error");
-        }
-    }
+  window.addEventListener('online', updateSyncPill);
+  window.addEventListener('offline', updateSyncPill);
+}
 
-    async function deleteType(type) {
-        if (!confirm(`هل أنت متأكد من حذف نوع "${type}"؟ سيتم حذف جميع سجلات الصيانة المرتبطة به.`)) return;
-        try {
-            delete AppState.frequencies[type];
-            await supabaseClient.from('frequencies').delete().eq('user_id', AppState.currentUserId).eq('maintenance_type', type);
-            await supabaseClient.from('maintenances').delete().eq('user_id', AppState.currentUserId).eq('type', type).eq('vehicle_id', AppState.currentVehicleId);
-            AppState.maintenances = AppState.maintenances.filter(m => m.type !== type);
-            updateDisplay();
-            updateChart();
-            showToast(`تم حذف نوع "${type}"`);
-        } catch (error) {
-            console.error('Error deleting type:', error);
-            showToast("خطأ في حذف النوع: " + error.message, "error");
-        }
-    }
+function init() {
+  const savedLang = localStorage.getItem('warchati_lang');
+  applyLanguage(savedLang === 'en' ? 'en' : 'ar');
+  initPasswordToggles();
+  initEventListeners();
+  setTodayDate();
+  updateSyncPill();
+  restoreSession();
+}
 
-    // ========== GESTIÓN DE VEHÍCULOS ==========
-    async function loadVehicles() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('vehicles')
-                .select('*')
-                .eq('user_id', AppState.currentUserId)
-                .order('created_at', { ascending: true });
-            if (error) throw error;
-            AppState.vehicles = data || [];
-            if (AppState.vehicles.length === 0) {
-                const defaultVehicle = await addVehicle('سيارتي');
-                if (defaultVehicle) AppState.vehicles = [defaultVehicle];
-            }
-            if (AppState.vehicles.length > 0 && !AppState.currentVehicleId) {
-                AppState.currentVehicleId = AppState.vehicles[0].id;
-            }
-            renderVehiclesList();
-            if (AppState.currentVehicleId) await loadVehicleData();
-        } catch (error) {
-            console.error('Error loading vehicles:', error);
-            showToast("خطأ في تحميل المركبات: " + error.message, "error");
-        }
-    }
-
-    function renderVehiclesList() {
-        const container = document.getElementById('vehiclesList');
-        if (!container) return;
-        if (AppState.vehicles.length === 0) {
-            container.innerHTML = '<p>لا توجد مركبات مضافة</p>';
-            return;
-        }
-        container.innerHTML = `
-            <select id="vehicleSelect" style="width:100%; padding:8px; border-radius:12px;">
-                ${AppState.vehicles.map(v => `<option value="${v.id}" ${v.id === AppState.currentVehicleId ? 'selected' : ''}>${v.name} (${formatNumber(v.current_km || 0)} km)</option>`).join('')}
-            </select>
-            <button id="changeVehicleBtn" style="margin-top:8px; width:100%; background:white; color:var(--primary);">تغيير المركبة</button>
-        `;
-        document.getElementById('changeVehicleBtn')?.addEventListener('click', () => changeVehicle(document.getElementById('vehicleSelect').value));
-    }
-
-    async function addVehicle(name = null) {
-        const vehicleName = name || document.getElementById('newVehicleName')?.value.trim();
-        if (!vehicleName) {
-            showToast("الرجاء إدخال اسم المركبة", "error");
-            return null;
-        }
-        try {
-            const { data, error } = await supabaseClient.from('vehicles').insert({
-                user_id: AppState.currentUserId,
-                name: vehicleName,
-                current_km: 0,
-                last_update: new Date().toISOString().split('T')[0]
-            }).select().single();
-            if (error) throw error;
-            if (document.getElementById('newVehicleName')) document.getElementById('newVehicleName').value = '';
-            await loadVehicles();
-            if (data) {
-                AppState.currentVehicleId = data.id;
-                await loadVehicleData();
-            }
-            showToast("تم إضافة المركبة بنجاح");
-            return data;
-        } catch (error) {
-            console.error('Error adding vehicle:', error);
-            showToast("خطأ في إضافة المركبة: " + error.message, "error");
-            return null;
-        }
-    }
-
-    async function changeVehicle(vehicleId) {
-        if (!vehicleId) return;
-        AppState.currentVehicleId = parseInt(vehicleId);
-        await loadVehicleData();
-        renderVehiclesList();
-        actualizarNombreVehiculoEnCabecera();
-        showToast("تم التبديل إلى المركبة المحددة");
-    }
-
-    async function loadVehicleData() {
-        if (!AppState.currentVehicleId) return;
-        try {
-            const { data: vehicleData, error: vehicleError } = await supabaseClient.from('vehicles').select('*').eq('id', AppState.currentVehicleId).single();
-            if (vehicleError) throw vehicleError;
-            if (vehicleData) {
-                AppState.vehicleKm = vehicleData.current_km || 0;
-                AppState.lastKmDate = vehicleData.last_update || "";
-            }
-            const [maintenancesResult, frequenciesResult] = await Promise.all([
-                supabaseClient.from('maintenances').select('*').eq('vehicle_id', AppState.currentVehicleId).order('date', { ascending: false }),
-                supabaseClient.from('frequencies').select('*').eq('user_id', AppState.currentUserId)
-            ]);
-            if (maintenancesResult.error) throw maintenancesResult.error;
-            if (frequenciesResult.error) throw frequenciesResult.error;
-            AppState.maintenances = maintenancesResult.data || [];
-            AppState.frequencies = { ...DEFAULT_FREQUENCIES };
-            if (frequenciesResult.data) {
-                for (const row of frequenciesResult.data) {
-                    AppState.frequencies[row.maintenance_type] = row.frequency_km;
-                }
-            }
-            actualizarNombreVehiculoEnCabecera();
-            updateDisplay();
-            updateChart();
-            await checkAndSendReminders();
-        } catch (error) {
-            console.error('Error loading vehicle data:', error);
-            showToast("خطأ في تحميل بيانات المركبة: " + error.message, "error");
-        }
-    }
-
-    async function updateTotalKilometers() {
-        const newKm = parseInt(document.getElementById('newKmInput')?.value);
-        if (!newKm || isNaN(newKm)) {
-            showToast("الرجاء إدخال قيمة صحيحة", "error");
-            return;
-        }
-        if (newKm <= AppState.vehicleKm) {
-            showToast(`الرجاء إدخال قيمة أكبر من ${formatNumber(AppState.vehicleKm)}`, "error");
-            return;
-        }
-        try {
-            const { error } = await supabaseClient.from('vehicles').update({
-                current_km: newKm,
-                last_update: new Date().toISOString().split('T')[0]
-            }).eq('id', AppState.currentVehicleId);
-            if (error) throw error;
-            AppState.vehicleKm = newKm;
-            AppState.lastKmDate = new Date().toISOString().split('T')[0];
-            document.getElementById('newKmInput').value = '';
-            updateDisplay();
-            const kmField = document.getElementById('kilometers');
-            if (kmField) kmField.value = AppState.vehicleKm;
-            showToast(`تم تحديث العداد إلى ${formatNumber(newKm)} km`);
-        } catch (error) {
-            console.error('Error updating kilometers:', error);
-            showToast("خطأ في تحديث العداد: " + error.message, "error");
-        }
-    }
-
-    // ========== GESTIÓN DE MANTENIMIENTOS ==========
-    async function addMaintenance() {
-        const typeEl = document.getElementById('maintenanceTypeSelect');
-        const kmEl = document.getElementById('kilometers');
-        const costEl = document.getElementById('cost');
-        const dateEl = document.getElementById('date');
-        const descEl = document.getElementById('description');
-
-        if (!typeEl || !kmEl || !costEl || !dateEl || !descEl) {
-            showToast("خطأ: عنصر النموذج مفقود", "error");
-            return;
-        }
-
-        const type = typeEl.value;
-        const kilometers = parseInt(kmEl.value);
-        const cost = parseFloat(costEl.value) || 0;
-        const date = dateEl.value || new Date().toISOString().split('T')[0];
-        const description = descEl.value || '';
-
-        if (!type) { showToast("اختر نوع الصيانة", "error"); return; }
-        if (!kilometers || isNaN(kilometers) || kilometers < 0) { showToast("الرجاء إدخال عداد صحيح", "error"); return; }
-        if (kilometers < AppState.vehicleKm) { showToast(`العداد يجب أن يكون ≥ ${formatNumber(AppState.vehicleKm)} km`, "error"); return; }
-        if (cost < 0) { showToast("التكلفة يجب أن تكون قيمة موجبة", "error"); return; }
-
-        try {
-            const { data, error } = await supabaseClient.from('maintenances').insert({
-                user_id: AppState.currentUserId,
-                vehicle_id: AppState.currentVehicleId,
-                type: type,
-                kilometers: kilometers,
-                cost: cost,
-                date: date,
-                description: description
-            }).select().single();
-
-            if (error) throw error;
-
-            if (data) AppState.maintenances.unshift(data);
-
-            if (kilometers > AppState.vehicleKm) {
-                AppState.vehicleKm = kilometers;
-                AppState.lastKmDate = new Date().toISOString().split('T')[0];
-                await supabaseClient.from('vehicles').update({
-                    current_km: AppState.vehicleKm,
-                    last_update: AppState.lastKmDate
-                }).eq('id', AppState.currentVehicleId);
-            }
-
-            clearForm();
-            updateDisplay();
-            updateChart();
-            showToast("تم تسجيل الصيانة ومزامنتها مع السحاب");
-            await checkAndSendReminders();
-        } catch (error) {
-            console.error('Error adding maintenance:', error);
-            showToast("خطأ في تسجيل الصيانة: " + error.message, "error");
-        }
-    }
-
-    async function deleteMaintenance(id) {
-        if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) return;
-        try {
-            const { error } = await supabaseClient.from('maintenances').delete().eq('id', id);
-            if (error) throw error;
-            AppState.maintenances = AppState.maintenances.filter(m => m.id !== id);
-            updateDisplay();
-            updateChart();
-            showToast("تم حذف السجل");
-        } catch (error) {
-            console.error('Error deleting maintenance:', error);
-            showToast("خطأ في حذف السجل: " + error.message, "error");
-        }
-    }
-
-    function clearForm() {
-        document.getElementById('cost').value = '';
-        document.getElementById('date').value = '';
-        document.getElementById('description').value = '';
-        const kmInput = document.getElementById('kilometers');
-        if (kmInput) kmInput.value = AppState.vehicleKm || '';
-        const typeSelect = document.getElementById('maintenanceTypeSelect');
-        if (typeSelect) typeSelect.selectedIndex = 0;
-    }
-
-    // ========== ACTUALIZACIÓN DE INTERFAZ ==========
-    function updateDisplay() {
-        document.getElementById('totalKmDisplay').innerHTML = formatNumber(AppState.vehicleKm) + ' km';
-        document.getElementById('lastKmUpdate').innerText = formatDate(AppState.lastKmDate) || formatDate(new Date());
-
-        const tbody = document.getElementById('freqBody');
-        if (tbody) {
-            tbody.innerHTML = '';
-            for (const [type, freq] of Object.entries(AppState.frequencies)) {
-                const lastKm = getLastKmForType(type);
-                const nextKm = getNextKmForType(type);
-                const remaining = getKmRemaining(type);
-                let status = "", rowClass = "";
-                if (remaining <= 0) { status = "⚠️ منتهي!"; rowClass = 'style="background:#fee2e2"'; }
-                else if (remaining <= 1000) { status = "🔴 " + formatNumber(remaining) + " km - عاجل"; rowClass = 'style="background:#fee2e2"'; }
-                else if (remaining <= 3000) { status = "🟡 " + formatNumber(remaining) + " km - قريب"; rowClass = 'style="background:#fef3c7"'; }
-                else { status = "✅ متبقي " + formatNumber(remaining) + " km"; }
-                const tr = document.createElement('tr');
-                if (rowClass) tr.setAttribute('style', rowClass.slice(7, -1));
-                tr.innerHTML = `
-                    <td>${type}</td>
-                    <td><input type="number" id="freq_${type.replace(/\s/g, '_')}" value="${freq}" style="width:100px" step="1000" min="1000" max="1000000"></td>
-                    <td>${lastKm > 0 ? formatNumber(lastKm) : '—'} km</td>
-                    <td><strong>${formatNumber(nextKm)} km</strong></td>
-                    <td>${status}</td>
-                    <td>
-                        <button class="edit-type-btn" data-type="${type}" style="background:var(--warning);color:white;padding:6px 12px;border:none;border-radius:8px;cursor:pointer;"><i class="fas fa-edit"></i></button>
-                        <button class="delete-type-btn" data-type="${type}" style="background:var(--danger);color:white;padding:6px 12px;border:none;border-radius:8px;cursor:pointer;"><i class="fas fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            }
-            document.querySelectorAll('.edit-type-btn').forEach(btn => { btn.onclick = () => editType(btn.getAttribute('data-type')); });
-            document.querySelectorAll('.delete-type-btn').forEach(btn => { btn.onclick = () => deleteType(btn.getAttribute('data-type')); });
-        }
-
-        const select = document.getElementById('maintenanceTypeSelect');
-        const filterSelect = document.getElementById('filterSelect');
-        if (select) {
-            select.innerHTML = '<option value="">اختر نوع الصيانة</option>';
-            for (const type of Object.keys(AppState.frequencies).sort()) select.innerHTML += `<option value="${type}">${type}</option>`;
-        }
-        if (filterSelect) {
-            const currentValue = filterSelect.value;
-            filterSelect.innerHTML = '<option value="">جميع الأنواع</option>';
-            for (const type of Object.keys(AppState.frequencies).sort()) filterSelect.innerHTML += `<option value="${type}">${type}</option>`;
-            filterSelect.value = currentValue;
-        }
-
-        const totalCost = AppState.maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
-        document.getElementById('totalCount').innerText = AppState.maintenances.length;
-        document.getElementById('totalCost').innerHTML = totalCost.toFixed(2) + ' SAR';
-
-        updateAlertsGrid();
-        applyFilters();
-
-        const kmInput = document.getElementById('kilometers');
-        if (kmInput && document.activeElement !== kmInput) kmInput.value = AppState.vehicleKm || '';
-    }
-
-    function updateAlertsGrid() {
-        const grid = document.getElementById('alertsGrid');
-        if (!grid) return;
-        const alerts = [];
-        for (const type of Object.keys(AppState.frequencies)) {
-            const remaining = getKmRemaining(type);
-            if (remaining <= 3000) alerts.push({ type, remaining });
-        }
-        document.getElementById('alertCount').innerText = alerts.length;
-        if (alerts.length === 0) {
-            grid.innerHTML = `<div class="stat-card"><i class="fas fa-check-circle"></i><h3>التنبيهات</h3><div class="value">✅ كل شيء على ما يرام</div><p>لا توجد تنبيهات</p></div>`;
-            return;
-        }
-        grid.innerHTML = alerts.map(a => `
-            <div class="stat-card" style="${a.remaining <= 1000 ? 'background:#fee2e2' : 'background:#fef3c7'}">
-                <i class="fas fa-bell"></i><h3>🔔 ${a.type}</h3>
-                <div class="value">${a.remaining <= 0 ? 'منتهي!' : formatNumber(a.remaining) + ' km'}</div>
-                <p>${a.remaining <= 0 ? 'مطلوب الآن' : (a.remaining <= 1000 ? 'أقل من 1000 km - عاجل' : 'يحتاج صيانة قريباً')}</p>
-                <button class="reminder-btn" data-type="${a.type}" data-remaining="${a.remaining}" style="margin-top:8px; background:var(--warning); padding:6px 12px;">📧 تذكير</button>
-            </div>
-        `).join('');
-        document.querySelectorAll('.reminder-btn').forEach(btn => {
-            btn.onclick = () => sendEmailReminder(btn.getAttribute('data-type'), parseInt(btn.getAttribute('data-remaining')));
-        });
-    }
-
-    function sendEmailReminder(type, remaining) {
-        if (!AppState.currentUserEmail) { showToast("⚠️ لا يوجد بريد إلكتروني", "error"); return; }
-        const subject = encodeURIComponent(`تذكير صيانة: ${type}`);
-        const body = encodeURIComponent(`مرحباً ${AppState.currentUsername},\n\nموعد صيانة ${type} قد اقترب. المتبقي ${remaining} كم.\n\nمع تحيات ورشتي`);
-        window.location.href = `mailto:${AppState.currentUserEmail}?subject=${subject}&body=${body}`;
-        showToast("تم فتح بريدك الإلكتروني لإرسال التذكير");
-    }
-
-    async function checkAndSendReminders() {
-        const REMINDER_COOLDOWN = 24 * 60 * 60 * 1000;
-        for (const type of Object.keys(AppState.frequencies)) {
-            const remaining = getKmRemaining(type);
-            if (remaining > 0 && remaining <= 1000) {
-                const storageKey = `reminder_${type}_${AppState.currentVehicleId}`;
-                const lastSent = localStorage.getItem(storageKey);
-                const now = Date.now();
-                if (!lastSent || (now - parseInt(lastSent)) > REMINDER_COOLDOWN) {
-                    localStorage.setItem(storageKey, now.toString());
-                    sendEmailReminder(type, remaining);
-                    break;
-                }
-            }
-        }
-    }
-
-    function applyFilters() {
-        AppState.currentFilter = document.getElementById('filterSelect')?.value || '';
-        let filtered = AppState.currentFilter ? AppState.maintenances.filter(m => m.type === AppState.currentFilter) : [...AppState.maintenances];
-        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-        const container = document.getElementById('maintList');
-        if (!container) return;
-        if (filtered.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:2rem;">لا توجد سجلات</div>';
-            return;
-        }
-        container.innerHTML = filtered.map(m => {
-            const nextKm = getNextKmForType(m.type);
-            const remaining = getKmRemaining(m.type);
-            let progressPercent = Math.min(100, (m.kilometers / nextKm) * 100);
-            let progressClass = "";
-            if (remaining <= 0 || remaining <= 1000) progressClass = "danger";
-            else if (remaining <= 3000) progressClass = "warning";
-            return `
-                <div class="maintenance-item">
-                    <div style="flex:2">
-                        <h4><i class="fas fa-wrench"></i> ${m.type}</h4>
-                        <div><span class="badge">📅 ${formatDate(m.date)}</span><span class="badge">🔧 ${formatNumber(m.kilometers)} km</span><span class="badge">💰 ${(m.cost || 0).toFixed(2)} SAR</span></div>
-                        <p style="margin-top:8px;">${m.description || 'بدون ملاحظات'}</p>
-                        <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width: ${progressPercent}%"></div></div>
-                        <small>الصيانة القادمة عند ${formatNumber(nextKm)} km (${remaining <= 0 ? 'منتهي' : formatNumber(remaining) + ' km متبقي'})</small>
-                    </div>
-                    <div><button class="invoice-btn" data-id="${m.id}" style="background:var(--primary);padding:8px 16px;"><i class="fas fa-file-invoice"></i> فاتورة</button><button class="delete-maint-btn" data-id="${m.id}" style="background:var(--danger);padding:8px 16px;"><i class="fas fa-trash"></i></button></div>
-                </div>
-            `;
-        }).join('');
-        document.querySelectorAll('.invoice-btn').forEach(btn => { btn.onclick = () => generateInvoicePDF(parseInt(btn.getAttribute('data-id'))); });
-        document.querySelectorAll('.delete-maint-btn').forEach(btn => { btn.onclick = () => deleteMaintenance(parseInt(btn.getAttribute('data-id'))); });
-    }
-
-    function resetFilters() {
-        const filterSelect = document.getElementById('filterSelect');
-        if (filterSelect) filterSelect.value = '';
-        applyFilters();
-    }
-
-    // ========== CHART ==========
-    function updateChart() {
-        const canvas = document.getElementById('expensesChart');
-        if (!canvas) return;
-        const existingChart = Chart.getChart(canvas);
-        if (existingChart) existingChart.destroy();
-
-        const monthlyData = {};
-        AppState.maintenances.forEach(m => {
-            const month = m.date.substring(0, 7);
-            monthlyData[month] = (monthlyData[month] || 0) + (m.cost || 0);
-        });
-        const months = Object.keys(monthlyData).sort();
-        const costs = months.map(m => monthlyData[m]);
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        AppState.expensesChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: months,
-                datasets: [{ label: 'المصروفات (SAR)', data: costs, backgroundColor: '#10b981', borderRadius: 5 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => ctx.parsed.y.toFixed(2) + ' SAR' } } },
-                scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + ' SAR' } } }
-            }
-        });
-    }
-
-    // ========== PDF (con logo) ==========
-    async function generateInvoicePDF(id) {
-        const m = AppState.maintenances.find(m => m.id === id);
-        if (!m) return;
-        const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
-
-        const element = document.createElement('div');
-        element.style.position = 'fixed';
-        element.style.top = '0';
-        element.style.left = '0';
-        element.style.width = '210mm';
-        element.style.backgroundColor = 'white';
-        element.style.color = '#1e293b';
-        element.style.padding = '15mm';
-        element.style.zIndex = '99999';
-        element.style.opacity = '0.7';
-        element.style.fontFamily = 'Tajawal, sans-serif';
-        element.style.textAlign = 'right';
-        element.style.direction = 'rtl';
-        element.style.boxSizing = 'border-box';
-        element.innerHTML = `
-            <div style="border-bottom:3px solid #10b981;margin-bottom:20px;display:flex;align-items:center;gap:15px;">
-                <img src="mi-icono.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;" alt="Logo">
-                <div>
-                    <h1 style="color:#1e293b;margin:0;">ورشتي</h1>
-                    <p style="color:#64748b;margin:0;">فاتورة صيانة رسمية</p>
-                </div>
-            </div>
-            <div style="margin-bottom:20px;">
-                <p><strong>رقم الفاتورة:</strong> INV-${m.id}-${Date.now()}</p>
-                <p><strong>التاريخ:</strong> ${formatDate(new Date())}</p>
-                <p><strong>المركبة:</strong> ${vehicleName}</p>
-            </div>
-            <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
-                <tr style="background:#f1f5f9;">
-                    <th style="padding:12px;text-align:right;">نوع الصيانة</th>
-                    <th style="padding:12px;text-align:right;">العداد</th>
-                    <th style="padding:12px;text-align:right;">المبلغ</th>
-                </tr>
-                <tr>
-                    <td style="padding:12px;border-top:1px solid #e2e8f0;">${m.type}</td>
-                    <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
-                    <td style="padding:12px;border-top:1px solid #e2e8f0;">${(m.cost || 0).toFixed(2)} SAR</td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="padding:12px;"><strong>الملاحظات:</strong> ${m.description || 'لا توجد'}</td>
-                </tr>
-            </table>
-            <div style="margin-top:30px;text-align:center;color:#64748b;">شكراً لثقتكم بنا</div>
-        `;
-
-        document.body.appendChild(element);
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        try {
-            const canvas = await html2canvas(element, { scale: 2, logging: false, useCORS: true });
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const imgRatio = canvas.height / canvas.width;
-            let imgWidth = pdfWidth;
-            let imgHeight = pdfWidth * imgRatio;
-            if (imgHeight > pdf.internal.pageSize.getHeight()) {
-                imgHeight = pdf.internal.pageSize.getHeight();
-                imgWidth = imgHeight / imgRatio;
-            }
-            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-            pdf.save(`invoice_${m.id}.pdf`);
-            showToast("تم إنشاء الفاتورة بنجاح");
-        } catch (error) {
-            console.error(error);
-            showToast("خطأ في إنشاء الفاتورة: " + error.message, "error");
-        } finally {
-            document.body.removeChild(element);
-        }
-    }
-
-    async function generateFullReport() {
-        const totalCost = AppState.maintenances.reduce((sum, m) => sum + (m.cost || 0), 0);
-        const vehicleName = AppState.vehicles.find(v => v.id === AppState.currentVehicleId)?.name || 'سيارة';
-
-        const element = document.createElement('div');
-        element.style.position = 'fixed';
-        element.style.top = '0';
-        element.style.left = '0';
-        element.style.width = '210mm';
-        element.style.backgroundColor = 'white';
-        element.style.color = '#1e293b';
-        element.style.padding = '15mm';
-        element.style.zIndex = '99999';
-        element.style.opacity = '0.7';
-        element.style.fontFamily = 'Tajawal, sans-serif';
-        element.style.textAlign = 'right';
-        element.style.direction = 'rtl';
-        element.style.boxSizing = 'border-box';
-        element.innerHTML = `
-            <div style="border-bottom:3px solid #10b981;margin-bottom:20px;display:flex;align-items:center;gap:15px;">
-                <img src="mi-icono.png" style="width:60px;height:60px;border-radius:50%;object-fit:cover;" alt="Logo">
-                <h1 style="color:#1e293b;margin:0;">تقرير الصيانة الشامل</h1>
-            </div>
-            <div style="margin:20px 0;">
-                <p><strong>المركبة:</strong> ${vehicleName}</p>
-                <p><strong>العداد الحالي:</strong> ${formatNumber(AppState.vehicleKm)} km</p>
-                <p><strong>إجمالي الصيانات:</strong> ${AppState.maintenances.length}</p>
-                <p><strong>إجمالي المصروفات:</strong> ${totalCost.toFixed(2)} SAR</p>
-            </div>
-            <h3>تفاصيل الصيانات</h3>
-            <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;">
-                <tr style="background:#f1f5f9;">
-                    <th style="padding:12px;">التاريخ</th>
-                    <th style="padding:12px;">النوع</th>
-                    <th style="padding:12px;">العداد</th>
-                    <th style="padding:12px;">التكلفة</th>
-                </tr>
-                ${AppState.maintenances.map(m => `
-                    <tr>
-                        <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatDate(m.date)}</td>
-                        <td style="padding:12px;border-top:1px solid #e2e8f0;">${m.type}</td>
-                        <td style="padding:12px;border-top:1px solid #e2e8f0;">${formatNumber(m.kilometers)} km</td>
-                        <td style="padding:12px;border-top:1px solid #e2e8f0;">${(m.cost || 0).toFixed(2)} SAR</td>
-                    </tr>
-                `).join('')}
-            </table>
-            <div style="margin-top:30px;text-align:center;color:#64748b;">تم إنشاء التقرير في ${formatDate(new Date())}</div>
-        `;
-
-        document.body.appendChild(element);
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        try {
-            const canvas = await html2canvas(element, { scale: 2, logging: false, useCORS: true });
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const imgRatio = canvas.height / canvas.width;
-            let imgWidth = pdfWidth;
-            let imgHeight = pdfWidth * imgRatio;
-            if (imgHeight > pdf.internal.pageSize.getHeight()) {
-                imgHeight = pdf.internal.pageSize.getHeight();
-                imgWidth = imgHeight / imgRatio;
-            }
-            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-            pdf.save(`report_${Date.now()}.pdf`);
-            showToast("تم إنشاء التقرير بنجاح");
-        } catch (error) {
-            console.error(error);
-            showToast("خطأ في إنشاء التقرير: " + error.message, "error");
-        } finally {
-            document.body.removeChild(element);
-        }
-    }
-
-    // ========== EXCEL ==========
-    function exportToExcel() {
-        try {
-            const wsData = [["التاريخ", "نوع الصيانة", "العداد (كم)", "التكلفة (SAR)", "الملاحظات"]];
-            AppState.maintenances.forEach(m => { wsData.push([formatDate(m.date), m.type, m.kilometers, (m.cost || 0).toFixed(2), m.description || ""]); });
-            const ws = XLSX.utils.aoa_to_sheet(wsData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "الصيانات");
-            XLSX.writeFile(wb, `تقرير_الصيانات_${Date.now()}.xlsx`);
-            showToast("تم تصدير البيانات إلى Excel");
-        } catch (error) { console.error(error); showToast("خطأ في تصدير البيانات", "error"); }
-    }
-
-    // ========== AUTHENTICATION (case-insensitive) ==========
-    async function register() {
-        const username = document.getElementById('regUsername').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const phone = document.getElementById('regPhone').value.trim();
-        const password = document.getElementById('regPassword').value;
-        const vehicleName = document.getElementById('regVehicle').value.trim() || 'سيارة';
-        if (!username || !email || !password) { alert("الرجاء إدخال اسم المستخدم والبريد الإلكتروني وكلمة المرور"); return; }
-        setLoading('registerSpinner', true);
-        try {
-            const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-                email, password,
-                options: { data: { username, phone, vehicle_name: vehicleName } }
-            });
-            if (authError) throw authError;
-            if (authData.user) {
-                const newUser = { id: authData.user.id, username, email, phone: phone || null, vehicle_name: vehicleName };
-                const { error: insertError } = await supabaseClient.from('users').insert(newUser);
-                if (insertError) throw insertError;
-                showToast("تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول");
-                showLogin();
-            } else { alert("خطأ: لم يتم إنشاء المستخدم"); }
-        } catch (error) {
-            console.error(error);
-            alert("خطأ في التسجيل: " + error.message);
-        } finally { setLoading('registerSpinner', false); }
-    }
-
-    async function login() {
-        const loginValue = document.getElementById('loginUsername').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        if (!loginValue || !password) { alert("الرجاء إدخال اسم المستخدم / البريد الإلكتروني / رقم الهاتف وكلمة المرور"); return; }
-        setLoading('loginSpinner', true);
-        try {
-            let email = loginValue;
-            if (!loginValue.includes('@')) {
-                const { data: user, error } = await supabaseClient
-                    .from('users')
-                    .select('email')
-                    .or(`username.ilike.${loginValue},phone.ilike.${loginValue}`)
-                    .maybeSingle();
-                if (error || !user?.email) throw new Error("اسم المستخدم أو رقم الهاتف غير صحيح");
-                email = user.email;
-            }
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) throw error;
-            if (data.user) {
-                const { data: profile, error: profileError } = await supabaseClient.from('users').select('*').eq('id', data.user.id).single();
-                if (profileError) throw profileError;
-                AppState.currentUserId = data.user.id;
-                AppState.currentUsername = profile.username;
-                AppState.currentUserEmail = data.user.email;
-                await loadVehicles();
-                actualizarNombreVehiculoEnCabecera();
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                showToast("مرحباً " + AppState.currentUsername);
-            } else { alert("بيانات الدخول غير صحيحة"); }
-        } catch (error) {
-            console.error(error);
-            alert("خطأ في الدخول: " + error.message);
-        } finally { setLoading('loginSpinner', false); }
-    }
-
-    async function resetPassword() {
-        const loginValue = document.getElementById('loginUsername')?.value.trim();
-        if (!loginValue) { showToast("الرجاء إدخال بريدك الإلكتروني أو اسم المستخدم أو رقم الهاتف", "error"); return; }
-        let email = loginValue;
-        if (!loginValue.includes('@')) {
-            try {
-                const { data: user, error } = await supabaseClient
-                    .from('users')
-                    .select('email')
-                    .or(`username.ilike.${loginValue},phone.ilike.${loginValue}`)
-                    .maybeSingle();
-                if (error || !user?.email) throw new Error("لم نتمكن من إيجاد حسابك");
-                email = user.email;
-            } catch (error) { showToast(error.message, "error"); return; }
-        }
-        setLoading('loginSpinner', true);
-        try {
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/update-password.html' });
-            if (error) throw error;
-            showToast("تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني");
-        } catch (error) {
-            console.error(error);
-            showToast("خطأ في إرسال رابط استعادة كلمة المرور: " + error.message, "error");
-        } finally { setLoading('loginSpinner', false); }
-    }
-
-    async function logout() {
-        const canvas = document.getElementById('expensesChart');
-        if (canvas) { const existingChart = Chart.getChart(canvas); if (existingChart) existingChart.destroy(); }
-        try { await supabaseClient.auth.signOut(); } catch (error) { console.error(error); }
-        Object.assign(AppState, {
-            currentUserId: null, currentUsername: null, currentUserEmail: null, currentVehicleId: null,
-            vehicles: [], maintenances: [], frequencies: {}, vehicleKm: 0, lastKmDate: "", currentFilter: "",
-            expensesChart: null
-        });
-        document.getElementById('loginContainer').style.display = 'flex';
-        document.getElementById('app').style.display = 'none';
-        showLogin();
-    }
-
-    function showRegister() {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('registerForm').style.display = 'block';
-    }
-
-    function showLogin() {
-        document.getElementById('loginForm').style.display = 'block';
-        document.getElementById('registerForm').style.display = 'none';
-        const fields = ['loginUsername', 'loginPassword', 'regUsername', 'regEmail', 'regPhone', 'regPassword', 'regVehicle'];
-        fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    }
-
-    // ========== EVENT LISTENERS ==========
-    function initEventListeners() {
-        document.getElementById('loginBtn')?.addEventListener('click', login);
-        document.getElementById('registerBtn')?.addEventListener('click', register);
-        document.getElementById('showRegisterBtn')?.addEventListener('click', showRegister);
-        document.getElementById('showLoginBtn')?.addEventListener('click', showLogin);
-        document.getElementById('forgotPasswordBtn')?.addEventListener('click', resetPassword);
-        document.getElementById('logoutBtn')?.addEventListener('click', logout);
-        document.getElementById('addVehicleBtn')?.addEventListener('click', () => addVehicle());
-        document.getElementById('updateKmBtn')?.addEventListener('click', updateTotalKilometers);
-        document.getElementById('addMaintBtn')?.addEventListener('click', addMaintenance);
-        document.getElementById('saveFreqBtn')?.addEventListener('click', saveFrequencies);
-        document.getElementById('addTypeBtn')?.addEventListener('click', openAddTypeModal);
-        document.getElementById('saveTypeBtn')?.addEventListener('click', saveType);
-        document.getElementById('closeTypeModalBtn')?.addEventListener('click', closeModal);
-        document.getElementById('toggleFreqHeader')?.addEventListener('click', toggleFrequencyTable);
-        document.getElementById('exportExcelBtn')?.addEventListener('click', exportToExcel);
-        document.getElementById('fullReportBtn')?.addEventListener('click', generateFullReport);
-        document.getElementById('applyFilterBtn')?.addEventListener('click', applyFilters);
-        document.getElementById('resetFilterBtn')?.addEventListener('click', resetFilters);
-        window.addEventListener('click', (e) => { if (e.target === document.getElementById('typeModal')) closeModal(); });
-    }
-
-    initEventListeners();
-    showLogin();
+init();
 </script>
 </body>
 </html>
